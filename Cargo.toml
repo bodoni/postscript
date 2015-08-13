@@ -1,0 +1,8 @@
+[package]
+name = "postscript"
+version = "0.0.1"
+authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
+license = "MIT"
+repository = "https://github.com/hilbert-space/postscript"
+homepage = "https://github.com/hilbert-space/postscript"
+description = "PostScript."
