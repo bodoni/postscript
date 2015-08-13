@@ -1,3 +1,5 @@
+//! Parser for PostScript fonts.
+
 /// An error.
 pub type Error = std::io::Error;
 
