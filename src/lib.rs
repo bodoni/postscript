@@ -13,6 +13,7 @@ macro_rules! raise(
 );
 
 mod band;
-mod compact;
+
+pub mod compact;
 
 pub use compact::Compact;

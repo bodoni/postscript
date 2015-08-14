@@ -1,13 +1,13 @@
 extern crate postscript;
 
 use postscript::Compact;
+use postscript::compact::Header;
 use std::io::Cursor;
 
 #[test]
 fn cff_header() {
     let compact = Compact::read(&mut read()).unwrap();
-    assert_eq!(compact.header.major, 1);
-    assert_eq!(compact.header.minor, 0);
+    assert_eq!(compact.header, Header { major: 1, minor: 0, hdrSize: 4, offSize: 2 });
 }
 
 fn read() -> Cursor<Vec<u8>> {
