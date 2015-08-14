@@ -48,6 +48,8 @@ macro_rules! itemize(
     ($code:item) => ($code);
 );
 
+pub mod primitive;
+
 mod header;
 
 pub use self::header::Header;

@@ -12,8 +12,6 @@ macro_rules! raise(
     );
 );
 
-pub mod primitive;
-
 mod band;
 mod compact;
 

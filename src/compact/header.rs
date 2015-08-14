@@ -1,6 +1,7 @@
-use primitive::*;
+use compact::primitive::*;
 
 spec! {
+    #[derive(Copy)]
     pub Header {
         major   (Card8  ),
         minor   (Card8  ),
