@@ -1,20 +1,28 @@
 //! Primitive data types.
 
+use std::io::Read;
 use std::mem;
 
 use Result;
-use band::{Band, Value};
+use band::{Band, Value, Walue};
 
 pub type Card8 = u8;
 pub type Card16 = u16;
 pub type OffSize = u8;
+pub type Offset = usize;
+
+macro_rules! fill(
+    ($band:ident, $count:expr, $buffer:ident) => (
+        if try!($band.read(&mut $buffer)) != $count {
+            return raise!("failed to read as much as needed");
+        }
+    );
+);
 
 macro_rules! read(
     ($band:ident, $size:expr) => (unsafe {
         let mut buffer: [u8; $size] = mem::uninitialized();
-        if try!($band.read(&mut buffer)) != $size {
-            return raise!("failed to read as much as needed");
-        }
+        fill!($band, $size, buffer);
         mem::transmute(buffer)
     });
 );
@@ -38,6 +46,7 @@ macro_rules! implement {
 
 implement!(u8, 1);
 implement!(u16, 2);
+implement!(u32, 4);
 
 impl Value for f64 {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
@@ -70,17 +79,61 @@ impl Value for f64 {
     }
 }
 
+#[cfg(target_endian = "big")]
+macro_rules! assemble(
+    ($hi:expr, $me:expr, $lo:expr) => ([0, $hi, $me, $lo]);
+);
+
+#[cfg(target_endian = "little")]
+macro_rules! assemble(
+    ($hi:expr, $me:expr, $lo:expr) => ([$lo, $me, $hi, 0]);
+);
+
+impl Walue for usize {
+    fn read<T: Band>(band: &mut T, size: usize) -> Result<Self> {
+        Ok(match size {
+            1 => try!(u8::read(band)) as usize,
+            2 => try!(u16::read(band)) as usize,
+            3 => {
+                let trio: [u8; 3] = read!(band, 3);
+                unsafe { mem::transmute::<_, u32>(assemble!(trio[0], trio[1], trio[2])) as usize }
+            },
+            4 => try!(u32::read(band)) as usize,
+            _ => raise!("found an invalid size"),
+        })
+    }
+}
+
+impl Walue for Vec<u8> {
+    fn read<T: Band>(band: &mut T, count: usize) -> Result<Self> {
+        let mut values = Vec::with_capacity(count);
+        unsafe { values.set_len(count) };
+        fill!(band, count, values);
+        Ok(values)
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use band::Value;
+    use band::{Value, Walue};
     use std::io::Cursor;
 
     #[test]
-    fn read_f64() {
-        let mut band = Cursor::new(vec![0xe2, 0xa2, 0x5f, 0xf]);
+    fn value_read_f64() {
+        let mut band = Cursor::new(vec![0xe2, 0xa2, 0x5f, 0x0f]);
         assert_eq!(f64::read(&mut band).unwrap(), -2.25);
 
-        let mut band = Cursor::new(vec![0x0a, 0x14, 0x05, 0x41, 0xc3, 0xff, 0xf]);
+        let mut band = Cursor::new(vec![0x0a, 0x14, 0x05, 0x41, 0xc3, 0xff, 0x0f]);
         assert!((f64::read(&mut band).unwrap() - 0.140541e-3).abs() < 1e-14);
+    }
+
+    #[test]
+    fn walue_read_usize() {
+        let mut band = Cursor::new(vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+        assert_eq!(usize::read(&mut band, 1).unwrap(), 0x01);
+        assert_eq!(usize::read(&mut band, 2).unwrap(), 0x0203);
+        assert_eq!(usize::read(&mut band, 3).unwrap(), 0x040506);
+        assert_eq!(usize::read(&mut band, 4).unwrap(), 0x0708090a);
     }
 }
