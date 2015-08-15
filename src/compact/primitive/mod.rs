@@ -9,6 +9,7 @@ use band::{Band, Value, Walue};
 pub type Card8 = u8;
 pub type Card16 = u16;
 pub type OffSize = u8;
+pub type SID = u16;
 
 macro_rules! fill(
     ($band:ident, $count:expr, $buffer:ident) => (

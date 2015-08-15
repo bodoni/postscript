@@ -20,7 +20,7 @@ fn name_index() {
     assert_eq!(table.count, 1);
     assert_eq!(table.offSize, 1);
     assert_eq!(table.offset, &[1, 23]);
-    assert_eq!(table.strings(), &["SourceSerifPro-Regular"]);
+    assert_eq!(table.get(0).unwrap(), "SourceSerifPro-Regular");
 }
 
 #[test]
@@ -31,6 +31,17 @@ fn dictionary_index() {
     assert_eq!(table.count, 1);
     assert_eq!(table.offSize, 1);
     assert_eq!(table.offset, &[1, 45]);
+}
+
+#[test]
+fn string_index() {
+    let compact = Compact::read(&mut read()).unwrap();
+    let table = &compact.string_index;
+
+    assert_eq!(table.count, 322);
+    assert_eq!(table.offSize, 2);
+    assert_eq!(table.get(175).unwrap(), "Aring");
+    assert_eq!(table.get(500).unwrap(), "nine.tosf");
 }
 
 fn read() -> Cursor<Vec<u8>> {

@@ -35,3 +35,15 @@ impl Value for Index {
         })
     }
 }
+
+pub fn string(index: &Index, i: usize) -> Option<String> {
+    if i >= index.count as usize {
+        return None;
+    }
+    let from = index.offset[i] as usize - 1;
+    if index.data[from] == 0 {
+        return None;
+    }
+    let until = index.offset[i + 1] as usize - 1;
+    Some(String::from_utf8_lossy(&index.data[from..until]).into_owned())
+}
