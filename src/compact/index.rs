@@ -19,10 +19,14 @@ impl Value for Index {
         }
         let offSize = try!(OffSize::read(band)) as usize;
         let mut offset = Vec::with_capacity(count + 1);
-        for _ in 0..(count + 1) {
-            offset.push(try!(Walue::read(band, offSize)));
+        for i in 0..(count + 1) {
+            let value = try!(Walue::read(band, offSize));
+            if i == 0 && value != 1 || i > 0 && value <= offset[i - 1] {
+                raise!("found a malformed index");
+            }
+            offset.push(value);
         }
-        let data = try!(Walue::read(band, offset[count] as usize));
+        let data = try!(Walue::read(band, offset[count] as usize - 1));
         Ok(Index {
             count: count as Card16,
             offSize: offSize as OffSize,
