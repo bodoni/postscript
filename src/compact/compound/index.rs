@@ -11,6 +11,17 @@ declare! {
     }
 }
 
+impl Index {
+    pub fn get(&self, i: usize) -> Option<&[Card8]> {
+        if i >= self.count as usize {
+            return None;
+        }
+        let from = self.offset[i] as usize - 1;
+        let until = self.offset[i + 1] as usize - 1;
+        Some(&self.data[from..until])
+    }
+}
+
 impl Value for Index {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
         let count = try!(Card16::read(band)) as usize;
@@ -34,16 +45,4 @@ impl Value for Index {
             data: data,
         })
     }
-}
-
-pub fn string(index: &Index, i: usize) -> Option<String> {
-    if i >= index.count as usize {
-        return None;
-    }
-    let from = index.offset[i] as usize - 1;
-    if index.data[from] == 0 {
-        return None;
-    }
-    let until = index.offset[i + 1] as usize - 1;
-    Some(String::from_utf8_lossy(&index.data[from..until]).into_owned())
 }

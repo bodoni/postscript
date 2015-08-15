@@ -1,6 +1,5 @@
 use std::mem;
 
-use compact::compound::index;
 use compact::primitive::SID;
 
 index! {
@@ -11,7 +10,9 @@ impl StringIndex {
     pub fn get(&self, id: SID) -> Option<String> {
         match id as usize {
             i if i < NUMBER_OF_STANDARD_STRINGS => get(id).map(|string| string.to_string()),
-            i => index::string(self, i - NUMBER_OF_STANDARD_STRINGS),
+            i => self.0.get(i - NUMBER_OF_STANDARD_STRINGS).map(|chunk| {
+                String::from_utf8_lossy(chunk).into_owned()
+            }),
         }
     }
 }
