@@ -1,6 +1,6 @@
 use std::mem;
 
-use compact::index;
+use compact::compound::index;
 use compact::primitive::SID;
 
 index! {

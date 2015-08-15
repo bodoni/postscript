@@ -1,4 +1,4 @@
-use compact::index;
+use compact::compound::index;
 
 index! {
     pub NameIndex
