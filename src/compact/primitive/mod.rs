@@ -9,7 +9,6 @@ use band::{Band, Value, Walue};
 pub type Card8 = u8;
 pub type Card16 = u16;
 pub type OffSize = u8;
-pub type Offset = usize;
 
 macro_rules! fill(
     ($band:ident, $count:expr, $buffer:ident) => (
@@ -53,5 +52,10 @@ impl Walue for Vec<u8> {
     }
 }
 
+mod integer;
 mod offset;
 mod real;
+
+pub use self::integer::Integer;
+pub use self::offset::Offset;
+pub use self::real::Real;

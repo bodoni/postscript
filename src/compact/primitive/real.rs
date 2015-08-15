@@ -1,7 +1,9 @@
 use Result;
 use band::{Band, Value};
 
-impl Value for f64 {
+pub type Real = f64;
+
+impl Value for Real {
     #[inline]
     fn read<T: Band>(band: &mut T) -> Result<Self> {
         match try!(read(band)).parse() {
@@ -40,14 +42,15 @@ fn read<T: Band>(band: &mut T) -> Result<String> {
 #[cfg(test)]
 mod tests {
     use band::Value;
+    use compact::primitive::Real;
     use std::io::Cursor;
 
     #[test]
     fn read() {
         let mut band = Cursor::new(vec![0xe2, 0xa2, 0x5f, 0x0f]);
-        assert_eq!(f64::read(&mut band).unwrap(), -2.25);
+        assert_eq!(Real::read(&mut band).unwrap(), -2.25);
 
         let mut band = Cursor::new(vec![0x0a, 0x14, 0x05, 0x41, 0xc3, 0xff, 0x0f]);
-        assert!((f64::read(&mut band).unwrap() - 0.140541e-3).abs() < 1e-14);
+        assert!((Real::read(&mut band).unwrap() - 0.140541e-3).abs() < 1e-14);
     }
 }
