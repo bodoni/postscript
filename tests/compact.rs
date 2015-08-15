@@ -23,6 +23,16 @@ fn name_index() {
     assert_eq!(table.strings(), &["SourceSerifPro-Regular"]);
 }
 
+#[test]
+fn dictionary_index() {
+    let compact = Compact::read(&mut read()).unwrap();
+    let table = &compact.dictionary_index;
+
+    assert_eq!(table.count, 1);
+    assert_eq!(table.offSize, 1);
+    assert_eq!(table.offset, &[1, 45]);
+}
+
 fn read() -> Cursor<Vec<u8>> {
     use std::fs::File;
     use std::io::{Read, Seek, SeekFrom};

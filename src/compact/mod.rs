@@ -10,6 +10,7 @@ use band::{Band, Value};
 pub struct Compact {
     pub header: Header,
     pub name_index: NameIndex,
+    pub dictionary_index: DictionaryIndex,
 }
 
 impl Compact {
@@ -24,7 +25,11 @@ impl Value for Compact {
         let header = try!(Header::read(band));
         try!(band.jump(header.hdrSize as u64));
         let name_index = try!(NameIndex::read(band));
-        Ok(Compact { header: header, name_index: name_index })
+        let dictionary_index = try!(DictionaryIndex::read(band));
+        if name_index.count != dictionary_index.count {
+            raise!("the name and top dictionary indices do not match");
+        }
+        Ok(Compact { header: header, name_index: name_index, dictionary_index: dictionary_index })
     }
 }
 
@@ -83,10 +88,12 @@ macro_rules! itemize(($code:item) => ($code));
 
 pub mod primitive;
 
+mod dictionary_index;
 mod header;
 mod index;
 mod name_index;
 
+pub use self::dictionary_index::DictionaryIndex;
 pub use self::header::Header;
 pub use self::index::Index;
 pub use self::name_index::NameIndex;
