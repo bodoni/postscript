@@ -1,6 +1,6 @@
 use compact::primitive::*;
 
-spec! {
+table! {
     #[derive(Copy)]
     pub Header {
         major   (Card8  ),
