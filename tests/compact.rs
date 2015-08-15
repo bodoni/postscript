@@ -20,6 +20,7 @@ fn name_index() {
     assert_eq!(table.count, 1);
     assert_eq!(table.offSize, 1);
     assert_eq!(table.offset, &[1, 23]);
+    assert_eq!(table.strings(), &["SourceSerifPro-Regular"]);
 }
 
 fn read() -> Cursor<Vec<u8>> {
