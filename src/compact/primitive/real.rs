@@ -2,34 +2,39 @@ use Result;
 use band::{Band, Value};
 
 impl Value for f64 {
+    #[inline]
     fn read<T: Band>(band: &mut T) -> Result<Self> {
-        let mut buffer = String::new();
-        let mut byte = 0;
-        let mut high = true;
-        loop {
-            let nibble = match high {
-                true => {
-                    byte = try!(u8::read(band));
-                    byte >> 4
-                },
-                false => byte & 0xf,
-            };
-            high = !high;
-            match nibble {
-                0...9 => buffer.push(('0' as u8 + nibble) as char),
-                0xa => buffer.push('.'),
-                0xb => buffer.push('e'),
-                0xc => buffer.push_str("e-"),
-                0xe => buffer.push('-'),
-                0xf => break,
-                _ => raise!("found a malformed real number"),
-            }
-        }
-        Ok(match buffer.parse() {
-            Ok(value) => value,
+        match try!(read(band)).parse() {
+            Ok(value) => Ok(value),
             _ => raise!("found a malformed real number"),
-        })
+        }
     }
+}
+
+fn read<T: Band>(band: &mut T) -> Result<String> {
+    let mut buffer = String::new();
+    let mut byte = 0;
+    let mut high = true;
+    loop {
+        let nibble = match high {
+            true => {
+                byte = try!(u8::read(band));
+                byte >> 4
+            },
+            false => byte & 0x0f,
+        };
+        high = !high;
+        match nibble {
+            0...9 => buffer.push(('0' as u8 + nibble) as char),
+            0x0a => buffer.push('.'),
+            0x0b => buffer.push('e'),
+            0x0c => buffer.push_str("e-"),
+            0x0e => buffer.push('-'),
+            0x0f => break,
+            _ => raise!("found a malformed real number"),
+        }
+    }
+    Ok(buffer)
 }
 
 #[cfg(test)]
