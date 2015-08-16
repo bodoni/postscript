@@ -10,9 +10,10 @@ use band::{Band, Value};
 /// A font set.
 pub struct FontSet {
     pub header: Header,
-    pub name_index: NameIndex,
-    pub top_dictionary: DictionaryIndex,
-    pub string_index: StringIndex,
+    pub names: NameIndex,
+    pub dictionaries: DictionaryIndex,
+    pub strings: StringIndex,
+    pub subroutines: SubroutineIndex,
 }
 
 impl FontSet {
@@ -26,17 +27,19 @@ impl Value for FontSet {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
         let header = try!(Header::read(band));
         try!(band.jump(header.hdrSize as u64));
-        let name_index = try!(NameIndex::read(band));
-        let top_dictionary = try!(DictionaryIndex::read(band));
-        if name_index.count != top_dictionary.count {
+        let names = try!(NameIndex::read(band));
+        let dictionaries = try!(DictionaryIndex::read(band));
+        if names.count != dictionaries.count {
             raise!("the name and top dictionary indices do not match");
         }
-        let string_index = try!(StringIndex::read(band));
+        let strings = try!(StringIndex::read(band));
+        let subroutines = try!(SubroutineIndex::read(band));
         Ok(FontSet {
             header: header,
-            name_index: name_index,
-            top_dictionary: top_dictionary,
-            string_index: string_index,
+            names: names,
+            dictionaries: dictionaries,
+            strings: strings,
+            subroutines: subroutines,
         })
     }
 }
@@ -44,4 +47,4 @@ impl Value for FontSet {
 pub mod compound;
 pub mod primitive;
 
-use self::compound::{DictionaryIndex, Header, NameIndex, StringIndex};
+use self::compound::{DictionaryIndex, Header, NameIndex, StringIndex, SubroutineIndex};

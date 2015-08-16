@@ -13,9 +13,9 @@ fn header() {
 }
 
 #[test]
-fn name_index() {
+fn names() {
     let set = FontSet::read(&mut read()).unwrap();
-    let table = &set.name_index;
+    let table = &set.names;
 
     assert_eq!(table.count, 1);
     assert_eq!(table.offSize, 1);
@@ -24,7 +24,7 @@ fn name_index() {
 }
 
 #[test]
-fn top_dictionary() {
+fn dictionaries() {
     use postscript::compact::compound::{Operand, Operator};
     use std::collections::HashMap;
 
@@ -37,7 +37,7 @@ fn top_dictionary() {
     );
 
     let set = FontSet::read(&mut read()).unwrap();
-    let table = &set.top_dictionary;
+    let table = &set.dictionaries;
 
     assert_eq!(table.count, 1);
     assert_eq!(table.offSize, 1);
@@ -52,14 +52,23 @@ fn top_dictionary() {
 }
 
 #[test]
-fn string_index() {
+fn strings() {
     let set = FontSet::read(&mut read()).unwrap();
-    let table = &set.string_index;
+    let table = &set.strings;
 
     assert_eq!(table.count, 322);
     assert_eq!(table.offSize, 2);
     assert_eq!(table.get(175).unwrap(), "Aring");
     assert_eq!(table.get(500).unwrap(), "nine.tosf");
+}
+
+#[test]
+fn subroutines() {
+    let set = FontSet::read(&mut read()).unwrap();
+    let table = &set.subroutines;
+
+    assert_eq!(table.count, 181);
+    assert_eq!(table.offSize, 2);
 }
 
 fn read() -> Cursor<Vec<u8>> {
