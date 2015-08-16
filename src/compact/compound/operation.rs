@@ -18,35 +18,26 @@ impl Value for Operation {
     fn read<T: Band>(band: &mut T) -> Result<Operation> {
         let mut operands = vec![];
         loop {
-            let mut code = try!(band.peek::<u8>()) as u16;
-            let operator = match Operator::get(code) {
-                Some(Operator::escape) => {
-                    code = try!(band.peek::<u16>());
-                    match Operator::get(code) {
-                        Some(operator) => operator,
-                        _ => raise!("found an unknown two-byte operator"),
-                    }
-                },
-                Some(operator) => operator,
-                _ => raise!("found an unknown one-byte operator"),
-            };
-            match operator {
-                Operator::Integer => {
+            match try!(band.peek::<u8>()) {
+                0x1c | 0x1d | 0x20...0xfe => {
                     operands.push(Operand::Integer(try!(Value::read(band))));
-                    continue;
                 },
-                Operator::Real => {
+                0x1e => {
                     operands.push(Operand::Real(try!(Value::read(band))));
-                    continue;
                 },
-                _ => {},
+                code => {
+                    let code = if code == 0x0c {
+                        try!(band.take::<u16>())
+                    } else {
+                        try!(band.take::<u8>()) as u16
+                    };
+                    let operator = match Operator::get(code) {
+                        Some(operator) => operator,
+                        _ => raise!("found an unknown operator"),
+                    };
+                    return Ok(Operation { operator: operator, operands: operands });
+                },
             }
-            if code >> 8 == 0 {
-                try!(band.take::<u8>());
-            } else {
-                try!(band.take::<u16>());
-            }
-            return Ok(Operation { operator: operator, operands: operands });
         }
     }
 }
@@ -59,24 +50,15 @@ macro_rules! operator {
 }
 
 macro_rules! operator_define {
-    ($name:ident [] [$($variant:ident,)*]) => (
+    (pub $name:ident { $($variant:ident,)* }) => (
         #[allow(non_camel_case_types)]
         #[derive(Clone, Copy, Debug, Eq, PartialEq)]
         pub enum $name { $($variant,)* }
     );
-    ($name:ident [[$variant:ident], $($todo:tt)*] [$($done:tt)*]) => (
-        operator_define!($name [$($todo)*] [$($done)*]);
-    );
-    ($name:ident [$variant:ident, $($todo:tt)*] [$($done:tt)*]) => (
-        operator_define!($name [$($todo)*] [$($done)* $variant,]);
-    );
-    (pub $name:ident { $($todo:tt)* }) => (
-        operator_define!($name [$($todo)*] []);
-    );
 }
 
 macro_rules! operator_implement {
-    ($name:ident [] [$($key:pat => $value:ident,)*]) => (
+    (pub $name:ident { $($key:pat => $value:ident,)* }) => (
         impl $name {
             pub fn get(code: u16) -> Option<Self> {
                 use self::$name::*;
@@ -86,15 +68,6 @@ macro_rules! operator_implement {
                 })
             }
         }
-    );
-    ($name:ident [$key:pat => [$value:ident], $($todo:tt)*] [$($done:tt)*]) => (
-        operator_implement!($name [$($todo)*] [$($done)* $key => $value,]);
-    );
-    ($name:ident [$key:pat => $value:ident, $($todo:tt)*] [$($done:tt)*]) => (
-        operator_implement!($name [$($todo)*] [$($done)* $key => $value,]);
-    );
-    (pub $name:ident { $($todo:tt)* }) => (
-        operator_implement!($name [$($todo)*] []);
     );
 }
 
@@ -112,7 +85,7 @@ operator! {
         0x09 => FamilyOtherBlues,
         0x0a => StdHW,
         0x0b => StdVW,
-        0x0c => escape,
+        // 0x0c => escape,
         0x0d => UniqueID,
         0x0e => XUID,
         0x0f => charset,
@@ -123,10 +96,12 @@ operator! {
         0x14 => defaultWidthX,
         0x15 => nominalWidthX,
         // 0x16...0x1b => Reserved,
-        0x1c...0x1d => Integer,
-        0x1e => Real,
+        // 0x1c => shortint,
+        // 0x1d => longint,
+        // 0x1e => BCD,
         // 0x1f => Reserved,
-        0x20...0xfe => [Integer],
+        // 0x20...0xf6 => <numbers>,
+        // 0xf7...0xfe => <numbers>,
         // 0xff => Reserved,
         0x0c00 => Copyright,
         0x0c01 => isFixedPitch,
