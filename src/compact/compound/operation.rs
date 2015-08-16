@@ -23,9 +23,9 @@ impl Value for Operation {
             match try!(band.peek::<u8>()) {
                 byte if byte <= 21 => {
                     let operator = if byte == 12 {
-                        try!(u16::read(band))
+                        try!(band.take::<u16>())
                     } else {
-                        try!(u8::read(band)) as u16
+                        try!(band.take::<u8>()) as u16
                     };
                     return Ok(Operation { operator: operator, operands: operands });
                 },

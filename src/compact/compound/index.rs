@@ -4,15 +4,15 @@ use compact::primitive::*;
 
 declare! {
     pub Index {
-        count   (Card16     ),
-        offSize (OffSize    ),
+        count   (u16        ),
+        offSize (OffsetSize ),
         offset  (Vec<Offset>),
-        data    (Vec<Card8> ),
+        data    (Vec<u8>    ),
     }
 }
 
 impl Index {
-    pub fn get(&self, i: usize) -> Option<&[Card8]> {
+    pub fn get(&self, i: usize) -> Option<&[u8]> {
         if i >= self.count as usize {
             return None;
         }
@@ -24,11 +24,11 @@ impl Index {
 
 impl Value for Index {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
-        let count = try!(Card16::read(band));
+        let count = try!(band.take::<u16>());
         if count == 0 {
             return Ok(Index::default());
         }
-        let offSize = try!(OffSize::read(band));
+        let offSize = try!(band.take::<OffsetSize>());
         let mut offset = Vec::with_capacity(count as usize + 1);
         for i in 0..(count as usize + 1) {
             let value = try!(ParametrizedValue::read(band, offSize));

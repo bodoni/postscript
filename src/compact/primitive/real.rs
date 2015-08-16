@@ -6,7 +6,7 @@ pub type Real = f64;
 impl Value for Real {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
         macro_rules! bad(() => (raise!("found a malformed real number")));
-        if try!(u8::read(band)) != 0x1e {
+        if try!(band.take::<u8>()) != 0x1e {
             bad!();
         }
         let mut buffer = String::new();
@@ -15,7 +15,7 @@ impl Value for Real {
         loop {
             let nibble = match high {
                 true => {
-                    byte = try!(u8::read(band));
+                    byte = try!(band.take::<u8>());
                     byte >> 4
                 },
                 false => byte & 0x0f,

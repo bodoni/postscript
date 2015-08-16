@@ -9,7 +9,7 @@ pub trait Band: Read + Seek + Sized {
         self.seek(SeekFrom::Start(position))
     }
 
-    #[inline]
+    #[inline(always)]
     fn take<T: Value>(&mut self) -> Result<T> {
         Value::read(self)
     }

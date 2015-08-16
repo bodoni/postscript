@@ -1,13 +1,13 @@
 use std::mem;
 
-use compact::primitive::SID;
+use compact::primitive::StringID;
 
 index! {
     pub StringIndex
 }
 
 impl StringIndex {
-    pub fn get(&self, id: SID) -> Option<String> {
+    pub fn get(&self, id: StringID) -> Option<String> {
         match id as usize {
             i if i < NUMBER_OF_STANDARD_STRINGS => get(id).map(|string| string.to_string()),
             i => self.0.get(i - NUMBER_OF_STANDARD_STRINGS).map(|chunk| {
@@ -17,15 +17,15 @@ impl StringIndex {
     }
 }
 
-fn get(id: SID) -> Option<&'static str> {
+fn get(id: StringID) -> Option<&'static str> {
     use std::collections::HashMap;
     use std::sync::{ONCE_INIT, Once};
 
     unsafe {
-        static mut MAP: *const HashMap<SID, &'static str> = 0 as *const _;
+        static mut MAP: *const HashMap<StringID, &'static str> = 0 as *const _;
         static ONCE: Once = ONCE_INIT;
         ONCE.call_once(|| {
-            let mut map: HashMap<SID, &'static str> = HashMap::new();
+            let mut map: HashMap<StringID, &'static str> = HashMap::new();
             for &(key, value) in STANDARD_STRINGS.iter() {
                 map.insert(key, value);
             }
@@ -40,7 +40,7 @@ macro_rules! map(
 );
 
 const NUMBER_OF_STANDARD_STRINGS: usize = 391;
-const STANDARD_STRINGS: [(SID, &'static str); NUMBER_OF_STANDARD_STRINGS] = map![
+const STANDARD_STRINGS: [(StringID, &'static str); NUMBER_OF_STANDARD_STRINGS] = map![
     0 => ".notdef",
     1 => "space",
     2 => "exclam",
