@@ -57,10 +57,12 @@ mod dictionary_index;
 mod header;
 mod index;
 mod name_index;
+mod operation;
 mod string_index;
 
 pub use self::dictionary_index::DictionaryIndex;
 pub use self::header::Header;
 pub use self::index::Index;
 pub use self::name_index::NameIndex;
+pub use self::operation::{Operand, Operation, Operator};
 pub use self::string_index::StringIndex;

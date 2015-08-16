@@ -25,12 +25,27 @@ fn name_index() {
 
 #[test]
 fn dictionary_index() {
+    use postscript::compact::compound::Operand::*;
+    use postscript::compact::compound::Operation;
+
     let compact = Compact::read(&mut read()).unwrap();
     let table = &compact.dictionary_index;
 
     assert_eq!(table.count, 1);
     assert_eq!(table.offSize, 1);
     assert_eq!(table.offset, &[1, 45]);
+    assert_eq!(table.get(0).unwrap().unwrap(), &[
+        Operation(0, vec![Integer(709)]),
+        Operation(1, vec![Integer(710)]),
+        Operation(3072, vec![Integer(711)]),
+        Operation(2, vec![Integer(712)]),
+        Operation(3, vec![Integer(712)]),
+        Operation(4, vec![Integer(388)]),
+        Operation(5, vec![Integer(-178), Integer(-335), Integer(1138), Integer(918)]),
+        Operation(15, vec![Integer(8340)]),
+        Operation(17, vec![Integer(8917)]),
+        Operation(18, vec![Integer(65), Integer(33671)]),
+    ]);
 }
 
 #[test]
