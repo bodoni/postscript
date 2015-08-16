@@ -2,7 +2,7 @@ use Result;
 use band::{Band, ParametrizedValue, Value};
 use compact::primitive::{Offset, OffsetSize};
 
-declare! {
+table_define! {
     pub Index {
         count   (u16        ),
         offSize (OffsetSize ),
