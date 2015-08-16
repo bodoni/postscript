@@ -33,8 +33,8 @@ pub trait Value {
 }
 
 #[doc(hidden)]
-pub trait Walue {
-    fn read<T: Band>(&mut T, usize) -> Result<Self>;
+pub trait ParametrizedValue<P> {
+    fn read<T: Band>(&mut T, P) -> Result<Self>;
 }
 
 impl<T: Read + Seek> Band for T {

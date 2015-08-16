@@ -4,7 +4,7 @@ use std::io::Read;
 use std::mem;
 
 use Result;
-use band::{Band, Value, Walue};
+use band::{Band, ParametrizedValue, Value};
 
 pub type Card8 = u8;
 pub type Card16 = u16;
@@ -44,7 +44,7 @@ implement!(u8, 1);
 implement!(u16, 2);
 implement!(u32, 4);
 
-impl Walue for Vec<u8> {
+impl ParametrizedValue<usize> for Vec<u8> {
     fn read<T: Band>(band: &mut T, count: usize) -> Result<Self> {
         let mut values = Vec::with_capacity(count);
         unsafe { values.set_len(count) };

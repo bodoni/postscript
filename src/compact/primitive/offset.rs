@@ -1,7 +1,8 @@
 use std::mem;
 
 use Result;
-use band::{Band, Value, Walue};
+use band::{Band, ParametrizedValue, Value};
+use compact::primitive::OffSize;
 
 pub type Offset = usize;
 
@@ -15,8 +16,8 @@ macro_rules! assemble(
     ($hi:expr, $me:expr, $lo:expr) => ([$lo, $me, $hi, 0]);
 );
 
-impl Walue for Offset {
-    fn read<T: Band>(band: &mut T, size: usize) -> Result<Self> {
+impl ParametrizedValue<OffSize> for Offset {
+    fn read<T: Band>(band: &mut T, size: OffSize) -> Result<Self> {
         Ok(match size {
             1 => try!(u8::read(band)) as Offset,
             2 => try!(u16::read(band)) as Offset,
@@ -32,7 +33,7 @@ impl Walue for Offset {
 
 #[cfg(test)]
 mod tests {
-    use band::Walue;
+    use band::ParametrizedValue;
     use compact::primitive::Offset;
     use std::io::Cursor;
 
