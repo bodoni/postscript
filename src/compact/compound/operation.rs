@@ -29,7 +29,7 @@ impl Value for Operation {
                     };
                     return Ok(Operation { operator: operator, operands: operands });
                 },
-                32...254 | 28 | 29 => operands.push(Operand::Integer(try!(Value::read(band)))),
+                28 | 29 | 32...254 => operands.push(Operand::Integer(try!(Value::read(band)))),
                 0x1e => operands.push(Operand::Real(try!(Value::read(band)))),
                 _ => raise!("found a malformed operation"),
             };

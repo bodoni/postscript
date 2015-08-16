@@ -1,6 +1,6 @@
 use Result;
 use band::{Band, ParametrizedValue, Value};
-use compact::primitive::*;
+use compact::primitive::{Offset, OffsetSize};
 
 declare! {
     pub Index {

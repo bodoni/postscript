@@ -1,4 +1,4 @@
-use compact::primitive::*;
+use compact::primitive::OffsetSize;
 
 table! {
     #[derive(Copy)]
