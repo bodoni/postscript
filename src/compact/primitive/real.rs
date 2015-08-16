@@ -1,7 +1,7 @@
 use Result;
 use band::{Band, Value};
 
-pub type Real = f64;
+pub type Real = f32;
 
 impl Value for Real {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
