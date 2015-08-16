@@ -25,16 +25,16 @@ fn name_index() {
 
 #[test]
 fn top_dictionary() {
-    macro_rules! operations(
-        ($($operator:ident => [$($operand:ident($number:expr)),*],)*) => (
-            vec![$(Operation {
-                operator: Operator::$operator,
-                operands: vec![$(Operand::$operand($number)),*],
-            },)*]
-        );
-    );
+    use postscript::compact::compound::{Operand, Operator};
+    use std::collections::HashMap;
 
-    use postscript::compact::compound::{Operand, Operation, Operator};
+    macro_rules! operations(
+        ($($operator:ident => [$($operand:ident($number:expr)),*],)*) => ({
+            let mut operations = HashMap::new();
+            $(operations.insert(Operator::$operator, vec![$(Operand::$operand($number)),*]);)*
+            operations
+        });
+    );
 
     let set = FontSet::read(&mut read()).unwrap();
     let table = &set.top_dictionary;

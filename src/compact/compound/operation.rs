@@ -2,44 +2,10 @@ use Result;
 use band::{Band, Value};
 use compact::primitive::{Integer, Real};
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct Operation {
-    pub operator: Operator,
-    pub operands: Vec<Operand>,
-}
-
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Operand {
     Integer(Integer),
     Real(Real),
-}
-
-impl Value for Operation {
-    fn read<T: Band>(band: &mut T) -> Result<Operation> {
-        let mut operands = vec![];
-        loop {
-            match try!(band.peek::<u8>()) {
-                0x1c | 0x1d | 0x20...0xfe => {
-                    operands.push(Operand::Integer(try!(Value::read(band))));
-                },
-                0x1e => {
-                    operands.push(Operand::Real(try!(Value::read(band))));
-                },
-                code => {
-                    let code = if code == 0x0c {
-                        try!(band.take::<u16>())
-                    } else {
-                        try!(band.take::<u8>()) as u16
-                    };
-                    let operator = match Operator::get(code) {
-                        Some(operator) => operator,
-                        _ => raise!("found an unknown operator"),
-                    };
-                    return Ok(Operation { operator: operator, operands: operands });
-                },
-            }
-        }
-    }
 }
 
 macro_rules! operator {
@@ -52,7 +18,7 @@ macro_rules! operator {
 macro_rules! operator_define {
     (pub $name:ident { $($variant:ident,)* }) => (
         #[allow(non_camel_case_types)]
-        #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
         pub enum $name { $($variant,)* }
     );
 }
@@ -137,5 +103,33 @@ operator! {
         0x0c25 => FDSelect,
         0x0c26 => FontName,
         // 0x0c27...0x0cff => Reserved,
+    }
+}
+
+impl Value for (Operator, Vec<Operand>) {
+    fn read<T: Band>(band: &mut T) -> Result<Self> {
+        let mut operands = vec![];
+        loop {
+            match try!(band.peek::<u8>()) {
+                0x1c | 0x1d | 0x20...0xfe => {
+                    operands.push(Operand::Integer(try!(Value::read(band))));
+                },
+                0x1e => {
+                    operands.push(Operand::Real(try!(Value::read(band))));
+                },
+                code => {
+                    let code = if code == 0x0c {
+                        try!(band.take::<u16>())
+                    } else {
+                        try!(band.take::<u8>()) as u16
+                    };
+                    let operator = match Operator::get(code) {
+                        Some(operator) => operator,
+                        _ => raise!("found an unknown operator"),
+                    };
+                    return Ok((operator, operands));
+                },
+            }
+        }
     }
 }
