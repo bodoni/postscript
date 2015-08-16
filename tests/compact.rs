@@ -25,6 +25,12 @@ fn name_index() {
 
 #[test]
 fn dictionary_index() {
+    macro_rules! operations(
+        ($($operator:expr => [$($operand:expr),*],)*) => (
+            vec![$(Operation { operator: $operator, operands: vec![$($operand),*] },)*]
+        );
+    );
+
     use postscript::compact::compound::Operand::*;
     use postscript::compact::compound::Operation;
 
@@ -34,18 +40,18 @@ fn dictionary_index() {
     assert_eq!(table.count, 1);
     assert_eq!(table.offSize, 1);
     assert_eq!(table.offset, &[1, 45]);
-    assert_eq!(table.get(0).unwrap().unwrap(), &[
-        Operation(0, vec![Integer(709)]),
-        Operation(1, vec![Integer(710)]),
-        Operation(3072, vec![Integer(711)]),
-        Operation(2, vec![Integer(712)]),
-        Operation(3, vec![Integer(712)]),
-        Operation(4, vec![Integer(388)]),
-        Operation(5, vec![Integer(-178), Integer(-335), Integer(1138), Integer(918)]),
-        Operation(15, vec![Integer(8340)]),
-        Operation(17, vec![Integer(8917)]),
-        Operation(18, vec![Integer(65), Integer(33671)]),
-    ]);
+    assert_eq!(table.get(0).unwrap().unwrap(), operations!(
+        0 => [Integer(709)],
+        1 => [Integer(710)],
+        3072 => [Integer(711)],
+        2 => [Integer(712)],
+        3 => [Integer(712)],
+        4 => [Integer(388)],
+        5 => [Integer(-178), Integer(-335), Integer(1138), Integer(918)],
+        15 => [Integer(8340)],
+        17 => [Integer(8917)],
+        18 => [Integer(65), Integer(33671)],
+    ));
 }
 
 #[test]

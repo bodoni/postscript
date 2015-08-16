@@ -3,7 +3,10 @@ use band::{Band, Value};
 use compact::primitive::{Integer, Real};
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Operation(pub Operator, pub Vec<Operand>);
+pub struct Operation {
+    pub operator: Operator,
+    pub operands: Vec<Operand>,
+}
 
 pub type Operator = u16;
 
@@ -24,7 +27,7 @@ impl Value for Operation {
                     } else {
                         try!(u8::read(band)) as u16
                     };
-                    return Ok(Operation(operator, operands));
+                    return Ok(Operation { operator: operator, operands: operands });
                 },
                 32...254 | 28 | 29 => operands.push(Operand::Integer(try!(Value::read(band)))),
                 0x1e => operands.push(Operand::Real(try!(Value::read(band)))),
