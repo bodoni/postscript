@@ -1,10 +1,10 @@
-use postscript::Compact;
+use postscript::compact::FontSet;
 use std::io::Cursor;
 
 #[test]
 fn header() {
-    let compact = Compact::read(&mut read()).unwrap();
-    let table = &compact.header;
+    let set = FontSet::read(&mut read()).unwrap();
+    let table = &set.header;
 
     assert_eq!(table.major, 1);
     assert_eq!(table.minor, 0);
@@ -14,8 +14,8 @@ fn header() {
 
 #[test]
 fn name_index() {
-    let compact = Compact::read(&mut read()).unwrap();
-    let table = &compact.name_index;
+    let set = FontSet::read(&mut read()).unwrap();
+    let table = &set.name_index;
 
     assert_eq!(table.count, 1);
     assert_eq!(table.offSize, 1);
@@ -28,8 +28,8 @@ fn dictionary_index() {
     use postscript::compact::compound::Operand::*;
     use postscript::compact::compound::Operation;
 
-    let compact = Compact::read(&mut read()).unwrap();
-    let table = &compact.dictionary_index;
+    let set = FontSet::read(&mut read()).unwrap();
+    let table = &set.dictionary_index;
 
     assert_eq!(table.count, 1);
     assert_eq!(table.offSize, 1);
@@ -50,8 +50,8 @@ fn dictionary_index() {
 
 #[test]
 fn string_index() {
-    let compact = Compact::read(&mut read()).unwrap();
-    let table = &compact.string_index;
+    let set = FontSet::read(&mut read()).unwrap();
+    let table = &set.string_index;
 
     assert_eq!(table.count, 322);
     assert_eq!(table.offSize, 2);

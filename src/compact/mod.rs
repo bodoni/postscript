@@ -8,21 +8,21 @@ use Result;
 use band::{Band, Value};
 
 /// A font set encoded in the compact font format.
-pub struct Compact {
+pub struct FontSet {
     pub header: Header,
     pub name_index: NameIndex,
     pub dictionary_index: DictionaryIndex,
     pub string_index: StringIndex,
 }
 
-impl Compact {
+impl FontSet {
     #[inline]
     pub fn read<T: Read + Seek>(reader: &mut T) -> Result<Self> {
         Value::read(reader)
     }
 }
 
-impl Value for Compact {
+impl Value for FontSet {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
         let header = try!(Header::read(band));
         try!(band.jump(header.hdrSize as u64));
@@ -32,7 +32,7 @@ impl Value for Compact {
             raise!("the name and top dictionary indices do not match");
         }
         let string_index = try!(StringIndex::read(band));
-        Ok(Compact {
+        Ok(FontSet {
             header: header,
             name_index: name_index,
             dictionary_index: dictionary_index,
