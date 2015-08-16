@@ -7,11 +7,11 @@ use std::io::{Read, Seek};
 use Result;
 use band::{Band, Value};
 
-/// A font set encoded in the compact font format.
+/// A font set.
 pub struct FontSet {
     pub header: Header,
     pub name_index: NameIndex,
-    pub dictionary_index: DictionaryIndex,
+    pub top_dictionary: DictionaryIndex,
     pub string_index: StringIndex,
 }
 
@@ -27,15 +27,15 @@ impl Value for FontSet {
         let header = try!(Header::read(band));
         try!(band.jump(header.hdrSize as u64));
         let name_index = try!(NameIndex::read(band));
-        let dictionary_index = try!(DictionaryIndex::read(band));
-        if name_index.count != dictionary_index.count {
+        let top_dictionary = try!(DictionaryIndex::read(band));
+        if name_index.count != top_dictionary.count {
             raise!("the name and top dictionary indices do not match");
         }
         let string_index = try!(StringIndex::read(band));
         Ok(FontSet {
             header: header,
             name_index: name_index,
-            dictionary_index: dictionary_index,
+            top_dictionary: top_dictionary,
             string_index: string_index,
         })
     }

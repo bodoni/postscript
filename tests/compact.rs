@@ -24,7 +24,7 @@ fn name_index() {
 }
 
 #[test]
-fn dictionary_index() {
+fn top_dictionary() {
     macro_rules! operations(
         ($($operator:expr => [$($operand:expr),*],)*) => (
             vec![$(Operation { operator: $operator, operands: vec![$($operand),*] },)*]
@@ -35,7 +35,7 @@ fn dictionary_index() {
     use postscript::compact::compound::Operation;
 
     let set = FontSet::read(&mut read()).unwrap();
-    let table = &set.dictionary_index;
+    let table = &set.top_dictionary;
 
     assert_eq!(table.count, 1);
     assert_eq!(table.offSize, 1);
