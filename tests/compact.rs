@@ -26,13 +26,15 @@ fn name_index() {
 #[test]
 fn top_dictionary() {
     macro_rules! operations(
-        ($($operator:expr => [$($operand:expr),*],)*) => (
-            vec![$(Operation { operator: $operator, operands: vec![$($operand),*] },)*]
+        ($($operator:ident => [$($operand:ident($number:expr)),*],)*) => (
+            vec![$(Operation {
+                operator: Operator::$operator,
+                operands: vec![$(Operand::$operand($number)),*],
+            },)*]
         );
     );
 
-    use postscript::compact::compound::Operand::*;
-    use postscript::compact::compound::Operation;
+    use postscript::compact::compound::{Operand, Operation, Operator};
 
     let set = FontSet::read(&mut read()).unwrap();
     let table = &set.top_dictionary;
@@ -41,16 +43,11 @@ fn top_dictionary() {
     assert_eq!(table.offSize, 1);
     assert_eq!(table.offset, &[1, 45]);
     assert_eq!(table.get(0).unwrap().unwrap(), operations!(
-        0 => [Integer(709)],
-        1 => [Integer(710)],
-        3072 => [Integer(711)],
-        2 => [Integer(712)],
-        3 => [Integer(712)],
-        4 => [Integer(388)],
-        5 => [Integer(-178), Integer(-335), Integer(1138), Integer(918)],
-        15 => [Integer(8340)],
-        17 => [Integer(8917)],
-        18 => [Integer(65), Integer(33671)],
+        version => [Integer(709)], Notice => [Integer(710)], Copyright => [Integer(711)],
+        FullName => [Integer(712)], FamilyName => [Integer(712)], Weight => [Integer(388)],
+        FontBBox => [Integer(-178), Integer(-335), Integer(1138), Integer(918)],
+        charset => [Integer(8340)], CharStrings => [Integer(8917)],
+        Private => [Integer(65), Integer(33671)],
     ));
 }
 

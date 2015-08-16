@@ -14,25 +14,39 @@ pub enum Operand {
     Real(Real),
 }
 
-pub type Operator = u16;
-
 impl Value for Operation {
     fn read<T: Band>(band: &mut T) -> Result<Operation> {
         let mut operands = vec![];
         loop {
-            match try!(band.peek::<u8>()) {
-                byte if byte <= 21 => {
-                    let operator = if byte == 12 {
-                        try!(band.take::<u16>())
-                    } else {
-                        try!(band.take::<u8>()) as u16
-                    };
-                    return Ok(Operation { operator: operator, operands: operands });
+            let mut code = try!(band.peek::<u8>()) as u16;
+            let operator = match Operator::get(code) {
+                Some(Operator::escape) => {
+                    code = try!(band.peek::<u16>());
+                    match Operator::get(code) {
+                        Some(operator) => operator,
+                        _ => raise!("found an unknown two-byte operator"),
+                    }
                 },
-                28 | 29 | 32...254 => operands.push(Operand::Integer(try!(Value::read(band)))),
-                0x1e => operands.push(Operand::Real(try!(Value::read(band)))),
-                _ => raise!("found a malformed operation"),
+                Some(operator) => operator,
+                _ => raise!("found an unknown one-byte operator"),
             };
+            match operator {
+                Operator::Integer => {
+                    operands.push(Operand::Integer(try!(Value::read(band))));
+                    continue;
+                },
+                Operator::Real => {
+                    operands.push(Operand::Real(try!(Value::read(band))));
+                    continue;
+                },
+                _ => {},
+            }
+            if code >> 8 == 0 {
+                try!(band.take::<u8>());
+            } else {
+                try!(band.take::<u16>());
+            }
+            return Ok(Operation { operator: operator, operands: operands });
         }
     }
 }
@@ -47,6 +61,7 @@ macro_rules! operator {
 macro_rules! operator_define {
     ($name:ident [] [$($variant:ident,)*]) => (
         #[allow(non_camel_case_types)]
+        #[derive(Clone, Copy, Debug, Eq, PartialEq)]
         pub enum $name { $($variant,)* }
     );
     ($name:ident [[$variant:ident], $($todo:tt)*] [$($done:tt)*]) => (
@@ -63,7 +78,7 @@ macro_rules! operator_define {
 macro_rules! operator_implement {
     ($name:ident [] [$($key:pat => $value:ident,)*]) => (
         impl $name {
-            pub fn map(code: u16) -> Option<Self> {
+            pub fn get(code: u16) -> Option<Self> {
                 use self::$name::*;
                 Some(match code {
                     $($key => $value,)+
@@ -84,7 +99,7 @@ macro_rules! operator_implement {
 }
 
 operator! {
-    pub Operator42 {
+    pub Operator {
         0x00 => version,
         0x01 => Notice,
         0x02 => FullName,
@@ -97,7 +112,7 @@ operator! {
         0x09 => FamilyOtherBlues,
         0x0a => StdHW,
         0x0b => StdVW,
-        // 0x0c => escape,
+        0x0c => escape,
         0x0d => UniqueID,
         0x0e => XUID,
         0x0f => charset,
