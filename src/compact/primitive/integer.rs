@@ -11,11 +11,11 @@ impl Value for Integer {
         );
         let byte0 = read!(u8);
         Ok(match byte0 {
-            32...246 => byte0 - 139,
-            247...250 => (byte0 - 247) * 256 + read!(u8) + 108,
-            251...254 => -(byte0 - 251) * 256 - read!(u8) - 108,
-            28 => read!(u16, i16),
-            29 => read!(u32, i32),
+            0x20...0xf6 => byte0 - 139,
+            0xf7...0xfa => (byte0 - 247) * 256 + read!(u8) + 108,
+            0xfb...0xfe => -(byte0 - 251) * 256 - read!(u8) - 108,
+            0x1c => read!(u16, i16),
+            0x1d => read!(u32, i32),
             _ => raise!("found a malformed integer"),
         })
     }
