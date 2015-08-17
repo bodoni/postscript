@@ -28,12 +28,12 @@ pub trait Band: Read + Seek + Sized {
 }
 
 #[doc(hidden)]
-pub trait Value {
+pub trait Value: Sized {
     fn read<T: Band>(&mut T) -> Result<Self>;
 }
 
 #[doc(hidden)]
-pub trait ParametrizedValue<P> {
+pub trait ParametrizedValue<P>: Sized {
     fn read<T: Band>(&mut T, P) -> Result<Self>;
 }
 
