@@ -14,6 +14,7 @@ pub struct FontSet {
     pub dictionaries: DictionaryIndex,
     pub strings: StringIndex,
     pub subroutines: SubroutineIndex,
+    pub encodings: Vec<Encoding>,
 }
 
 impl FontSet {
@@ -34,17 +35,44 @@ impl Value for FontSet {
         }
         let strings = try!(StringIndex::read(band));
         let subroutines = try!(SubroutineIndex::read(band));
+        let encodings = try!(read_encodings(&dictionaries));
         Ok(FontSet {
             header: header,
             names: names,
             dictionaries: dictionaries,
             strings: strings,
             subroutines: subroutines,
+            encodings: encodings,
         })
     }
+}
+
+fn read_encodings(dictionaries: &DictionaryIndex) -> Result<Vec<Encoding>> {
+    let mut encodings = vec![];
+    for i in 0..(dictionaries.count as usize) {
+        let mut dictionary = match try!(dictionaries.get(i)) {
+            Some(dictionary) => dictionary,
+            _ => raise!("failed to find a dictionary"),
+        };
+        let offset = match dictionary.remove(&Operator::Encoding)
+                                     .or_else(|| Operator::Encoding.default()) {
+            Some(ref operands) => match (operands.len(), operands.get(0)) {
+                (1, Some(&Operand::Integer(offset))) => offset,
+                _ => raise!("found an unsupported encoding"),
+            },
+            _ => raise!("failed to identify an encoding"),
+        };
+        encodings.push(match offset {
+            0 => Encoding::Standard,
+            1 => Encoding::Expert,
+            _ => raise!("found an unsupported encoding"),
+        });
+    }
+    Ok(encodings)
 }
 
 pub mod compound;
 pub mod primitive;
 
-use self::compound::{DictionaryIndex, Header, NameIndex, StringIndex, SubroutineIndex};
+use self::compound::{DictionaryIndex, NameIndex, StringIndex, SubroutineIndex};
+use self::compound::{Encoding, Header, Operand, Operator};

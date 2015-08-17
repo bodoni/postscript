@@ -15,12 +15,12 @@ fn header() {
 #[test]
 fn names() {
     let set = FontSet::read(&mut read()).unwrap();
-    let table = &set.names;
+    let index = &set.names;
 
-    assert_eq!(table.count, 1);
-    assert_eq!(table.offSize, 1);
-    assert_eq!(table.offset, &[1, 23]);
-    assert_eq!(table.get(0).unwrap(), "SourceSerifPro-Regular");
+    assert_eq!(index.count, 1);
+    assert_eq!(index.offSize, 1);
+    assert_eq!(index.offset, &[1, 23]);
+    assert_eq!(index.get(0).unwrap(), "SourceSerifPro-Regular");
 }
 
 #[test]
@@ -37,12 +37,12 @@ fn dictionaries() {
     );
 
     let set = FontSet::read(&mut read()).unwrap();
-    let table = &set.dictionaries;
+    let index = &set.dictionaries;
 
-    assert_eq!(table.count, 1);
-    assert_eq!(table.offSize, 1);
-    assert_eq!(table.offset, &[1, 45]);
-    assert_eq!(table.get(0).unwrap().unwrap(), operations!(
+    assert_eq!(index.count, 1);
+    assert_eq!(index.offSize, 1);
+    assert_eq!(index.offset, &[1, 45]);
+    assert_eq!(index.get(0).unwrap().unwrap(), operations!(
         version => [Integer(709)], Notice => [Integer(710)], Copyright => [Integer(711)],
         FullName => [Integer(712)], FamilyName => [Integer(712)], Weight => [Integer(388)],
         FontBBox => [Integer(-178), Integer(-335), Integer(1138), Integer(918)],
@@ -54,21 +54,31 @@ fn dictionaries() {
 #[test]
 fn strings() {
     let set = FontSet::read(&mut read()).unwrap();
-    let table = &set.strings;
+    let index = &set.strings;
 
-    assert_eq!(table.count, 322);
-    assert_eq!(table.offSize, 2);
-    assert_eq!(table.get(175).unwrap(), "Aring");
-    assert_eq!(table.get(500).unwrap(), "nine.tosf");
+    assert_eq!(index.count, 322);
+    assert_eq!(index.offSize, 2);
+    assert_eq!(index.get(175).unwrap(), "Aring");
+    assert_eq!(index.get(500).unwrap(), "nine.tosf");
 }
 
 #[test]
 fn subroutines() {
     let set = FontSet::read(&mut read()).unwrap();
-    let table = &set.subroutines;
+    let index = &set.subroutines;
 
-    assert_eq!(table.count, 181);
-    assert_eq!(table.offSize, 2);
+    assert_eq!(index.count, 181);
+    assert_eq!(index.offSize, 2);
+}
+
+#[test]
+fn encodings() {
+    use postscript::compact::compound::Encoding;
+
+    let set = FontSet::read(&mut read()).unwrap();
+    let vector = &set.encodings;
+
+    assert_eq!(vector, &vec![Encoding::Standard]);
 }
 
 fn read() -> Cursor<Vec<u8>> {
