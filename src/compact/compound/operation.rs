@@ -9,9 +9,9 @@ pub enum Operand {
 }
 
 macro_rules! operator {
-    (pub $name:ident { $($key:pat => $value:ident [$($default:tt)*],)+ }) => (
-        operator_define! { pub $name { $($value,)+ } }
-        operator_implement! { pub $name { $($key => $value,)+ } }
+    (pub $name:ident { $($code:pat => $variant:ident $default:tt,)+ }) => (
+        operator_define! { pub $name { $($variant,)+ } }
+        operator_implement! { pub $name { $($code => $variant $default,)+ } }
     );
 }
 
@@ -24,18 +24,30 @@ macro_rules! operator_define {
 }
 
 macro_rules! operator_implement {
-    (pub $name:ident { $($key:pat => $value:ident,)* }) => (
-        impl $name {
-            pub fn get(code: u16) -> Option<Self> {
-                use self::$name::*;
-                Some(match code {
-                    $($key => $value,)+
-                    _ => return None,
-                })
+    (pub $name:ident { $($code:pat => $variant:ident $default:tt,)* }) => (impl $name {
+        pub fn get(code: u16) -> Option<Self> {
+            use self::$name::*;
+            Some(match code {
+                $($code => $variant,)+
+                _ => return None,
+            })
+        }
+
+        pub fn default(&self) -> Option<Vec<Operand>> {
+            use self::$name::*;
+            match *self {
+                $($variant => operator_default!($default),)+
             }
         }
-    );
+    });
 }
+
+macro_rules! operator_default(
+    ([$($operand:ident($number:expr)),+]) => (
+        Some(vec![$(Operand::$operand($number)),+])
+    );
+    ([]) => (None);
+);
 
 operator! {
     pub Operator {
