@@ -54,6 +54,7 @@ macro_rules! index {
 macro_rules! itemize(($code:item) => ($code));
 
 mod dictionary_index;
+mod encoding;
 mod header;
 mod index;
 mod name_index;
@@ -62,6 +63,7 @@ mod string_index;
 mod subroutine_index;
 
 pub use self::dictionary_index::DictionaryIndex;
+pub use self::encoding::Encoding;
 pub use self::header::Header;
 pub use self::index::Index;
 pub use self::name_index::NameIndex;
