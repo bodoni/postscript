@@ -1,12 +1,16 @@
-use postscript::compact::compound::{Encoding, Operator};
+use postscript::compact::compound::Operator;
 use random::{self, Source};
 use test::{Bencher, black_box};
 
+const SAMPLES: usize = 1000;
+
 #[bench]
 fn encoding_get(bencher: &mut Bencher) {
+    use postscript::compact::compound::Encoding;
+
     let mut source = random::default().seed([42, 69]);
-    let codes = source.iter::<u64>().take(1000).map(|number| (number as u16) % 256)
-                                               .collect::<Vec<_>>();
+    let codes = source.iter::<u64>().take(SAMPLES).map(|number| (number as u16) % 256)
+                                                  .collect::<Vec<_>>();
     let encoding = Encoding::Standard;
     bencher.iter(|| {
         for &code in &codes {
@@ -17,8 +21,8 @@ fn encoding_get(bencher: &mut Bencher) {
 
 #[bench]
 fn operator_default(bencher: &mut Bencher) {
-    let mut source = random::default().seed([42, 69]);
-    let operators = generate_operators(&mut source, 1000);
+    let mut source = random::default().seed([69, 42]);
+    let operators = generate_operators(&mut source, SAMPLES);
     bencher.iter(|| {
         for &operator in &operators {
             black_box(operator.default());
@@ -28,11 +32,27 @@ fn operator_default(bencher: &mut Bencher) {
 
 #[bench]
 fn operator_get(bencher: &mut Bencher) {
-    let mut source = random::default().seed([69, 42]);
-    let codes = generate_codes(&mut source, 1000);
+    let mut source = random::default().seed([42, 69]);
+    let codes = generate_codes(&mut source, SAMPLES);
     bencher.iter(|| {
         for &code in &codes {
             black_box(Operator::get(code));
+        }
+    });
+}
+
+#[bench]
+fn string_index_get(bencher: &mut Bencher) {
+    use postscript::compact::compound::StringIndex;
+    use postscript::compact::primitive::StringID;
+
+    let mut source = random::default().seed([69, 42]);
+    let ids = source.iter::<u64>().take(SAMPLES).map(|number| (number as StringID) % 391)
+                                                .collect::<Vec<_>>();
+    let index = StringIndex::default();
+    bencher.iter(|| {
+        for &id in &ids {
+            black_box(index.get(id));
         }
     });
 }
