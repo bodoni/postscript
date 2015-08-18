@@ -8,6 +8,13 @@ homepage = "https://github.com/bodoni/postscript"
 documentation = "https://bodoni.github.io/postscript"
 description = "The package provides a parser for PostScript fonts."
 
+[dev-dependencies]
+random = "*"
+
+[[bench]]
+name = "postscript"
+path = "benches/lib.rs"
+
 [[test]]
 name = "postscript"
 path = "tests/lib.rs"
