@@ -66,7 +66,7 @@ macro_rules! lookup {
                 $(map.insert($key, $value);)+
                 MAP = ::std::mem::transmute(Box::new(map));
             });
-            (&*MAP).get(&$what).map(|&value| value)
+            (&*MAP).get(&$what).cloned()
         }
     });
 }
