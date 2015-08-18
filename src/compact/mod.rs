@@ -58,7 +58,7 @@ fn read_encodings(dictionaries: &DictionaryIndex) -> Result<Vec<Encoding>> {
                                      .or_else(|| Operator::Encoding.default()) {
             Some(ref operands) => match (operands.len(), operands.get(0)) {
                 (1, Some(&Operand::Integer(offset))) => offset,
-                _ => raise!("found an unsupported encoding"),
+                _ => raise!("found an encoding operator with invalid operands"),
             },
             _ => raise!("failed to identify an encoding"),
         };
