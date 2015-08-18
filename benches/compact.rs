@@ -24,10 +24,6 @@ fn operator_get(bencher: &mut Bencher) {
     });
 }
 
-fn generate_operators<T: Source>(source: &mut T, count: usize) -> Vec<Operator> {
-    generate_codes(source, count).iter().map(|&code| Operator::get(code).unwrap()).collect()
-}
-
 fn generate_codes<T: Source>(source: &mut T, count: usize) -> Vec<u16> {
     let mut codes = vec![];
     while codes.len() != count {
@@ -52,4 +48,8 @@ fn generate_codes<T: Source>(source: &mut T, count: usize) -> Vec<u16> {
         }
     }
     codes
+}
+
+fn generate_operators<T: Source>(source: &mut T, count: usize) -> Vec<Operator> {
+    generate_codes(source, count).iter().map(|&code| Operator::get(code).unwrap()).collect()
 }
