@@ -54,19 +54,10 @@ macro_rules! index {
 macro_rules! itemize(($code:item) => ($code));
 
 macro_rules! lookup {
-    ($what:ident, $from:ty => $into:ty { $($key:expr => $value:expr,)+ }) => ({
-        use std::collections::HashMap;
-        use std::sync::{ONCE_INIT, Once};
-
-        unsafe {
-            static mut MAP: *const HashMap<$from, $into> = 0 as *const _;
-            static ONCE: Once = ONCE_INIT;
-            ONCE.call_once(|| {
-                let mut map: HashMap<$from, $into> = HashMap::new();
-                $(map.insert($key, $value);)+
-                MAP = ::std::mem::transmute(Box::new(map));
-            });
-            (&*MAP).get(&$what).cloned()
+    ($what:ident, $from:ty => $into:ty { $($key:pat => $value:expr,)+ }) => ({
+        match $what {
+            $($key => Some($value),)+
+            _ => None,
         }
     });
 }
