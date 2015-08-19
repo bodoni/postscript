@@ -17,7 +17,7 @@ impl Encoding {
 }
 
 fn get_standard(code: u16) -> Option<StringID> {
-    lookup!(code, u16 => StringID {
+    lookup!(code {
         0 => 0,
         1 => 0,
         2 => 0,
@@ -278,7 +278,7 @@ fn get_standard(code: u16) -> Option<StringID> {
 }
 
 fn get_expert(code: u16) -> Option<StringID> {
-    lookup!(code, u16 => StringID {
+    lookup!(code {
         0 => 0,
         1 => 0,
         2 => 0,

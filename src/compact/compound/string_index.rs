@@ -18,7 +18,7 @@ impl StringIndex {
 const NUMBER_OF_STANDARD_STRINGS: usize = 391;
 
 fn get(id: StringID) -> Option<&'static str> {
-    lookup!(id, StringID => &'static str {
+    lookup!(id {
         0 => ".notdef",
         1 => "space",
         2 => "exclam",

@@ -54,7 +54,7 @@ macro_rules! index {
 macro_rules! itemize(($code:item) => ($code));
 
 macro_rules! lookup {
-    ($what:ident, $from:ty => $into:ty { $($key:pat => $value:expr,)+ }) => ({
+    ($what:ident { $($key:pat => $value:expr,)+ }) => ({
         match $what {
             $($key => Some($value),)+
             _ => None,
