@@ -42,7 +42,7 @@ fn dictionaries() {
     assert_eq!(index.count, 1);
     assert_eq!(index.offSize, 1);
     assert_eq!(index.offset, &[1, 45]);
-    assert_eq!(index.get(0).unwrap().unwrap(), operations!(
+    assert_eq!(&*index.get(0).unwrap().unwrap(), &operations!(
         version => [Integer(709)], Notice => [Integer(710)], Copyright => [Integer(711)],
         FullName => [Integer(712)], FamilyName => [Integer(712)], Weight => [Integer(388)],
         FontBBox => [Integer(-178), Integer(-335), Integer(1138), Integer(918)],

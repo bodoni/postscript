@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+use std::ops::Deref;
+
 use Result;
 use band::{Band, Value};
 use compact::primitive::{Integer, Real};
@@ -118,6 +121,9 @@ operator! {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct Operations(HashMap<Operator, Vec<Operand>>);
+
 impl Value for (Operator, Vec<Operand>) {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
         let mut operands = vec![];
@@ -143,5 +149,33 @@ impl Value for (Operator, Vec<Operand>) {
                 },
             }
         }
+    }
+}
+
+impl Operations {
+    #[inline]
+    pub fn get(&self, operator: Operator) -> Option<Vec<Operand>> {
+        self.0.get(&operator).cloned().or_else(|| operator.default())
+    }
+}
+
+impl Value for Operations {
+    fn read<T: Band>(band: &mut T) -> Result<Self> {
+        let size = try!(band.count());
+        let mut map = HashMap::new();
+        while try!(band.position()) < size {
+            let (operator, operands) = try!(Value::read(band));
+            map.insert(operator, operands);
+        }
+        Ok(Operations(map))
+    }
+}
+
+impl Deref for Operations {
+    type Target = HashMap<Operator, Vec<Operand>>;
+
+    #[inline]
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }

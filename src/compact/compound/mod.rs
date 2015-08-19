@@ -63,11 +63,12 @@ mod operation;
 mod string_index;
 mod subroutine_index;
 
+pub use self::charset::Charset;
 pub use self::dictionary_index::DictionaryIndex;
 pub use self::encoding::Encoding;
 pub use self::header::Header;
 pub use self::index::Index;
 pub use self::name_index::NameIndex;
-pub use self::operation::{Operand, Operator};
+pub use self::operation::{Operator, Operand, Operations};
 pub use self::string_index::StringIndex;
 pub use self::subroutine_index::SubroutineIndex;

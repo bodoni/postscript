@@ -47,12 +47,12 @@ fn string_index_get(bencher: &mut Bencher) {
     use postscript::compact::primitive::StringID;
 
     let mut source = random::default().seed([69, 42]);
-    let ids = source.iter::<u64>().take(SAMPLES).map(|number| (number as StringID) % 391)
-                                                .collect::<Vec<_>>();
+    let sids = source.iter::<u64>().take(SAMPLES).map(|number| (number as StringID) % 391)
+                                                 .collect::<Vec<_>>();
     let index = StringIndex::default();
     bencher.iter(|| {
-        for &id in &ids {
-            black_box(index.get(id));
+        for &sid in &sids {
+            black_box(index.get(sid));
         }
     });
 }

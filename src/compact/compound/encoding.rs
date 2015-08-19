@@ -17,9 +17,9 @@ impl Encoding {
 }
 
 macro_rules! lookup(
-    ($one:ident { $($code:pat => $id:expr => $name:expr,)+ }) => (
+    ($one:ident { $($code:pat => $sid:expr => $name:expr,)+ }) => (
         Some(match $one {
-            $($code => $id,)+
+            $($code => $sid,)+
             _ => return None,
         })
     );

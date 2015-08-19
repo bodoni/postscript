@@ -5,9 +5,9 @@ index! {
 }
 
 impl StringIndex {
-    pub fn get(&self, id: StringID) -> Option<String> {
-        match id as usize {
-            i if i < NUMBER_OF_STANDARD_STRINGS => get(id).map(|string| string.to_string()),
+    pub fn get(&self, sid: StringID) -> Option<String> {
+        match sid as usize {
+            i if i < NUMBER_OF_STANDARD_STRINGS => get(sid).map(|string| string.to_string()),
             i => self.0.get(i - NUMBER_OF_STANDARD_STRINGS).map(|chunk| {
                 String::from_utf8_lossy(chunk).into_owned()
             }),
@@ -17,8 +17,8 @@ impl StringIndex {
 
 const NUMBER_OF_STANDARD_STRINGS: usize = 391;
 
-fn get(id: StringID) -> Option<&'static str> {
-    Some(match id {
+fn get(sid: StringID) -> Option<&'static str> {
+    Some(match sid {
         0 => ".notdef",
         1 => "space",
         2 => "exclam",
