@@ -1,3 +1,5 @@
+use Result;
+use band::{Band, Value};
 use compact::primitive::StringID;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -15,6 +17,12 @@ impl Charset {
             Charset::Expert => get_expert(sid),
             Charset::ExpertSubset => get_expert_subset(sid),
         }
+    }
+}
+
+impl Value for Charset {
+    fn read<T: Band>(_: &mut T) -> Result<Self> {
+        Ok(Charset::ISOAdobe)
     }
 }
 

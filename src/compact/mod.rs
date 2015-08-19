@@ -15,6 +15,7 @@ pub struct FontSet {
     pub strings: StringIndex,
     pub subroutines: SubroutineIndex,
     pub encodings: Vec<Encoding>,
+    pub charsets: Vec<Charset>,
 }
 
 impl FontSet {
@@ -36,13 +37,14 @@ impl Value for FontSet {
         let strings = try!(StringIndex::read(band));
         let subroutines = try!(SubroutineIndex::read(band));
 
-        let mut encodings = vec![];
+        let (mut encodings, mut charsets) = (vec![], vec![]);
         for i in 0..(dictionaries.count as usize) {
             let dictionary = match try!(dictionaries.get(i)) {
                 Some(dictionary) => dictionary,
                 _ => raise!("failed to find a dictionary"),
             };
-            encodings.push(try!(read_encoding(&dictionary)));
+            encodings.push(try!(read_encoding(band, &dictionary)));
+            charsets.push(try!(read_charset(band, &dictionary)));
         }
 
         Ok(FontSet {
@@ -52,11 +54,12 @@ impl Value for FontSet {
             strings: strings,
             subroutines: subroutines,
             encodings: encodings,
+            charsets: charsets,
         })
     }
 }
 
-fn read_encoding(dictionary: &Operations) -> Result<Encoding> {
+fn read_encoding<T: Band>(_: &mut T, dictionary: &Operations) -> Result<Encoding> {
     let offset = match dictionary.get(Operator::Encoding) {
         Some(operands) => match (operands.len(), operands.get(0)) {
             (1, Some(&Operand::Integer(offset))) => offset,
@@ -64,17 +67,35 @@ fn read_encoding(dictionary: &Operations) -> Result<Encoding> {
         },
         _ => raise!("failed to identify an encoding"),
     };
-
     Ok(match offset {
         0 => Encoding::Standard,
         1 => Encoding::Expert,
-        _ => raise!("found an unsupported encoding"),
+        _ => unimplemented!(),
     })
+}
+
+fn read_charset<T: Band>(band: &mut T, dictionary: &Operations) -> Result<Charset> {
+    let offset = match dictionary.get(Operator::charset) {
+        Some(operands) => match (operands.len(), operands.get(0)) {
+            (1, Some(&Operand::Integer(offset))) => offset,
+            _ => raise!("found a charset operator with invalid operands"),
+        },
+        _ => raise!("failed to identify a charset"),
+    };
+    match offset {
+        0 => Ok(Charset::ISOAdobe),
+        1 => Ok(Charset::Expert),
+        2 => Ok(Charset::ExpertSubset),
+        _ => {
+            try!(band.jump(offset as u64));
+            Value::read(band)
+        }
+    }
 }
 
 pub mod compound;
 pub mod primitive;
 
-use self::compound::{Encoding, Header};
+use self::compound::{Charset, Encoding, Header};
 use self::compound::{DictionaryIndex, NameIndex, StringIndex, SubroutineIndex};
 use self::compound::{Operator, Operand, Operations};
