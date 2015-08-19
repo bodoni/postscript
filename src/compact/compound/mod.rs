@@ -53,15 +53,6 @@ macro_rules! index {
 
 macro_rules! itemize(($code:item) => ($code));
 
-macro_rules! lookup {
-    ($what:ident { $($key:pat => $value:expr,)+ }) => ({
-        match $what {
-            $($key => Some($value),)+
-            _ => None,
-        }
-    });
-}
-
 mod charset;
 mod dictionary_index;
 mod encoding;

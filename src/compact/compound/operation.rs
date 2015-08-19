@@ -27,8 +27,9 @@ macro_rules! operator_implement {
     (pub $name:ident { $($code:pat => $variant:ident $default:tt,)* }) => (impl $name {
         pub fn get(code: u16) -> Option<Self> {
             use self::$name::*;
-            lookup!(code {
+            Some(match code {
                 $($code => $variant,)+
+                _ => return None,
             })
         }
 

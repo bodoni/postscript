@@ -18,7 +18,7 @@ impl StringIndex {
 const NUMBER_OF_STANDARD_STRINGS: usize = 391;
 
 fn get(id: StringID) -> Option<&'static str> {
-    lookup!(id {
+    Some(match id {
         0 => ".notdef",
         1 => "space",
         2 => "exclam",
@@ -410,5 +410,6 @@ fn get(id: StringID) -> Option<&'static str> {
         388 => "Regular",
         389 => "Roman",
         390 => "Semibold",
+        _ => return None,
     })
 }
