@@ -36,7 +36,7 @@ macro_rules! operator_implement {
             })
         }
 
-        pub fn default(&self) -> Option<Vec<Operand>> {
+        pub fn default(&self) -> Option<&'static [Operand]> {
             use self::$name::*;
             match *self {
                 $($variant => operator_default!($default),)+
@@ -46,9 +46,10 @@ macro_rules! operator_implement {
 }
 
 macro_rules! operator_default(
-    ([$($operand:ident($number:expr)),+]) => (
-        Some(vec![$(Operand::$operand($number)),+])
-    );
+    ([$($operand:ident($number:expr)),+]) => ({
+        const OPERANDS: &'static [Operand] = &[$(Operand::$operand($number)),+];
+        Some(OPERANDS)
+    });
     ([]) => (None);
 );
 
@@ -154,8 +155,11 @@ impl Value for (Operator, Vec<Operand>) {
 
 impl Operations {
     #[inline]
-    pub fn get(&self, operator: Operator) -> Option<Vec<Operand>> {
-        self.0.get(&operator).cloned().or_else(|| operator.default())
+    pub fn get(&self, operator: Operator) -> Option<&[Operand]> {
+        match self.0.get(&operator) {
+            Some(operands) => Some(&*operands),
+            _ => operator.default(),
+        }
     }
 }
 

@@ -58,7 +58,7 @@ impl Value for FontSet {
 
 fn read_encoding(dictionary: &Operations) -> Result<Encoding> {
     let offset = match dictionary.get(Operator::Encoding) {
-        Some(ref operands) => match (operands.len(), operands.get(0)) {
+        Some(operands) => match (operands.len(), operands.get(0)) {
             (1, Some(&Operand::Integer(offset))) => offset,
             _ => raise!("found an encoding operator with invalid operands"),
         },
