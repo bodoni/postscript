@@ -62,6 +62,7 @@ macro_rules! lookup {
     });
 }
 
+mod charset;
 mod dictionary_index;
 mod encoding;
 mod header;
