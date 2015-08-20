@@ -507,3 +507,16 @@ fn get_standard_string(sid: StringID) -> Option<&'static str> {
         _ => return None,
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use compact::primitive::StringID;
+    use super::NUMBER_OF_STANDARD_STRINGS;
+    use super::get_standard_string;
+
+    #[test]
+    fn number_of_standard_strings() {
+        assert!(get_standard_string(NUMBER_OF_STANDARD_STRINGS as StringID - 1).is_some());
+        assert!(get_standard_string(NUMBER_OF_STANDARD_STRINGS as StringID).is_none());
+    }
+}
