@@ -2,9 +2,7 @@ use compact::primitive::StringID;
 
 const NUMBER_OF_STANDARD_STRINGS: usize = 391;
 
-index! {
-    pub StringIndex
-}
+index!(StringIndex);
 
 impl StringIndex {
     pub fn get(&self, sid: StringID) -> Option<String> {

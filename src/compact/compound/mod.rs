@@ -28,7 +28,7 @@ macro_rules! table_implement {
 }
 
 macro_rules! index {
-    ($(#[$attribute:meta])* pub $structure:ident) => (
+    ($(#[$attribute:meta])* $structure:ident) => (
         $(#[$attribute])*
         #[derive(Clone, Debug, Default, Eq, PartialEq)]
         pub struct $structure(pub ::compact::compound::Index);

@@ -45,21 +45,10 @@ impl Value for Index {
     }
 }
 
-index! {
-    pub CharStringIndex
-}
-
-index! {
-    pub DictionaryIndex
-}
-
-index! {
-    pub NameIndex
-}
-
-index! {
-    pub SubroutineIndex
-}
+index!(CharStringIndex);
+index!(DictionaryIndex);
+index!(NameIndex);
+index!(SubroutineIndex);
 
 impl DictionaryIndex {
     pub fn get(&self, i: usize) -> Result<Option<Operations>> {
