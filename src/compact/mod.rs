@@ -32,9 +32,6 @@ impl Value for FontSet {
         try!(band.jump(header.hdrSize as u64));
         let names = try!(NameIndex::read(band));
         let dictionaries = try!(DictionaryIndex::read(band));
-        if names.count != dictionaries.count {
-            raise!("the name and top dictionary indices do not match");
-        }
         let strings = try!(StringIndex::read(band));
         let subroutines = try!(SubroutineIndex::read(band));
 
@@ -42,10 +39,7 @@ impl Value for FontSet {
         let mut char_sets = vec![];
         let mut char_strings = vec![];
         for i in 0..(dictionaries.count as usize) {
-            let dictionary = match try!(dictionaries.get(i)) {
-                Some(dictionary) => dictionary,
-                _ => raise!("failed to find a dictionary"),
-            };
+            let dictionary = try!(dictionaries.get(i)).unwrap();
             encodings.push(try!(read_encoding(band, &dictionary)));
             char_sets.push(try!(read_char_set(band, &dictionary)));
             char_strings.push(try!(read_char_strings(band, &dictionary)));
@@ -69,7 +63,7 @@ macro_rules! read_operand(
         match $operations.get(Operator::$operator) {
             Some(operands) => match (operands.len(), operands.get(0)) {
                 (1, Some(&Operand::$operand(value))) => value,
-                _ => raise!("found an operator with invalid operands"),
+                _ => raise!("found an operation with invalid operands"),
             },
             _ => raise!("failed to find an operation"),
         }
