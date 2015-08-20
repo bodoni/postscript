@@ -3,7 +3,7 @@
 macro_rules! table {
     ($(#[$attribute:meta])* pub $structure:ident { $($field:ident ($kind:ty),)+ }) => (
         table_define! { $(#[$attribute])* pub $structure { $($field ($kind),)+ } }
-        table_implement! { pub $structure { $($field,)+ } }
+        table_read! { pub $structure { $($field,)+ } }
     );
 }
 
@@ -15,7 +15,7 @@ macro_rules! table_define {
     });
 }
 
-macro_rules! table_implement {
+macro_rules! table_read {
     (pub $structure:ident { $($field:ident,)+ }) => (
         impl ::band::Value for $structure {
             fn read<T: ::band::Band>(band: &mut T) -> ::Result<Self> {
