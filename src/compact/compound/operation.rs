@@ -123,7 +123,7 @@ operator! {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Operations(HashMap<Operator, Vec<Operand>>);
+pub struct Operations(pub HashMap<Operator, Vec<Operand>>);
 
 impl Value for (Operator, Vec<Operand>) {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
