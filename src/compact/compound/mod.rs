@@ -63,7 +63,7 @@ mod operation;
 mod string_index;
 mod subroutine_index;
 
-pub use self::charset::Charset;
+pub use self::charset::{Charset, Charset1, CharsetRange1};
 pub use self::dictionary_index::DictionaryIndex;
 pub use self::encoding::Encoding;
 pub use self::header::Header;

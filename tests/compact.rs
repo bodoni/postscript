@@ -76,11 +76,32 @@ fn encodings() {
     use postscript::compact::compound::Encoding;
 
     let set = FontSet::read(&mut read()).unwrap();
-    let strings = &set.strings;
-    let encodings = &set.encodings;
+    let vector = &set.encodings;
 
-    assert_eq!(encodings, &vec![Encoding::Standard]);
-    assert_eq!(strings.get(Encoding::Standard.get(42).unwrap()).unwrap(), "asterisk");
+    assert_eq!(vector.len(), 1);
+
+    let strings = &set.strings;
+    match &vector[0] {
+        encoding @ &Encoding::Standard => {
+            assert_eq!(strings.get(encoding.get(42).unwrap()).unwrap(), "asterisk");
+        },
+        _ => unreachable!(),
+    }
+}
+
+#[test]
+fn charsets() {
+    use postscript::compact::compound::Charset;
+
+    let set = FontSet::read(&mut read()).unwrap();
+    let vector = &set.charsets;
+
+    assert_eq!(vector.len(), 1);
+
+    match &vector[0] {
+        &Charset::Format1(..) => {},
+        _ => unreachable!(),
+    }
 }
 
 fn read() -> Cursor<Vec<u8>> {

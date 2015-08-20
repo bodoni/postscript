@@ -1,5 +1,7 @@
 use compact::primitive::StringID;
 
+const NUMBER_OF_STANDARD_STRINGS: usize = 391;
+
 index! {
     pub StringIndex
 }
@@ -14,8 +16,6 @@ impl StringIndex {
         }
     }
 }
-
-const NUMBER_OF_STANDARD_STRINGS: usize = 391;
 
 fn get(sid: StringID) -> Option<&'static str> {
     Some(match sid {

@@ -2,11 +2,25 @@ use Result;
 use band::{Band, Value};
 use compact::primitive::StringID;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Charset {
     ISOAdobe,
     Expert,
     ExpertSubset,
+    Format1(Charset1),
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Charset1 {
+    pub format: u8,
+    pub Range1: Vec<CharsetRange1>,
+}
+
+table! {
+    pub CharsetRange1 {
+        first (StringID),
+        nLeft (u8      ),
+    }
 }
 
 impl Charset {
@@ -16,13 +30,37 @@ impl Charset {
             Charset::ISOAdobe => get_iso_adobe(sid),
             Charset::Expert => get_expert(sid),
             Charset::ExpertSubset => get_expert_subset(sid),
+            _ => None,
         }
     }
 }
 
 impl Value for Charset {
-    fn read<T: Band>(_: &mut T) -> Result<Self> {
-        Ok(Charset::ISOAdobe)
+    fn read<T: Band>(band: &mut T) -> Result<Self> {
+        Ok(match try!(band.peek::<u8>()) {
+            0 => unimplemented!(),
+            1 => Charset::Format1(try!(Charset1::read(band, 547))),
+            2 => unimplemented!(),
+            _ => raise!("found an unknown charset format"),
+        })
+    }
+}
+
+impl Charset1 {
+    fn read<T: Band>(band: &mut T, glyphs: usize) -> Result<Self> {
+        let format = try!(band.take::<u8>());
+        debug_assert_eq!(format, 1);
+        let mut Range1 = vec![];
+        let mut found = 0 + 1;
+        while found < glyphs {
+            let range = try!(CharsetRange1::read(band));
+            found += 1 + range.nLeft as usize;
+            Range1.push(range);
+        }
+        if found != glyphs {
+            raise!("found a malformed charset");
+        }
+        Ok(Charset1 { format: format, Range1: Range1 })
     }
 }
 
