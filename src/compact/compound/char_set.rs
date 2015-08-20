@@ -24,25 +24,24 @@ table! {
 }
 
 impl CharSet {
+    #[doc(hidden)]
+    pub fn read<T: Band>(band: &mut T, glyphs: usize) -> Result<Self> {
+        Ok(match try!(band.peek::<u8>()) {
+            0 => unimplemented!(),
+            1 => CharSet::Format1(try!(CharSet1::read(band, glyphs))),
+            2 => unimplemented!(),
+            _ => raise!("found a char set with an unknown format"),
+        })
+    }
+
     #[inline]
     pub fn get(&self, sid: u16) -> Option<&'static str> {
         match *self {
             CharSet::ISOAdobe => get_iso_adobe(sid),
             CharSet::Expert => get_expert(sid),
             CharSet::ExpertSubset => get_expert_subset(sid),
-            _ => None,
+            _ => unimplemented!(),
         }
-    }
-}
-
-impl Value for CharSet {
-    fn read<T: Band>(band: &mut T) -> Result<Self> {
-        Ok(match try!(band.peek::<u8>()) {
-            0 => unimplemented!(),
-            1 => CharSet::Format1(try!(CharSet1::read(band, 547))),
-            2 => unimplemented!(),
-            _ => raise!("found an unknown charset format"),
-        })
     }
 }
 
@@ -58,7 +57,7 @@ impl CharSet1 {
             Range1.push(range);
         }
         if found != glyphs {
-            raise!("found a malformed charset");
+            raise!("found a malformed char set");
         }
         Ok(CharSet1 { format: format, Range1: Range1 })
     }

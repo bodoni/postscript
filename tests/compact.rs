@@ -105,11 +105,16 @@ fn char_sets() {
 #[test]
 fn char_strings() {
     let set = FontSet::read(&mut read()).unwrap();
-    let index = &set.char_strings;
+    let vector = &set.char_strings;
 
-    assert_eq!(index.len(), 1);
-    assert_eq!(index[0].count, 547);
-    assert_eq!(index[0].offSize, 2);
+    assert_eq!(vector.len(), 1);
+    match &vector[0] {
+        &Some(ref index) => {
+            assert_eq!(index.count, 547);
+            assert_eq!(index.offSize, 2);
+        },
+        _ => unreachable!(),
+    }
 }
 
 fn read() -> Cursor<Vec<u8>> {

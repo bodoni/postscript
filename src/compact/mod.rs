@@ -16,7 +16,7 @@ pub struct FontSet {
     pub subroutines: SubroutineIndex,
     pub encodings: Vec<Encoding>,
     pub char_sets: Vec<CharSet>,
-    pub char_strings: Vec<CharStringIndex>,
+    pub char_strings: Vec<Option<CharStringIndex>>,
 }
 
 impl FontSet {
@@ -41,8 +41,9 @@ impl Value for FontSet {
         for i in 0..(dictionaries.count as usize) {
             let dictionary = try!(dictionaries.get(i)).unwrap();
             encodings.push(try!(read_encoding(band, &dictionary)));
-            char_sets.push(try!(read_char_set(band, &dictionary)));
             char_strings.push(try!(read_char_strings(band, &dictionary)));
+            let glyphs = char_strings[i].as_ref().map(|index| index.count as usize);
+            char_sets.push(try!(read_char_set(band, &dictionary, glyphs)));
         }
 
         Ok(FontSet {
@@ -58,44 +59,56 @@ impl Value for FontSet {
     }
 }
 
-macro_rules! read_operand(
-    ($operations:ident, $operator:ident, $operand:ident) => (
-        match $operations.get(Operator::$operator) {
+macro_rules! operand(
+    ($operation:expr, $operand:ident) => (
+        match $operation {
             Some(operands) => match (operands.len(), operands.get(0)) {
-                (1, Some(&Operand::$operand(value))) => value,
-                _ => raise!("found an operation with invalid operands"),
+                (1, Some(&Operand::$operand(value))) => Some(value),
+                _ => None,
             },
-            _ => raise!("failed to find an operation"),
+            _ => None,
         }
     );
-    ($operations:ident, $operator:ident) => (
-        read_operand!($operations, $operator, Integer)
-    );
+    ($operation:expr) => (operand!($operation, Integer));
 );
 
 fn read_encoding<T: Band>(_: &mut T, operations: &Operations) -> Result<Encoding> {
-    Ok(match read_operand!(operations, Encoding) {
-        0 => Encoding::Standard,
-        1 => Encoding::Expert,
-        _ => unimplemented!(),
+    Ok(match operand!(operations.get(Operator::Encoding)) {
+        Some(0) => Encoding::Standard,
+        Some(1) => Encoding::Expert,
+        Some(_) => unimplemented!(),
+        _ => raise!("failed to process an encoding operation"),
     })
 }
 
-fn read_char_set<T: Band>(band: &mut T, operations: &Operations) -> Result<CharSet> {
-    match read_operand!(operations, charset) {
-        0 => Ok(CharSet::ISOAdobe),
-        1 => Ok(CharSet::Expert),
-        2 => Ok(CharSet::ExpertSubset),
-        offset => {
-            try!(band.jump(offset as u64));
-            Value::read(band)
-        }
-    }
+fn read_char_set<T: Band>(band: &mut T, operations: &Operations, glyphs: Option<usize>)
+                          -> Result<CharSet> {
+
+    Ok(match operand!(operations.get(Operator::charset)) {
+        Some(0) => CharSet::ISOAdobe,
+        Some(1) => CharSet::Expert,
+        Some(2) => CharSet::ExpertSubset,
+        Some(offset) => match glyphs {
+            Some(glyphs) => {
+                try!(band.jump(offset as u64));
+                try!(CharSet::read(band, glyphs))
+            },
+            _ => raise!("expected the number of glyphs to be known to read a custom char set"),
+        },
+        _ => raise!("failed to process a char-set operation"),
+    })
 }
 
-fn read_char_strings<T: Band>(band: &mut T, operations: &Operations) -> Result<CharStringIndex> {
-    try!(band.jump(read_operand!(operations, CharStrings) as u64));
-    Value::read(band)
+fn read_char_strings<T: Band>(band: &mut T, operations: &Operations)
+                              -> Result<Option<CharStringIndex>> {
+
+    Ok(match operand!(operations.get(Operator::CharStrings)) {
+        Some(offset) => {
+            try!(band.jump(offset as u64));
+            Some(try!(Value::read(band)))
+        },
+        _ => None,
+    })
 }
 
 pub mod compound;
