@@ -3,64 +3,64 @@ use band::{Band, Value};
 use compact::primitive::StringID;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum Charset {
+pub enum CharSet {
     ISOAdobe,
     Expert,
     ExpertSubset,
-    Format1(Charset1),
+    Format1(CharSet1),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Charset1 {
+pub struct CharSet1 {
     pub format: u8,
-    pub Range1: Vec<CharsetRange1>,
+    pub Range1: Vec<CharSetRange1>,
 }
 
 table! {
-    pub CharsetRange1 {
+    pub CharSetRange1 {
         first (StringID),
         nLeft (u8      ),
     }
 }
 
-impl Charset {
+impl CharSet {
     #[inline]
     pub fn get(&self, sid: u16) -> Option<&'static str> {
         match *self {
-            Charset::ISOAdobe => get_iso_adobe(sid),
-            Charset::Expert => get_expert(sid),
-            Charset::ExpertSubset => get_expert_subset(sid),
+            CharSet::ISOAdobe => get_iso_adobe(sid),
+            CharSet::Expert => get_expert(sid),
+            CharSet::ExpertSubset => get_expert_subset(sid),
             _ => None,
         }
     }
 }
 
-impl Value for Charset {
+impl Value for CharSet {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
         Ok(match try!(band.peek::<u8>()) {
             0 => unimplemented!(),
-            1 => Charset::Format1(try!(Charset1::read(band, 547))),
+            1 => CharSet::Format1(try!(CharSet1::read(band, 547))),
             2 => unimplemented!(),
             _ => raise!("found an unknown charset format"),
         })
     }
 }
 
-impl Charset1 {
+impl CharSet1 {
     fn read<T: Band>(band: &mut T, glyphs: usize) -> Result<Self> {
         let format = try!(band.take::<u8>());
         debug_assert_eq!(format, 1);
         let mut Range1 = vec![];
         let mut found = 0 + 1;
         while found < glyphs {
-            let range = try!(CharsetRange1::read(band));
+            let range = try!(CharSetRange1::read(band));
             found += 1 + range.nLeft as usize;
             Range1.push(range);
         }
         if found != glyphs {
             raise!("found a malformed charset");
         }
-        Ok(Charset1 { format: format, Range1: Range1 })
+        Ok(CharSet1 { format: format, Range1: Range1 })
     }
 }
 

@@ -15,7 +15,7 @@ pub struct FontSet {
     pub strings: StringIndex,
     pub subroutines: SubroutineIndex,
     pub encodings: Vec<Encoding>,
-    pub charsets: Vec<Charset>,
+    pub char_sets: Vec<CharSet>,
 }
 
 impl FontSet {
@@ -37,14 +37,14 @@ impl Value for FontSet {
         let strings = try!(StringIndex::read(band));
         let subroutines = try!(SubroutineIndex::read(band));
 
-        let (mut encodings, mut charsets) = (vec![], vec![]);
+        let (mut encodings, mut char_sets) = (vec![], vec![]);
         for i in 0..(dictionaries.count as usize) {
             let dictionary = match try!(dictionaries.get(i)) {
                 Some(dictionary) => dictionary,
                 _ => raise!("failed to find a dictionary"),
             };
             encodings.push(try!(read_encoding(band, &dictionary)));
-            charsets.push(try!(read_charset(band, &dictionary)));
+            char_sets.push(try!(read_charset(band, &dictionary)));
         }
 
         Ok(FontSet {
@@ -54,7 +54,7 @@ impl Value for FontSet {
             strings: strings,
             subroutines: subroutines,
             encodings: encodings,
-            charsets: charsets,
+            char_sets: char_sets,
         })
     }
 }
@@ -74,7 +74,7 @@ fn read_encoding<T: Band>(_: &mut T, dictionary: &Operations) -> Result<Encoding
     })
 }
 
-fn read_charset<T: Band>(band: &mut T, dictionary: &Operations) -> Result<Charset> {
+fn read_charset<T: Band>(band: &mut T, dictionary: &Operations) -> Result<CharSet> {
     let offset = match dictionary.get(Operator::charset) {
         Some(operands) => match (operands.len(), operands.get(0)) {
             (1, Some(&Operand::Integer(offset))) => offset,
@@ -83,9 +83,9 @@ fn read_charset<T: Band>(band: &mut T, dictionary: &Operations) -> Result<Charse
         _ => raise!("failed to identify a charset"),
     };
     match offset {
-        0 => Ok(Charset::ISOAdobe),
-        1 => Ok(Charset::Expert),
-        2 => Ok(Charset::ExpertSubset),
+        0 => Ok(CharSet::ISOAdobe),
+        1 => Ok(CharSet::Expert),
+        2 => Ok(CharSet::ExpertSubset),
         _ => {
             try!(band.jump(offset as u64));
             Value::read(band)
@@ -96,6 +96,6 @@ fn read_charset<T: Band>(band: &mut T, dictionary: &Operations) -> Result<Charse
 pub mod compound;
 pub mod primitive;
 
-use self::compound::{Charset, Encoding, Header};
+use self::compound::{CharSet, Encoding, Header};
 use self::compound::{DictionaryIndex, NameIndex, StringIndex, SubroutineIndex};
 use self::compound::{Operator, Operand, Operations};
