@@ -77,7 +77,7 @@ fn read_encoding<T: Band>(_: &mut T, operations: &Operations) -> Result<Encoding
         Some(0) => Encoding::Standard,
         Some(1) => Encoding::Expert,
         Some(_) => unimplemented!(),
-        _ => raise!("failed to process an encoding operation"),
+        _ => raise!("failed to process an operation"),
     })
 }
 
@@ -95,20 +95,23 @@ fn read_char_set<T: Band>(band: &mut T, operations: &Operations, glyphs: Option<
             },
             _ => raise!("expected the number of glyphs to be known to read a custom char set"),
         },
-        _ => raise!("failed to process a char-set operation"),
+        _ => raise!("failed to process an operation"),
     })
 }
 
 fn read_char_strings<T: Band>(band: &mut T, operations: &Operations)
                               -> Result<Option<CharStringIndex>> {
 
-    Ok(match operand!(operations.get(Operator::CharStrings)) {
-        Some(offset) => {
-            try!(band.jump(offset as u64));
-            Some(try!(Value::read(band)))
-        },
-        _ => None,
-    })
+    let offset = match operand!(operations.get(Operator::CharStrings)) {
+        Some(offset) => offset as u64,
+        _ => return Ok(None),
+    };
+    let _ = match operand!(operations.get(Operator::CharstringType)) {
+        Some(kind) => kind,
+        _ => raise!("failed to process an operation"),
+    };
+    try!(band.jump(offset as u64));
+    Ok(Some(try!(Value::read(band))))
 }
 
 pub mod compound;

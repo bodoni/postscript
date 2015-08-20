@@ -36,10 +36,10 @@ impl CharSet {
 
     #[inline]
     pub fn get(&self, sid: u16) -> Option<&'static str> {
-        match *self {
-            CharSet::ISOAdobe => get_iso_adobe(sid),
-            CharSet::Expert => get_expert(sid),
-            CharSet::ExpertSubset => get_expert_subset(sid),
+        match self {
+            &CharSet::ISOAdobe => get_iso_adobe(sid),
+            &CharSet::Expert => get_expert(sid),
+            &CharSet::ExpertSubset => get_expert_subset(sid),
             _ => unimplemented!(),
         }
     }
