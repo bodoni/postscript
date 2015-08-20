@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::ops::Deref;
 
 use Result;
 use band::{Band, Value};
@@ -175,11 +174,4 @@ impl Value for Operations {
     }
 }
 
-impl Deref for Operations {
-    type Target = HashMap<Operator, Vec<Operand>>;
-
-    #[inline]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+deref!(Operations(0) => HashMap<Operator, Vec<Operand>>);

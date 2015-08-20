@@ -58,14 +58,7 @@ macro_rules! index {
             }
         }
 
-        impl ::std::ops::Deref for $structure {
-            type Target = ::compact::compound::Index;
-
-            #[inline]
-            fn deref(&self) -> &Self::Target {
-                &self.0
-            }
-        }
+        deref!($structure(0) => ::compact::compound::Index);
     );
 }
 
