@@ -1,5 +1,8 @@
+use std::io::Cursor;
+
 use Result;
 use band::{Band, ParametrizedValue, Value};
+use compact::compound::Operations;
 use compact::primitive::{Offset, OffsetSize};
 
 table_define! {
@@ -47,11 +50,26 @@ index! {
 }
 
 index! {
+    pub DictionaryIndex
+}
+
+index! {
     pub NameIndex
 }
 
 index! {
     pub SubroutineIndex
+}
+
+impl DictionaryIndex {
+    pub fn get(&self, i: usize) -> Result<Option<Operations>> {
+        let chunk = match self.0.get(i) {
+            Some(chunk) => chunk,
+            _ => return Ok(None),
+        };
+        let mut band = Cursor::new(chunk);
+        Ok(Some(try!(Value::read(&mut band))))
+    }
 }
 
 impl NameIndex {
