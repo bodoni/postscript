@@ -49,16 +49,18 @@ macro_rules! index {
     ($(#[$attribute:meta])* $structure:ident) => (
         $(#[$attribute])*
         #[derive(Clone, Debug, Default, Eq, PartialEq)]
-        pub struct $structure(pub ::compact::compound::Index);
+        pub struct $structure {
+            index: ::compact::compound::Index,
+        }
 
         impl ::band::Value for $structure {
             #[inline]
             fn read<T: ::band::Band>(band: &mut T) -> ::Result<Self> {
-                Ok($structure(try!(::band::Value::read(band))))
+                Ok($structure { index: try!(::band::Value::read(band)) })
             }
         }
 
-        deref!($structure(0) => ::compact::compound::Index);
+        deref!($structure(index) => ::compact::compound::Index);
     );
 }
 
@@ -70,7 +72,7 @@ index!(SubroutineIndex);
 
 impl DictionaryIndex {
     pub fn get(&self, i: usize) -> Result<Option<Operations>> {
-        let chunk = match self.0.get(i) {
+        let chunk = match self.index.get(i) {
             Some(chunk) => chunk,
             _ => return Ok(None),
         };
@@ -82,7 +84,7 @@ impl DictionaryIndex {
 impl NameIndex {
     #[inline]
     pub fn get(&self, i: usize) -> Option<String> {
-        self.0.get(i).and_then(|chunk| match chunk[0] {
+        self.index.get(i).and_then(|chunk| match chunk[0] {
             0 => None,
             _ => Some(String::from_utf8_lossy(chunk).into_owned()),
         })
@@ -95,7 +97,7 @@ impl StringIndex {
             i if i < NUMBER_OF_STANDARD_STRINGS => {
                 get_standard_string(sid).map(|string| string.to_string())
             },
-            i => self.0.get(i - NUMBER_OF_STANDARD_STRINGS).map(|chunk| {
+            i => self.index.get(i - NUMBER_OF_STANDARD_STRINGS).map(|chunk| {
                 String::from_utf8_lossy(chunk).into_owned()
             }),
         }
