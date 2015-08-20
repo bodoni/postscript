@@ -27,30 +27,6 @@ macro_rules! table_implement {
     );
 }
 
-macro_rules! index {
-    ($(#[$attribute:meta])* $structure:ident) => (
-        $(#[$attribute])*
-        #[derive(Clone, Debug, Default, Eq, PartialEq)]
-        pub struct $structure(pub ::compact::compound::Index);
-
-        impl ::band::Value for $structure {
-            #[inline]
-            fn read<T: ::band::Band>(band: &mut T) -> ::Result<Self> {
-                Ok($structure(try!(::band::Value::read(band))))
-            }
-        }
-
-        impl ::std::ops::Deref for $structure {
-            type Target = ::compact::compound::Index;
-
-            #[inline]
-            fn deref(&self) -> &Self::Target {
-                &self.0
-            }
-        }
-    );
-}
-
 macro_rules! itemize(($code:item) => ($code));
 
 mod char_set;
@@ -58,11 +34,10 @@ mod encoding;
 mod header;
 mod index;
 mod operation;
-mod string_index;
 
 pub use self::char_set::{CharSet, CharSet1, CharSetRange1};
 pub use self::encoding::Encoding;
 pub use self::header::Header;
-pub use self::index::{Index, CharStringIndex, DictionaryIndex, NameIndex, SubroutineIndex};
+pub use self::index::Index;
+pub use self::index::{CharStringIndex, DictionaryIndex, NameIndex, StringIndex, SubroutineIndex};
 pub use self::operation::{Operator, Operand, Operations};
-pub use self::string_index::StringIndex;
