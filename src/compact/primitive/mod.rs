@@ -5,6 +5,7 @@ use std::mem;
 use Result;
 use band::{Band, ParametrizedValue, Value};
 
+pub type GlyphID = u16;
 pub type OffsetSize = u8;
 pub type StringID = u16;
 

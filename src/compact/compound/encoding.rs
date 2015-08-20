@@ -1,4 +1,4 @@
-use compact::primitive::StringID;
+use compact::primitive::{GlyphID, StringID};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Encoding {
@@ -8,25 +8,25 @@ pub enum Encoding {
 
 impl Encoding {
     #[inline]
-    pub fn get(&self, code: u16) -> Option<StringID> {
+    pub fn get(&self, gid: GlyphID) -> Option<StringID> {
         match *self {
-            Encoding::Standard => get_standard(code),
-            Encoding::Expert => get_expert(code),
+            Encoding::Standard => get_standard(gid),
+            Encoding::Expert => get_expert(gid),
         }
     }
 }
 
 macro_rules! lookup(
-    ($one:ident { $($code:pat => $sid:expr => $name:expr,)+ }) => (
+    ($one:ident { $($gid:pat => $sid:expr => $name:expr,)+ }) => (
         Some(match $one {
-            $($code => $sid,)+
+            $($gid => $sid,)+
             _ => return None,
         })
     );
 );
 
-fn get_standard(code: u16) -> Option<StringID> {
-    lookup!(code {
+fn get_standard(gid: GlyphID) -> Option<StringID> {
+    lookup!(gid {
         0 => 0 => ".notdef",
         1 => 0 => ".notdef",
         2 => 0 => ".notdef",
@@ -286,8 +286,8 @@ fn get_standard(code: u16) -> Option<StringID> {
     })
 }
 
-fn get_expert(code: u16) -> Option<StringID> {
-    lookup!(code {
+fn get_expert(gid: GlyphID) -> Option<StringID> {
+    lookup!(gid {
         0 => 0 => ".notdef",
         1 => 0 => ".notdef",
         2 => 0 => ".notdef",

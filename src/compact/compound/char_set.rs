@@ -1,6 +1,6 @@
 use Result;
 use band::{Band, Value};
-use compact::primitive::StringID;
+use compact::primitive::{GlyphID, StringID};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum CharSet {
@@ -35,11 +35,11 @@ impl CharSet {
     }
 
     #[inline]
-    pub fn get(&self, sid: u16) -> Option<&'static str> {
+    pub fn get(&self, gid: GlyphID) -> Option<&'static str> {
         match self {
-            &CharSet::ISOAdobe => get_iso_adobe(sid),
-            &CharSet::Expert => get_expert(sid),
-            &CharSet::ExpertSubset => get_expert_subset(sid),
+            &CharSet::ISOAdobe => get_iso_adobe(gid),
+            &CharSet::Expert => get_expert(gid),
+            &CharSet::ExpertSubset => get_expert_subset(gid),
             _ => unimplemented!(),
         }
     }
@@ -63,8 +63,8 @@ impl CharSet1 {
     }
 }
 
-fn get_iso_adobe(sid: StringID) -> Option<&'static str> {
-    Some(match sid {
+fn get_iso_adobe(gid: GlyphID) -> Option<&'static str> {
+    Some(match gid {
         1 => "space",
         2 => "exclam",
         3 => "quotedbl",
@@ -297,8 +297,8 @@ fn get_iso_adobe(sid: StringID) -> Option<&'static str> {
     })
 }
 
-fn get_expert(sid: StringID) -> Option<&'static str> {
-    Some(match sid {
+fn get_expert(gid: GlyphID) -> Option<&'static str> {
+    Some(match gid {
         1 => "space",
         229 => "exclamsmall",
         230 => "Hungarumlautsmall",
@@ -468,8 +468,8 @@ fn get_expert(sid: StringID) -> Option<&'static str> {
     })
 }
 
-fn get_expert_subset(sid: StringID) -> Option<&'static str> {
-    Some(match sid {
+fn get_expert_subset(gid: GlyphID) -> Option<&'static str> {
+    Some(match gid {
         1 => "space",
         231 => "dollaroldstyle",
         232 => "dollarsuperior",
