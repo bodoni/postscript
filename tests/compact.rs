@@ -77,10 +77,9 @@ fn encodings() {
 
     let set = FontSet::read(&mut read()).unwrap();
     let vector = &set.encodings;
+    let strings = &set.strings;
 
     assert_eq!(vector.len(), 1);
-
-    let strings = &set.strings;
     match &vector[0] {
         encoding @ &Encoding::Standard => {
             assert_eq!(strings.get(encoding.get(42).unwrap()).unwrap(), "asterisk");
@@ -97,11 +96,20 @@ fn char_sets() {
     let vector = &set.char_sets;
 
     assert_eq!(vector.len(), 1);
-
     match &vector[0] {
         &CharSet::Format1(..) => {},
         _ => unreachable!(),
     }
+}
+
+#[test]
+fn char_strings() {
+    let set = FontSet::read(&mut read()).unwrap();
+    let index = &set.char_strings;
+
+    assert_eq!(index.len(), 1);
+    assert_eq!(index[0].count, 547);
+    assert_eq!(index[0].offSize, 2);
 }
 
 fn read() -> Cursor<Vec<u8>> {

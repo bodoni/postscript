@@ -16,6 +16,7 @@ pub struct FontSet {
     pub subroutines: SubroutineIndex,
     pub encodings: Vec<Encoding>,
     pub char_sets: Vec<CharSet>,
+    pub char_strings: Vec<CharStringIndex>,
 }
 
 impl FontSet {
@@ -37,14 +38,17 @@ impl Value for FontSet {
         let strings = try!(StringIndex::read(band));
         let subroutines = try!(SubroutineIndex::read(band));
 
-        let (mut encodings, mut char_sets) = (vec![], vec![]);
+        let mut encodings = vec![];
+        let mut char_sets = vec![];
+        let mut char_strings = vec![];
         for i in 0..(dictionaries.count as usize) {
             let dictionary = match try!(dictionaries.get(i)) {
                 Some(dictionary) => dictionary,
                 _ => raise!("failed to find a dictionary"),
             };
             encodings.push(try!(read_encoding(band, &dictionary)));
-            char_sets.push(try!(read_charset(band, &dictionary)));
+            char_sets.push(try!(read_char_set(band, &dictionary)));
+            char_strings.push(try!(read_char_strings(band, &dictionary)));
         }
 
         Ok(FontSet {
@@ -55,47 +59,54 @@ impl Value for FontSet {
             subroutines: subroutines,
             encodings: encodings,
             char_sets: char_sets,
+            char_strings: char_strings,
         })
     }
 }
 
-fn read_encoding<T: Band>(_: &mut T, dictionary: &Operations) -> Result<Encoding> {
-    let offset = match dictionary.get(Operator::Encoding) {
-        Some(operands) => match (operands.len(), operands.get(0)) {
-            (1, Some(&Operand::Integer(offset))) => offset,
-            _ => raise!("found an encoding operator with invalid operands"),
-        },
-        _ => raise!("failed to identify an encoding"),
-    };
-    Ok(match offset {
+macro_rules! read_operand(
+    ($operations:ident, $operator:ident, $operand:ident) => (
+        match $operations.get(Operator::$operator) {
+            Some(operands) => match (operands.len(), operands.get(0)) {
+                (1, Some(&Operand::$operand(value))) => value,
+                _ => raise!("found an operator with invalid operands"),
+            },
+            _ => raise!("failed to find an operation"),
+        }
+    );
+    ($operations:ident, $operator:ident) => (
+        read_operand!($operations, $operator, Integer)
+    );
+);
+
+fn read_encoding<T: Band>(_: &mut T, operations: &Operations) -> Result<Encoding> {
+    Ok(match read_operand!(operations, Encoding) {
         0 => Encoding::Standard,
         1 => Encoding::Expert,
         _ => unimplemented!(),
     })
 }
 
-fn read_charset<T: Band>(band: &mut T, dictionary: &Operations) -> Result<CharSet> {
-    let offset = match dictionary.get(Operator::charset) {
-        Some(operands) => match (operands.len(), operands.get(0)) {
-            (1, Some(&Operand::Integer(offset))) => offset,
-            _ => raise!("found a charset operator with invalid operands"),
-        },
-        _ => raise!("failed to identify a charset"),
-    };
-    match offset {
+fn read_char_set<T: Band>(band: &mut T, operations: &Operations) -> Result<CharSet> {
+    match read_operand!(operations, charset) {
         0 => Ok(CharSet::ISOAdobe),
         1 => Ok(CharSet::Expert),
         2 => Ok(CharSet::ExpertSubset),
-        _ => {
+        offset => {
             try!(band.jump(offset as u64));
             Value::read(band)
         }
     }
 }
 
+fn read_char_strings<T: Band>(band: &mut T, operations: &Operations) -> Result<CharStringIndex> {
+    try!(band.jump(read_operand!(operations, CharStrings) as u64));
+    Value::read(band)
+}
+
 pub mod compound;
 pub mod primitive;
 
 use self::compound::{CharSet, Encoding, Header};
-use self::compound::{DictionaryIndex, NameIndex, StringIndex, SubroutineIndex};
+use self::compound::{CharStringIndex, DictionaryIndex, NameIndex, StringIndex, SubroutineIndex};
 use self::compound::{Operator, Operand, Operations};

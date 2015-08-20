@@ -1,0 +1,3 @@
+index! {
+    pub CharStringIndex
+}
