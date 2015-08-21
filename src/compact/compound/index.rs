@@ -3,7 +3,7 @@ use std::io::Cursor;
 use Result;
 use band::{Band, ParametrizedValue, Value};
 use compact::compound::Operations;
-use compact::primitive::{Offset, OffsetSize, StringID};
+use compact::primitive::{Integer, Offset, OffsetSize, StringID};
 
 table_define! {
     pub Index {
@@ -47,28 +47,52 @@ impl Value for Index {
 
 macro_rules! index {
     ($(#[$attribute:meta])* $structure:ident) => (
+        index_define! { $(#[$attribute])* pub $structure {} }
+        index_implement! { $structure }
+    );
+}
+
+macro_rules! index_define {
+    ($(#[$attribute:meta])* pub $structure:ident { $($field:ident: $kind:ty,)* }) => (
         $(#[$attribute])*
         #[derive(Clone, Debug, Default, Eq, PartialEq)]
         pub struct $structure {
             index: ::compact::compound::Index,
+            $($field: $kind,)*
         }
 
+        deref! { $structure::index => ::compact::compound::Index }
+    );
+}
+
+macro_rules! index_implement {
+    ($structure:ident) => (
         impl ::band::Value for $structure {
             #[inline]
             fn read<T: ::band::Band>(band: &mut T) -> ::Result<Self> {
                 Ok($structure { index: try!(::band::Value::read(band)) })
             }
         }
-
-        deref!($structure(index) => ::compact::compound::Index);
     );
 }
 
-index!(CharStringIndex);
+index_define! {
+    pub CharStringIndex {
+        kind: Integer,
+    }
+}
+
 index!(DictionaryIndex);
 index!(NameIndex);
 index!(StringIndex);
 index!(SubroutineIndex);
+
+impl CharStringIndex {
+    pub fn read<T: Band>(band: &mut T, kind: Integer) -> Result<Self> {
+        let index = try!(Value::read(band));
+        Ok(CharStringIndex { index: index, kind: kind })
+    }
+}
 
 impl DictionaryIndex {
     pub fn get(&self, i: usize) -> Result<Option<Operations>> {

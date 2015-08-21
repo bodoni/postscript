@@ -106,12 +106,12 @@ fn read_char_strings<T: Band>(band: &mut T, operations: &Operations)
         Some(offset) => offset as u64,
         _ => return Ok(None),
     };
-    let _ = match operand!(operations.get(Operator::CharstringType)) {
+    let kind = match operand!(operations.get(Operator::CharstringType)) {
         Some(kind) => kind,
         _ => raise!("failed to process an operation"),
     };
     try!(band.jump(offset as u64));
-    Ok(Some(try!(Value::read(band))))
+    Ok(Some(try!(CharStringIndex::read(band, kind))))
 }
 
 pub mod compound;

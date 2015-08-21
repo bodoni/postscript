@@ -174,4 +174,4 @@ impl Value for Operations {
     }
 }
 
-deref!(Operations(0) => HashMap<Operator, Vec<Operand>>);
+deref! { Operations::0 => HashMap<Operator, Vec<Operand>> }

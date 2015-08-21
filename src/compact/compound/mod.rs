@@ -28,7 +28,7 @@ macro_rules! table_read {
 }
 
 macro_rules! deref {
-    ($structure:ident($field:tt) => $target:ty) => (itemize! {
+    ($structure:ident::$field:tt => $target:ty) => (itemize! {
         impl ::std::ops::Deref for $structure {
             type Target = $target;
 
