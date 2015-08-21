@@ -1,4 +1,4 @@
-//! Compact font format.
+//! The compact font format.
 
 #![allow(non_snake_case)]
 

@@ -15,3 +15,4 @@ macro_rules! raise(
 mod band;
 
 pub mod compact;
+pub mod type2;

@@ -89,6 +89,10 @@ index!(SubroutineIndex);
 
 impl CharStringIndex {
     pub fn read<T: Band>(band: &mut T, kind: Integer) -> Result<Self> {
+        match kind {
+            2 => {},
+            _ => raise!("found char-string data with an unknown format"),
+        }
         let index = try!(Value::read(band));
         Ok(CharStringIndex { index: index, kind: kind })
     }
