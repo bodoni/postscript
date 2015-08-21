@@ -108,13 +108,8 @@ fn char_strings() {
     let vector = &set.char_strings;
 
     assert_eq!(vector.len(), 1);
-    match &vector[0] {
-        &Some(ref index) => {
-            assert_eq!(index.count, 547);
-            assert_eq!(index.offSize, 2);
-        },
-        _ => unreachable!(),
-    }
+    assert_eq!(vector[0].count, 547);
+    assert_eq!(vector[0].offSize, 2);
 }
 
 fn read() -> Cursor<Vec<u8>> {

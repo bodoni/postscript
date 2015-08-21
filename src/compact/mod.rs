@@ -16,7 +16,7 @@ pub struct FontSet {
     pub subroutines: SubroutineIndex,
     pub encodings: Vec<Encoding>,
     pub char_sets: Vec<CharSet>,
-    pub char_strings: Vec<Option<CharStringIndex>>,
+    pub char_strings: Vec<CharStringIndex>,
 }
 
 impl FontSet {
@@ -42,8 +42,7 @@ impl Value for FontSet {
             let dictionary = try!(dictionaries.get(i)).unwrap();
             encodings.push(try!(read_encoding(band, &dictionary)));
             char_strings.push(try!(read_char_strings(band, &dictionary)));
-            let glyphs = char_strings[i].as_ref().map(|index| index.count as usize);
-            char_sets.push(try!(read_char_set(band, &dictionary, glyphs)));
+            char_sets.push(try!(read_char_set(band, &dictionary, char_strings[i].count as usize)));
         }
 
         Ok(FontSet {
@@ -81,37 +80,34 @@ fn read_encoding<T: Band>(_: &mut T, operations: &Operations) -> Result<Encoding
     })
 }
 
-fn read_char_set<T: Band>(band: &mut T, operations: &Operations, glyphs: Option<usize>)
+fn read_char_set<T: Band>(band: &mut T, operations: &Operations, glyphs: usize)
                           -> Result<CharSet> {
 
     Ok(match operand!(operations.get(Operator::charset)) {
         Some(0) => CharSet::ISOAdobe,
         Some(1) => CharSet::Expert,
         Some(2) => CharSet::ExpertSubset,
-        Some(offset) => match glyphs {
-            Some(glyphs) => {
-                try!(band.jump(offset as u64));
-                try!(CharSet::read(band, glyphs))
-            },
-            _ => raise!("expected the number of glyphs to be known to read a custom char set"),
+        Some(offset) => {
+            try!(band.jump(offset as u64));
+            try!(CharSet::read(band, glyphs))
         },
         _ => raise!("failed to process an operation"),
     })
 }
 
 fn read_char_strings<T: Band>(band: &mut T, operations: &Operations)
-                              -> Result<Option<CharStringIndex>> {
+                              -> Result<CharStringIndex> {
 
     let offset = match operand!(operations.get(Operator::CharStrings)) {
         Some(offset) => offset as u64,
-        _ => return Ok(None),
+        _ => raise!("failed to process an operation"),
     };
     let kind = match operand!(operations.get(Operator::CharstringType)) {
         Some(kind) => kind,
         _ => raise!("failed to process an operation"),
     };
     try!(band.jump(offset as u64));
-    Ok(Some(try!(CharStringIndex::read(band, kind))))
+    Ok(try!(CharStringIndex::read(band, kind)))
 }
 
 pub mod compound;
