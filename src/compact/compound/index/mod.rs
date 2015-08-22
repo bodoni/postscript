@@ -99,12 +99,16 @@ impl TopDictionaryIndex {
 }
 
 impl NameIndex {
-    #[inline]
-    pub fn get(&self, i: usize) -> Option<String> {
-        if i >= self.len() {
-            return None;
+    pub fn into_vec(self) -> Vec<String> {
+        let NameIndex { index } = self;
+        let mut vector = Vec::with_capacity(index.len());
+        for chunk in index {
+            vector.push(match String::from_utf8(chunk) {
+                Ok(string) => string,
+                Err(chunk) => String::from_utf8_lossy(&chunk.into_bytes()).into_owned(),
+            });
         }
-        Some(String::from_utf8_lossy(&self.index[i]).into_owned())
+        vector
     }
 }
 

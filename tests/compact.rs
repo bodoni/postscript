@@ -39,7 +39,7 @@ fn names() {
     let index = &set.names;
 
     assert_eq!(index.len(), 1);
-    assert_eq!(index.get(0).unwrap(), "SourceSerifPro-Regular");
+    assert_eq!(&index[0], "SourceSerifPro-Regular");
 }
 
 #[test]

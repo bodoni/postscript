@@ -10,7 +10,7 @@ use band::{Band, ParametrizedValue, Value};
 /// A font set.
 pub struct FontSet {
     pub header: Header,
-    pub names: NameIndex,
+    pub names: Vec<String>,
     pub top_dictionaries: TopDictionaryIndex,
     pub strings: StringIndex,
     pub subroutines: SubroutineIndex,
@@ -31,7 +31,7 @@ impl Value for FontSet {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
         let header = try!(Header::read(band));
         try!(band.jump(header.hdrSize as u64));
-        let names = try!(NameIndex::read(band));
+        let names = try!(NameIndex::read(band)).into_vec();
         let top_dictionaries = try!(TopDictionaryIndex::read(band));
         let strings = try!(StringIndex::read(band));
         let subroutines = try!(SubroutineIndex::read(band));
