@@ -38,9 +38,7 @@ fn names() {
     let set = FontSet::read(&mut read()).unwrap();
     let index = &set.names;
 
-    assert_eq!(index.count, 1);
-    assert_eq!(index.offSize, 1);
-    assert_eq!(index.offset, &[1, 23]);
+    assert_eq!(index.len(), 1);
     assert_eq!(index.get(0).unwrap(), "SourceSerifPro-Regular");
 }
 
@@ -49,9 +47,7 @@ fn top_dictionaries() {
     let set = FontSet::read(&mut read()).unwrap();
     let index = &set.top_dictionaries;
 
-    assert_eq!(index.count, 1);
-    assert_eq!(index.offSize, 1);
-    assert_eq!(index.offset, &[1, 45]);
+    assert_eq!(index.len(), 1);
     assert_eq!(&*index.get(0).unwrap().unwrap(), &compact_operations!(
         Version => [Integer(709)], Notice => [Integer(710)], Copyright => [Integer(711)],
         FullName => [Integer(712)], FamilyName => [Integer(712)], Weight => [Integer(388)],
@@ -66,8 +62,7 @@ fn strings() {
     let set = FontSet::read(&mut read()).unwrap();
     let index = &set.strings;
 
-    assert_eq!(index.count, 322);
-    assert_eq!(index.offSize, 2);
+    assert_eq!(index.len(), 322);
     assert_eq!(index.get(175).unwrap(), "Aring");
     assert_eq!(index.get(500).unwrap(), "nine.tosf");
 }
@@ -77,8 +72,7 @@ fn subroutines() {
     let set = FontSet::read(&mut read()).unwrap();
     let index = &set.subroutines;
 
-    assert_eq!(index.count, 181);
-    assert_eq!(index.offSize, 2);
+    assert_eq!(index.len(), 181);
     assert_eq!(index.get(69).unwrap().unwrap(), type2_operations!(
         (HHCurveTo, [Integer(28), Integer(-29), Integer(-26), Integer(15), Integer(-31)]),
         (HVCurveTo, [Integer(-53), Integer(-43), Integer(-42), Integer(-68), Integer(-7),
@@ -124,8 +118,7 @@ fn charstrings() {
     let vector = &set.charstrings;
 
     assert_eq!(vector.len(), 1);
-    assert_eq!(vector[0].count, 547);
-    assert_eq!(vector[0].offSize, 2);
+    assert_eq!(vector[0].len(), 547);
     assert_eq!(vector[0].get(15).unwrap().unwrap(), type2_operations!(
         (CallGSubr, [Integer(-25)]), (HStemHM, []),
         (HintMask, [Integer(124), Integer(51), Integer(384), Integer(51)]),

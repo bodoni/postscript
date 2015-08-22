@@ -40,11 +40,11 @@ impl Value for FontSet {
         let mut charsets = vec![];
         let mut charstrings = vec![];
         let mut private_dictionaries = vec![];
-        for i in 0..(top_dictionaries.count as usize) {
+        for i in 0..top_dictionaries.len() {
             let dictionary = try!(top_dictionaries.get(i)).unwrap();
             encodings.push(try!(read_encoding(band, &dictionary)));
             charstrings.push(try!(read_charstrings(band, &dictionary)));
-            charsets.push(try!(read_charset(band, &dictionary, charstrings[i].count as usize)));
+            charsets.push(try!(read_charset(band, &dictionary, charstrings[i].len())));
             private_dictionaries.push(try!(read_private_dictionary(band, &dictionary)));
         }
 
