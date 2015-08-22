@@ -82,10 +82,10 @@ fn subroutines() {
     assert_eq!(index.count, 181);
     assert_eq!(index.offSize, 2);
     assert_eq!(index.get(69).unwrap().unwrap(), operations!(
-        (hhcurveto, [Integer(28), Integer(-29), Integer(-26), Integer(15), Integer(-31)]),
-        (hvcurveto, [Integer(-53), Integer(-43), Integer(-42), Integer(-68), Integer(-7),
+        (HHCurveTo, [Integer(28), Integer(-29), Integer(-26), Integer(15), Integer(-31)]),
+        (HVCurveTo, [Integer(-53), Integer(-43), Integer(-42), Integer(-68), Integer(-7),
                      Integer(1), Integer(-10), Integer(1), Integer(-6)]),
-        (return_, []),
+        (Return, []),
     ));
 }
 
@@ -140,12 +140,12 @@ fn charstrings() {
     assert_eq!(vector[0].count, 547);
     assert_eq!(vector[0].offSize, 2);
     assert_eq!(vector[0].get(15).unwrap().unwrap(), operations!(
-        (callgsubr, [Integer(-25)]), (hstemhm, []),
-        (hintmask, [Integer(124), Integer(51), Integer(384), Integer(51)]),
-        (rmoveto, [Integer(33), Integer(695), Integer(669)]), (hlineto, [Integer(-241)]),
-        (hintmask, []), (callgsubr, [Integer(17), Integer(0)]), (hintmask, []),
-        (callsubr, [Integer(33), Integer(-82)]), (hintmask, []),
-        (callsubr, [Integer(-47), Integer(-38)]),
+        (CallGSubr, [Integer(-25)]), (HStemHM, []),
+        (HintMask, [Integer(124), Integer(51), Integer(384), Integer(51)]),
+        (RMoveTo, [Integer(33), Integer(695), Integer(669)]), (HLineTo, [Integer(-241)]),
+        (HintMask, []), (CallGSubr, [Integer(17), Integer(0)]), (HintMask, []),
+        (CallSubr, [Integer(33), Integer(-82)]), (HintMask, []),
+        (CallSubr, [Integer(-47), Integer(-38)]),
     ));
 }
 
