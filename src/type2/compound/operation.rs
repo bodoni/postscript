@@ -20,7 +20,7 @@ impl Value for Operation {
                     };
                     let operator = match Operator::get(code) {
                         Some(operator) => operator,
-                        _ => raise!("found an unknown operator"),
+                        _ => raise!("found an unknown operator ({:#x})", code),
                     };
                     return Ok((operator, arguments));
                 },
