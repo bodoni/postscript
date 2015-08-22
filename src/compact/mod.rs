@@ -11,7 +11,7 @@ use band::{Band, ParametrizedValue, Value};
 pub struct FontSet {
     pub header: Header,
     pub names: Vec<String>,
-    pub top_dictionaries: TopDictionaryIndex,
+    pub top_dictionaries: Vec<Operations>,
     pub strings: StringIndex,
     pub subroutines: SubroutineIndex,
     pub encodings: Vec<Encoding>,
@@ -31,8 +31,8 @@ impl Value for FontSet {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
         let header = try!(Header::read(band));
         try!(band.jump(header.hdrSize as u64));
-        let names = try!(NameIndex::read(band)).into_vec();
-        let top_dictionaries = try!(TopDictionaryIndex::read(band));
+        let names = try!(try!(NameIndex::read(band)).into_vec());
+        let top_dictionaries = try!(try!(TopDictionaryIndex::read(band)).into_vec());
         let strings = try!(StringIndex::read(band));
         let subroutines = try!(SubroutineIndex::read(band));
 
@@ -40,12 +40,11 @@ impl Value for FontSet {
         let mut charsets = vec![];
         let mut charstrings = vec![];
         let mut private_dictionaries = vec![];
-        for i in 0..top_dictionaries.len() {
-            let dictionary = try!(top_dictionaries.get(i)).unwrap();
-            encodings.push(try!(read_encoding(band, &dictionary)));
-            charstrings.push(try!(read_charstrings(band, &dictionary)));
-            charsets.push(try!(read_charset(band, &dictionary, charstrings[i].len())));
-            private_dictionaries.push(try!(read_private_dictionary(band, &dictionary)));
+        for (i, dictionary) in top_dictionaries.iter().enumerate() {
+            encodings.push(try!(read_encoding(band, dictionary)));
+            charstrings.push(try!(read_charstrings(band, dictionary)));
+            charsets.push(try!(read_charset(band, dictionary, charstrings[i].len())));
+            private_dictionaries.push(try!(read_private_dictionary(band, dictionary)));
         }
 
         Ok(FontSet {

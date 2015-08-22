@@ -90,16 +90,18 @@ impl ParametrizedValue<i32> for CharstringIndex {
 }
 
 impl TopDictionaryIndex {
-    pub fn get(&self, i: usize) -> Result<Option<compact::compound::Operations>> {
-        if i >= self.len() {
-            return Ok(None);
+    pub fn into_vec(self) -> Result<Vec<compact::compound::Operations>> {
+        let TopDictionaryIndex { index } = self;
+        let mut vector = Vec::with_capacity(index.len());
+        for chunk in index {
+            vector.push(try!(Value::read(&mut Cursor::new(chunk))));
         }
-        Ok(Some(try!(Value::read(&mut Cursor::new(&*self.index[i])))))
+        Ok(vector)
     }
 }
 
 impl NameIndex {
-    pub fn into_vec(self) -> Vec<String> {
+    pub fn into_vec(self) -> Result<Vec<String>> {
         let NameIndex { index } = self;
         let mut vector = Vec::with_capacity(index.len());
         for chunk in index {
@@ -108,7 +110,7 @@ impl NameIndex {
                 Err(chunk) => String::from_utf8_lossy(&chunk.into_bytes()).into_owned(),
             });
         }
-        vector
+        Ok(vector)
     }
 }
 

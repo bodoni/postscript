@@ -36,19 +36,19 @@ fn header() {
 #[test]
 fn names() {
     let set = FontSet::read(&mut read()).unwrap();
-    let index = &set.names;
+    let vector = &set.names;
 
-    assert_eq!(index.len(), 1);
-    assert_eq!(&index[0], "SourceSerifPro-Regular");
+    assert_eq!(vector.len(), 1);
+    assert_eq!(&vector[0], "SourceSerifPro-Regular");
 }
 
 #[test]
 fn top_dictionaries() {
     let set = FontSet::read(&mut read()).unwrap();
-    let index = &set.top_dictionaries;
+    let vector = &set.top_dictionaries;
 
-    assert_eq!(index.len(), 1);
-    assert_eq!(&*index.get(0).unwrap().unwrap(), &compact_operations!(
+    assert_eq!(vector.len(), 1);
+    assert_eq!(&*vector[0], &compact_operations!(
         Version => [Integer(709)], Notice => [Integer(710)], Copyright => [Integer(711)],
         FullName => [Integer(712)], FamilyName => [Integer(712)], Weight => [Integer(388)],
         FontBBox => [Integer(-178), Integer(-335), Integer(1138), Integer(918)],
