@@ -2,10 +2,10 @@
 
 #![allow(non_snake_case)]
 
-use std::io::{Read, Seek};
+use std::io::{Cursor, Read, Seek};
 
 use Result;
-use band::{Band, Value};
+use band::{Band, ParametrizedValue, Value};
 
 /// A font set.
 pub struct FontSet {
@@ -17,6 +17,7 @@ pub struct FontSet {
     pub encodings: Vec<Encoding>,
     pub charsets: Vec<Charset>,
     pub charstrings: Vec<CharstringIndex>,
+    pub private_dictionaries: Vec<Operations>,
 }
 
 impl FontSet {
@@ -38,11 +39,13 @@ impl Value for FontSet {
         let mut encodings = vec![];
         let mut charsets = vec![];
         let mut charstrings = vec![];
+        let mut private_dictionaries = vec![];
         for i in 0..(dictionaries.count as usize) {
             let dictionary = try!(dictionaries.get(i)).unwrap();
             encodings.push(try!(read_encoding(band, &dictionary)));
             charstrings.push(try!(read_charstrings(band, &dictionary)));
             charsets.push(try!(read_charset(band, &dictionary, charstrings[i].count as usize)));
+            private_dictionaries.push(try!(read_private_dictionary(band, &dictionary)));
         }
 
         Ok(FontSet {
@@ -54,60 +57,60 @@ impl Value for FontSet {
             encodings: encodings,
             charsets: charsets,
             charstrings: charstrings,
+            private_dictionaries: private_dictionaries,
         })
     }
 }
 
-macro_rules! argument(
-    ($operation:expr, $argument:ident) => (
-        match $operation {
-            Some(arguments) => match (arguments.len(), arguments.get(0)) {
-                (1, Some(&Number::$argument(value))) => Some(value),
-                _ => None,
-            },
-            _ => None,
+macro_rules! get_single(
+    ($operations:expr, $operator:ident) => ({
+        match $operations.get_single(Operator::$operator) {
+            Some(Number::Integer(value)) => value,
+            _ => raise!("failed to process an operation ({})", stringify!($operator)),
+        }
+    });
+);
+
+macro_rules! get_double(
+    ($operations:expr, $operator:ident) => (
+        match $operations.get_double(Operator::$operator) {
+            Some((Number::Integer(value0), Number::Integer(value1))) => (value0, value1),
+            _ => raise!("failed to process an operation ({})", stringify!($operator)),
         }
     );
-    ($operation:expr) => (argument!($operation, Integer));
 );
 
 fn read_encoding<T: Band>(_: &mut T, operations: &Operations) -> Result<Encoding> {
-    Ok(match argument!(operations.get(Operator::Encoding)) {
-        Some(0) => Encoding::Standard,
-        Some(1) => Encoding::Expert,
-        Some(_) => unimplemented!(),
-        _ => raise!("failed to process an operation"),
+    Ok(match get_single!(operations, Encoding) {
+        0 => Encoding::Standard,
+        1 => Encoding::Expert,
+        _ => unimplemented!(),
     })
 }
 
-fn read_charset<T: Band>(band: &mut T, operations: &Operations, glyphs: usize)
-                          -> Result<Charset> {
-
-    Ok(match argument!(operations.get(Operator::Charset)) {
-        Some(0) => Charset::ISOAdobe,
-        Some(1) => Charset::Expert,
-        Some(2) => Charset::ExpertSubset,
-        Some(offset) => {
+fn read_charset<T: Band>(band: &mut T, operations: &Operations, glyphs: usize) -> Result<Charset> {
+    match get_single!(operations, Charset) {
+        0 => Ok(Charset::ISOAdobe),
+        1 => Ok(Charset::Expert),
+        2 => Ok(Charset::ExpertSubset),
+        offset => {
             try!(band.jump(offset as u64));
-            try!(Charset::read(band, glyphs))
+            Charset::read(band, glyphs)
         },
-        _ => raise!("failed to process an operation"),
-    })
+    }
 }
 
-fn read_charstrings<T: Band>(band: &mut T, operations: &Operations)
-                             -> Result<CharstringIndex> {
+fn read_charstrings<T: Band>(band: &mut T, operations: &Operations) -> Result<CharstringIndex> {
+    try!(band.jump(get_single!(operations, Charstrings) as u64));
+    CharstringIndex::read(band, get_single!(operations, CharstringType))
+}
 
-    let offset = match argument!(operations.get(Operator::Charstrings)) {
-        Some(offset) => offset as u64,
-        _ => raise!("failed to process an operation"),
-    };
-    let format = match argument!(operations.get(Operator::CharstringType)) {
-        Some(format) => format,
-        _ => raise!("failed to process an operation"),
-    };
+fn read_private_dictionary<T: Band>(band: &mut T, operations: &Operations) -> Result<Operations> {
+    let (size, offset) = get_double!(operations, Private);
     try!(band.jump(offset as u64));
-    Ok(try!(CharstringIndex::read(band, format)))
+    let chunk: Vec<u8> = try!(ParametrizedValue::read(band, size as usize));
+    let mut band = Cursor::new(chunk);
+    Value::read(&mut band)
 }
 
 pub mod compound;

@@ -40,6 +40,28 @@ impl Operations {
             _ => operator.default(),
         }
     }
+
+    #[inline]
+    pub fn get_single(&self, operator: Operator) -> Option<Number> {
+        self.get(operator).and_then(|arguments| {
+            if arguments.len() > 0 {
+                Some(arguments[0])
+            } else {
+                None
+            }
+        })
+    }
+
+    #[inline]
+    pub fn get_double(&self, operator: Operator) -> Option<(Number, Number)> {
+        self.get(operator).and_then(|arguments| {
+            if arguments.len() > 1 {
+                Some((arguments[0], arguments[1]))
+            } else {
+                None
+            }
+        })
+    }
 }
 
 impl Value for Operations {
