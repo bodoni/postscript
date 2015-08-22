@@ -109,8 +109,7 @@ fn read_private_dictionary<T: Band>(band: &mut T, operations: &Operations) -> Re
     let (size, offset) = get_double!(operations, Private);
     try!(band.jump(offset as u64));
     let chunk: Vec<u8> = try!(ParametrizedValue::read(band, size as usize));
-    let mut band = Cursor::new(chunk);
-    Value::read(&mut band)
+    Value::read(&mut Cursor::new(chunk))
 }
 
 pub mod compound;
