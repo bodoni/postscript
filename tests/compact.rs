@@ -29,11 +29,11 @@ fn dictionaries() {
     use postscript::compact::primitive::Number;
     use std::collections::HashMap;
 
-    macro_rules! arguments(
+    macro_rules! operations(
         ($($operator:ident => [$($argument:ident($number:expr)),*],)*) => ({
-            let mut arguments = HashMap::new();
-            $(arguments.insert(Operator::$operator, vec![$(Number::$argument($number)),*]);)*
-            arguments
+            let mut operations = HashMap::new();
+            $(operations.insert(Operator::$operator, vec![$(Number::$argument($number)),*]);)*
+            operations
         });
     );
 
@@ -43,7 +43,7 @@ fn dictionaries() {
     assert_eq!(index.count, 1);
     assert_eq!(index.offSize, 1);
     assert_eq!(index.offset, &[1, 45]);
-    assert_eq!(&*index.get(0).unwrap().unwrap(), &arguments!(
+    assert_eq!(&*index.get(0).unwrap().unwrap(), &operations!(
         version => [Integer(709)], Notice => [Integer(710)], Copyright => [Integer(711)],
         FullName => [Integer(712)], FamilyName => [Integer(712)], Weight => [Integer(388)],
         FontBBox => [Integer(-178), Integer(-335), Integer(1138), Integer(918)],
@@ -105,12 +105,31 @@ fn charsets() {
 
 #[test]
 fn charstrings() {
+    use postscript::type2::compound::Operator;
+    use postscript::type2::primitive::Number;
+
+    macro_rules! operations(
+        ($(($operator:ident, [$($argument:ident($number:expr)),*]),)*) => ({
+            let mut operations = vec![];
+            $(operations.push((Operator::$operator, vec![$(Number::$argument($number)),*]));)*
+            operations
+        });
+    );
+
     let set = FontSet::read(&mut read()).unwrap();
     let vector = &set.charstrings;
 
     assert_eq!(vector.len(), 1);
     assert_eq!(vector[0].count, 547);
     assert_eq!(vector[0].offSize, 2);
+    assert_eq!(vector[0].get(15).unwrap().unwrap(), operations!(
+        (callgsubr, [Integer(-25)]), (hstemhm, []),
+        (hintmask, [Integer(124), Integer(51), Integer(384), Integer(51)]),
+        (rmoveto, [Integer(33), Integer(695), Integer(669)]), (hlineto, [Integer(-241)]),
+        (hintmask, []), (callgsubr, [Integer(17), Integer(0)]), (hintmask, []),
+        (callsubr, [Integer(33), Integer(-82)]), (hintmask, []),
+        (callsubr, [Integer(-47), Integer(-38)]),
+    ));
 }
 
 fn read() -> Cursor<Vec<u8>> {

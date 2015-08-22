@@ -4,6 +4,58 @@ use Result;
 use band::{Band, Value};
 use compact::primitive::Number;
 
+pub type Operation = (Operator, Vec<Number>);
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Operations(pub HashMap<Operator, Vec<Number>>);
+
+impl Value for Operation {
+    fn read<T: Band>(band: &mut T) -> Result<Self> {
+        let mut arguments = vec![];
+        loop {
+            match try!(band.peek::<u8>()) {
+                0x1c | 0x1d | 0x1e | 0x20...0xfe => arguments.push(try!(Value::read(band))),
+                code => {
+                    let code = if code == 0x0c {
+                        try!(band.take::<u16>())
+                    } else {
+                        try!(band.take::<u8>()) as u16
+                    };
+                    let operator = match Operator::get(code) {
+                        Some(operator) => operator,
+                        _ => raise!("found an unknown operator"),
+                    };
+                    return Ok((operator, arguments));
+                },
+            }
+        }
+    }
+}
+
+impl Operations {
+    #[inline]
+    pub fn get(&self, operator: Operator) -> Option<&[Number]> {
+        match self.0.get(&operator) {
+            Some(arguments) => Some(&*arguments),
+            _ => operator.default(),
+        }
+    }
+}
+
+impl Value for Operations {
+    fn read<T: Band>(band: &mut T) -> Result<Self> {
+        let size = try!(band.count());
+        let mut map = HashMap::new();
+        while try!(band.position()) < size {
+            let (operator, arguments) = try!(Value::read(band));
+            map.insert(operator, arguments);
+        }
+        Ok(Operations(map))
+    }
+}
+
+deref! { Operations::0 => HashMap<Operator, Vec<Number>> }
+
 macro_rules! operator {
     (pub $name:ident { $($code:pat => $variant:ident $default:tt,)+ }) => (
         operator_define! { pub $name { $($variant,)+ } }
@@ -114,53 +166,3 @@ operator! {
         // 0x0c27...0x0cff => Reserved,
     }
 }
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct Operations(pub HashMap<Operator, Vec<Number>>);
-
-impl Value for (Operator, Vec<Number>) {
-    fn read<T: Band>(band: &mut T) -> Result<Self> {
-        let mut arguments = vec![];
-        loop {
-            match try!(band.peek::<u8>()) {
-                0x1c | 0x1d | 0x1e | 0x20...0xfe => arguments.push(try!(Value::read(band))),
-                code => {
-                    let code = if code == 0x0c {
-                        try!(band.take::<u16>())
-                    } else {
-                        try!(band.take::<u8>()) as u16
-                    };
-                    let operator = match Operator::get(code) {
-                        Some(operator) => operator,
-                        _ => raise!("found an unknown operator"),
-                    };
-                    return Ok((operator, arguments));
-                },
-            }
-        }
-    }
-}
-
-impl Operations {
-    #[inline]
-    pub fn get(&self, operator: Operator) -> Option<&[Number]> {
-        match self.0.get(&operator) {
-            Some(arguments) => Some(&*arguments),
-            _ => operator.default(),
-        }
-    }
-}
-
-impl Value for Operations {
-    fn read<T: Band>(band: &mut T) -> Result<Self> {
-        let size = try!(band.count());
-        let mut map = HashMap::new();
-        while try!(band.position()) < size {
-            let (operator, arguments) = try!(Value::read(band));
-            map.insert(operator, arguments);
-        }
-        Ok(Operations(map))
-    }
-}
-
-deref! { Operations::0 => HashMap<Operator, Vec<Number>> }

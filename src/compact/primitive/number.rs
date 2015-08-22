@@ -29,7 +29,7 @@ impl Number {
 
 impl Value for Number {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
-        macro_rules! read(($kind:ident) => (try!($kind::read(band))));
+        macro_rules! read(($kind:ident) => (try!(band.take::<$kind>())));
         let first = read!(u8);
         Ok(match first {
             0x20...0xf6 => Integer(first as i32 - 139),

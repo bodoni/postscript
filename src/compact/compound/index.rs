@@ -2,8 +2,8 @@ use std::io::Cursor;
 
 use Result;
 use band::{Band, ParametrizedValue, Value};
-use compact::compound::Operations;
 use compact::primitive::{Offset, OffsetSize, StringID};
+use {compact, type2};
 
 table_define! {
     pub Index {
@@ -78,7 +78,6 @@ macro_rules! index_implement {
 
 index_define! {
     pub CharstringIndex {
-        kind: i32,
     }
 }
 
@@ -88,18 +87,25 @@ index!(StringIndex);
 index!(SubroutineIndex);
 
 impl CharstringIndex {
-    pub fn read<T: Band>(band: &mut T, kind: i32) -> Result<Self> {
-        match kind {
-            2 => {},
+    pub fn read<T: Band>(band: &mut T, format: i32) -> Result<Self> {
+        Ok(match format {
+            2 => CharstringIndex { index: try!(Value::read(band)) },
             _ => raise!("found char-string data with an unknown format"),
-        }
-        let index = try!(Value::read(band));
-        Ok(CharstringIndex { index: index, kind: kind })
+        })
+    }
+
+    pub fn get(&self, i: usize) -> Result<Option<type2::compound::Operations>> {
+        let chunk = match self.index.get(i) {
+            Some(chunk) => chunk,
+            _ => return Ok(None),
+        };
+        let mut band = Cursor::new(chunk);
+        Ok(Some(try!(Value::read(&mut band))))
     }
 }
 
 impl DictionaryIndex {
-    pub fn get(&self, i: usize) -> Result<Option<Operations>> {
+    pub fn get(&self, i: usize) -> Result<Option<compact::compound::Operations>> {
         let chunk = match self.index.get(i) {
             Some(chunk) => chunk,
             _ => return Ok(None),
