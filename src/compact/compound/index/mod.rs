@@ -124,6 +124,17 @@ impl NameIndex {
     }
 }
 
+impl SubroutineIndex {
+    pub fn get(&self, i: usize) -> Result<Option<type2::compound::Operations>> {
+        let chunk = match self.index.get(i) {
+            Some(chunk) => chunk,
+            _ => return Ok(None),
+        };
+        let mut band = Cursor::new(chunk);
+        Ok(Some(try!(Value::read(&mut band))))
+    }
+}
+
 mod string;
 
 pub use self::string::StringIndex;

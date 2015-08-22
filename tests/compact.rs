@@ -65,11 +65,28 @@ fn strings() {
 
 #[test]
 fn subroutines() {
+    use postscript::type2::compound::Operator;
+    use postscript::type2::primitive::Number;
+
+    macro_rules! operations(
+        ($(($operator:ident, [$($argument:ident($number:expr)),*]),)*) => ({
+            let mut operations = vec![];
+            $(operations.push((Operator::$operator, vec![$(Number::$argument($number)),*]));)*
+            operations
+        });
+    );
+
     let set = FontSet::read(&mut read()).unwrap();
     let index = &set.subroutines;
 
     assert_eq!(index.count, 181);
     assert_eq!(index.offSize, 2);
+    assert_eq!(index.get(69).unwrap().unwrap(), operations!(
+        (hhcurveto, [Integer(28), Integer(-29), Integer(-26), Integer(15), Integer(-31)]),
+        (hvcurveto, [Integer(-53), Integer(-43), Integer(-42), Integer(-68), Integer(-7),
+                     Integer(1), Integer(-10), Integer(1), Integer(-6)]),
+        (return_, []),
+    ));
 }
 
 #[test]
