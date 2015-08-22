@@ -5,30 +5,40 @@ use band::{Band, ParametrizedValue, Value};
 use compact::compound::Operations;
 use compact::primitive::{Offset, OffsetSize};
 
-pub type Index = Vec<Vec<u8>>;
+table_define! {
+    pub Index {
+        count   (u16         ),
+        offSize (OffsetSize  ),
+        offset  (Vec<Offset> ),
+        data    (Vec<Vec<u8>>),
+    }
+}
 
 impl Value for Index {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
-        let count = try!(band.take::<u16>()) as usize;
+        let count = try!(band.take::<u16>());
         if count == 0 {
-            return Ok(vec![]);
+            return Ok(Index::default());
         }
-        let offset_size = try!(band.take::<OffsetSize>());
-        let mut offsets = Vec::with_capacity(count + 1);
-        for i in 0..(count + 1) {
-            let offset = try!(Offset::read(band, offset_size)).as_u32() as usize;
-            if i == 0 && offset != 1 || i > 0 && offset <= offsets[i - 1] {
+        let offSize = try!(band.take::<OffsetSize>());
+        let mut offset = Vec::with_capacity(count as usize + 1);
+        for i in 0..(count as usize + 1) {
+            let value = try!(Offset::read(band, offSize));
+            if i == 0 && value != Offset(1) || i > 0 && value <= offset[i - 1] {
                 raise!("found a malformed index");
             }
-            offsets.push(offset);
+            offset.push(value);
         }
-        let mut chunks = Vec::with_capacity(count);
-        for i in 0..count {
-            chunks.push(try!(ParametrizedValue::read(band, offsets[i + 1] - offsets[i])));
+        let mut data = Vec::with_capacity(count as usize);
+        for i in 0..(count as usize) {
+            let size = (offset[i + 1].as_u32() - offset[i].as_u32()) as usize;
+            data.push(try!(ParametrizedValue::read(band, size)));
         }
-        Ok(chunks)
+        Ok(Index { count: count, offSize: offSize, offset: offset, data: data })
     }
 }
+
+deref! { Index::data => [Vec<u8>] }
 
 macro_rules! index {
     ($(#[$attribute:meta])* $structure:ident) => (
@@ -82,9 +92,9 @@ impl ParametrizedValue<i32> for Charstrings {
 
 impl TopDictionaries {
     pub fn into_vec(self) -> Result<Vec<Operations>> {
-        let TopDictionaries { index } = self;
-        let mut vector = Vec::with_capacity(index.len());
-        for chunk in index {
+        let TopDictionaries { index: Index { data, .. } } = self;
+        let mut vector = Vec::with_capacity(data.len());
+        for chunk in data {
             vector.push(try!(Value::read(&mut Cursor::new(chunk))));
         }
         Ok(vector)
@@ -93,9 +103,9 @@ impl TopDictionaries {
 
 impl Names {
     pub fn into_vec(self) -> Result<Vec<String>> {
-        let Names { index } = self;
-        let mut vector = Vec::with_capacity(index.len());
-        for chunk in index {
+        let Names { index: Index { data, .. } } = self;
+        let mut vector = Vec::with_capacity(data.len());
+        for chunk in data {
             vector.push(match String::from_utf8(chunk) {
                 Ok(string) => string,
                 Err(chunk) => String::from_utf8_lossy(&chunk.into_bytes()).into_owned(),

@@ -4,6 +4,7 @@ use Result;
 use band::{Band, ParametrizedValue};
 use compact::primitive::OffsetSize;
 
+#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Offset(pub u32);
 
 #[cfg(target_endian = "big")]
