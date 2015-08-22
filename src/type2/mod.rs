@@ -1,5 +1,7 @@
 //! The Type 2 charstring format.
 
+pub mod primitive;
+
 macro_rules! operator {
     ($($some:tt)*) => ();
 }

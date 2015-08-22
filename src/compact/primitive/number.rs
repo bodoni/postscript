@@ -29,18 +29,14 @@ impl Number {
 
 impl Value for Number {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
-        macro_rules! read_integer(
-            ($kind:ident, $via:ty) => (try!($kind::read(band)) as $via as i32);
-            ($kind:ident) => (try!($kind::read(band)) as i32);
-        );
-
-        let byte0 = read_integer!(u8);
-        Ok(match byte0 {
-            0x20...0xf6 => Integer(byte0 - 139),
-            0xf7...0xfa => Integer((byte0 - 247) * 256 + read_integer!(u8) + 108),
-            0xfb...0xfe => Integer(-(byte0 - 251) * 256 - read_integer!(u8) - 108),
-            0x1c => Integer(read_integer!(u16, i16)),
-            0x1d => Integer(read_integer!(u32, i32)),
+        macro_rules! read(($kind:ident) => (try!($kind::read(band))));
+        let first = read!(u8);
+        Ok(match first {
+            0x20...0xf6 => Integer(first as i32 - 139),
+            0xf7...0xfa => Integer((first as i32 - 247) * 256 + read!(u8) as i32 + 108),
+            0xfb...0xfe => Integer(-(first as i32 - 251) * 256 - read!(u8) as i32 - 108),
+            0x1c => Integer(read!(u16) as i16 as i32),
+            0x1d => Integer(read!(u32) as i32),
             0x1e => Real(try!(read_real(band))),
             _ => raise!("found a malformed number"),
         })
