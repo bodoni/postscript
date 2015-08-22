@@ -89,15 +89,15 @@ fn encodings() {
 }
 
 #[test]
-fn char_sets() {
-    use postscript::compact::compound::CharSet;
+fn charsets() {
+    use postscript::compact::compound::Charset;
 
     let set = FontSet::read(&mut read()).unwrap();
-    let vector = &set.char_sets;
+    let vector = &set.charsets;
 
     assert_eq!(vector.len(), 1);
     match &vector[0] {
-        &CharSet::Format1(..) => {},
+        &Charset::Format1(..) => {},
         _ => unreachable!(),
     }
 }

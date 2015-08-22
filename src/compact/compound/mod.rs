@@ -42,13 +42,13 @@ macro_rules! deref {
 
 macro_rules! itemize(($code:item) => ($code));
 
-mod char_set;
+mod charset;
 mod encoding;
 mod header;
 mod index;
 mod operation;
 
-pub use self::char_set::{CharSet, CharSet1, CharSetRange1};
+pub use self::charset::{Charset, Charset1, CharsetRange1};
 pub use self::encoding::Encoding;
 pub use self::header::Header;
 pub use self::index::Index;

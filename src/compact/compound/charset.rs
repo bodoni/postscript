@@ -3,32 +3,32 @@ use band::{Band, Value};
 use compact::primitive::{GlyphID, StringID};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum CharSet {
+pub enum Charset {
     ISOAdobe,
     Expert,
     ExpertSubset,
-    Format1(CharSet1),
+    Format1(Charset1),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct CharSet1 {
+pub struct Charset1 {
     pub format: u8,
-    pub Range1: Vec<CharSetRange1>,
+    pub Range1: Vec<CharsetRange1>,
 }
 
 table! {
-    pub CharSetRange1 {
+    pub CharsetRange1 {
         first (StringID),
         nLeft (u8      ),
     }
 }
 
-impl CharSet {
+impl Charset {
     #[doc(hidden)]
     pub fn read<T: Band>(band: &mut T, glyphs: usize) -> Result<Self> {
         Ok(match try!(band.peek::<u8>()) {
             0 => unimplemented!(),
-            1 => CharSet::Format1(try!(CharSet1::read(band, glyphs))),
+            1 => Charset::Format1(try!(Charset1::read(band, glyphs))),
             2 => unimplemented!(),
             _ => raise!("found a char set with an unknown format"),
         })
@@ -37,29 +37,29 @@ impl CharSet {
     #[inline]
     pub fn get(&self, gid: GlyphID) -> Option<&'static str> {
         match self {
-            &CharSet::ISOAdobe => get_iso_adobe(gid),
-            &CharSet::Expert => get_expert(gid),
-            &CharSet::ExpertSubset => get_expert_subset(gid),
+            &Charset::ISOAdobe => get_iso_adobe(gid),
+            &Charset::Expert => get_expert(gid),
+            &Charset::ExpertSubset => get_expert_subset(gid),
             _ => unimplemented!(),
         }
     }
 }
 
-impl CharSet1 {
+impl Charset1 {
     fn read<T: Band>(band: &mut T, glyphs: usize) -> Result<Self> {
         let format = try!(band.take::<u8>());
         debug_assert_eq!(format, 1);
         let mut Range1 = vec![];
         let mut found = 0 + 1;
         while found < glyphs {
-            let range = try!(CharSetRange1::read(band));
+            let range = try!(CharsetRange1::read(band));
             found += 1 + range.nLeft as usize;
             Range1.push(range);
         }
         if found != glyphs {
             raise!("found a malformed char set");
         }
-        Ok(CharSet1 { format: format, Range1: Range1 })
+        Ok(Charset1 { format: format, Range1: Range1 })
     }
 }
 

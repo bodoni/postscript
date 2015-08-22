@@ -15,7 +15,7 @@ pub struct FontSet {
     pub strings: StringIndex,
     pub subroutines: SubroutineIndex,
     pub encodings: Vec<Encoding>,
-    pub char_sets: Vec<CharSet>,
+    pub charsets: Vec<Charset>,
     pub char_strings: Vec<CharStringIndex>,
 }
 
@@ -36,13 +36,13 @@ impl Value for FontSet {
         let subroutines = try!(SubroutineIndex::read(band));
 
         let mut encodings = vec![];
-        let mut char_sets = vec![];
+        let mut charsets = vec![];
         let mut char_strings = vec![];
         for i in 0..(dictionaries.count as usize) {
             let dictionary = try!(dictionaries.get(i)).unwrap();
             encodings.push(try!(read_encoding(band, &dictionary)));
             char_strings.push(try!(read_char_strings(band, &dictionary)));
-            char_sets.push(try!(read_char_set(band, &dictionary, char_strings[i].count as usize)));
+            charsets.push(try!(read_charset(band, &dictionary, char_strings[i].count as usize)));
         }
 
         Ok(FontSet {
@@ -52,7 +52,7 @@ impl Value for FontSet {
             strings: strings,
             subroutines: subroutines,
             encodings: encodings,
-            char_sets: char_sets,
+            charsets: charsets,
             char_strings: char_strings,
         })
     }
@@ -80,16 +80,16 @@ fn read_encoding<T: Band>(_: &mut T, operations: &Operations) -> Result<Encoding
     })
 }
 
-fn read_char_set<T: Band>(band: &mut T, operations: &Operations, glyphs: usize)
-                          -> Result<CharSet> {
+fn read_charset<T: Band>(band: &mut T, operations: &Operations, glyphs: usize)
+                          -> Result<Charset> {
 
     Ok(match operand!(operations.get(Operator::charset)) {
-        Some(0) => CharSet::ISOAdobe,
-        Some(1) => CharSet::Expert,
-        Some(2) => CharSet::ExpertSubset,
+        Some(0) => Charset::ISOAdobe,
+        Some(1) => Charset::Expert,
+        Some(2) => Charset::ExpertSubset,
         Some(offset) => {
             try!(band.jump(offset as u64));
-            try!(CharSet::read(band, glyphs))
+            try!(Charset::read(band, glyphs))
         },
         _ => raise!("failed to process an operation"),
     })
@@ -113,6 +113,6 @@ fn read_char_strings<T: Band>(band: &mut T, operations: &Operations)
 pub mod compound;
 pub mod primitive;
 
-use self::compound::{CharSet, Encoding, Header};
+use self::compound::{Charset, Encoding, Header};
 use self::compound::{CharStringIndex, DictionaryIndex, NameIndex, StringIndex, SubroutineIndex};
 use self::compound::{Operator, Operand, Operations};
