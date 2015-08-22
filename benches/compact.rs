@@ -43,13 +43,13 @@ fn operator_get(bencher: &mut Bencher) {
 
 #[bench]
 fn string_index_get(bencher: &mut Bencher) {
-    use postscript::compact::compound::StringIndex;
+    use postscript::compact::compound::Strings;
     use postscript::compact::primitive::StringID;
 
     let mut source = random::default().seed([69, 42]);
     let sids = source.iter::<u64>().take(SAMPLES).map(|number| (number as StringID) % 391)
                                                  .collect::<Vec<_>>();
-    let index = StringIndex::default();
+    let index = Strings::default();
     bencher.iter(|| {
         for &sid in &sids {
             black_box(index.get(sid));
