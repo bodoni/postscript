@@ -51,6 +51,6 @@ mod operation;
 pub use self::charset::{Charset, Charset1, CharsetRange1};
 pub use self::encoding::Encoding;
 pub use self::header::Header;
-pub use self::index::{CharstringIndex, Index, NameIndex};
-pub use self::index::{StringIndex, SubroutineIndex, TopDictionaryIndex};
+pub use self::index::{Charstrings, Index, Names};
+pub use self::index::{Strings, Subroutines, TopDictionaries};
 pub use self::operation::{Operation, Operations, Operator};

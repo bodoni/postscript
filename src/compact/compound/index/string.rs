@@ -1,10 +1,10 @@
 use compact::primitive::StringID;
 
-index!(StringIndex);
+index!(Strings);
 
 const NUMBER_OF_STANDARD_STRINGS: usize = 391;
 
-impl StringIndex {
+impl Strings {
     pub fn get(&self, sid: StringID) -> Option<String> {
         match sid as usize {
             i if i < NUMBER_OF_STANDARD_STRINGS => {

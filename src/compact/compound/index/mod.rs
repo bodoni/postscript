@@ -62,16 +62,16 @@ macro_rules! index_implement {
 }
 
 index_define! {
-    pub CharstringIndex {
+    pub Charstrings {
         format: i32,
     }
 }
 
-index!(TopDictionaryIndex);
-index!(NameIndex);
-index!(SubroutineIndex);
+index!(TopDictionaries);
+index!(Names);
+index!(Subroutines);
 
-impl CharstringIndex {
+impl Charstrings {
     pub fn get(&self, i: usize) -> Result<Option<type2::compound::Operations>> {
         if i >= self.len() {
             return Ok(None);
@@ -80,18 +80,18 @@ impl CharstringIndex {
     }
 }
 
-impl ParametrizedValue<i32> for CharstringIndex {
+impl ParametrizedValue<i32> for Charstrings {
     fn read<T: Band>(band: &mut T, format: i32) -> Result<Self> {
         Ok(match format {
-            2 => CharstringIndex { index: try!(Value::read(band)), format: format },
+            2 => Charstrings { index: try!(Value::read(band)), format: format },
             _ => raise!("found an unknown charstring format"),
         })
     }
 }
 
-impl TopDictionaryIndex {
+impl TopDictionaries {
     pub fn into_vec(self) -> Result<Vec<compact::compound::Operations>> {
-        let TopDictionaryIndex { index } = self;
+        let TopDictionaries { index } = self;
         let mut vector = Vec::with_capacity(index.len());
         for chunk in index {
             vector.push(try!(Value::read(&mut Cursor::new(chunk))));
@@ -100,9 +100,9 @@ impl TopDictionaryIndex {
     }
 }
 
-impl NameIndex {
+impl Names {
     pub fn into_vec(self) -> Result<Vec<String>> {
-        let NameIndex { index } = self;
+        let Names { index } = self;
         let mut vector = Vec::with_capacity(index.len());
         for chunk in index {
             vector.push(match String::from_utf8(chunk) {
@@ -114,7 +114,7 @@ impl NameIndex {
     }
 }
 
-impl SubroutineIndex {
+impl Subroutines {
     pub fn get(&self, i: usize) -> Result<Option<type2::compound::Operations>> {
         if i >= self.len() {
             return Ok(None);
@@ -140,4 +140,4 @@ impl SubroutineIndex {
 
 mod string;
 
-pub use self::string::StringIndex;
+pub use self::string::Strings;

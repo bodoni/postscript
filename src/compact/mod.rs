@@ -12,11 +12,11 @@ pub struct FontSet {
     pub header: Header,
     pub names: Vec<String>,
     pub top_dictionaries: Vec<Operations>,
-    pub strings: StringIndex,
-    pub subroutines: SubroutineIndex,
+    pub strings: Strings,
+    pub subroutines: Subroutines,
     pub encodings: Vec<Encoding>,
     pub charsets: Vec<Charset>,
-    pub charstrings: Vec<CharstringIndex>,
+    pub charstrings: Vec<Charstrings>,
     pub private_dictionaries: Vec<Operations>,
 }
 
@@ -31,10 +31,10 @@ impl Value for FontSet {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
         let header = try!(Header::read(band));
         try!(band.jump(header.hdrSize as u64));
-        let names = try!(try!(NameIndex::read(band)).into_vec());
-        let top_dictionaries = try!(try!(TopDictionaryIndex::read(band)).into_vec());
-        let strings = try!(StringIndex::read(band));
-        let subroutines = try!(SubroutineIndex::read(band));
+        let names = try!(try!(Names::read(band)).into_vec());
+        let top_dictionaries = try!(try!(TopDictionaries::read(band)).into_vec());
+        let strings = try!(Strings::read(band));
+        let subroutines = try!(Subroutines::read(band));
 
         let mut encodings = vec![];
         let mut charsets = vec![];
@@ -99,7 +99,7 @@ fn read_charset<T: Band>(band: &mut T, operations: &Operations, glyphs: usize) -
     }
 }
 
-fn read_charstrings<T: Band>(band: &mut T, operations: &Operations) -> Result<CharstringIndex> {
+fn read_charstrings<T: Band>(band: &mut T, operations: &Operations) -> Result<Charstrings> {
     try!(band.jump(get_single!(operations, Charstrings) as u64));
     ParametrizedValue::read(band, get_single!(operations, CharstringType))
 }
@@ -115,6 +115,6 @@ pub mod compound;
 pub mod primitive;
 
 use self::compound::{Charset, Encoding, Header};
-use self::compound::{CharstringIndex, NameIndex, StringIndex, SubroutineIndex, TopDictionaryIndex};
+use self::compound::{Charstrings, Names, Strings, Subroutines, TopDictionaries};
 use self::compound::{Operator, Operations};
 use self::primitive::Number;
