@@ -53,4 +53,4 @@ pub use self::encoding::Encoding;
 pub use self::header::Header;
 pub use self::index::Index;
 pub use self::index::{CharstringIndex, DictionaryIndex, NameIndex, StringIndex, SubroutineIndex};
-pub use self::operation::{Operator, Operand, Operations};
+pub use self::operation::{Operator, Operations};

@@ -58,21 +58,21 @@ impl Value for FontSet {
     }
 }
 
-macro_rules! operand(
-    ($operation:expr, $operand:ident) => (
+macro_rules! argument(
+    ($operation:expr, $argument:ident) => (
         match $operation {
-            Some(operands) => match (operands.len(), operands.get(0)) {
-                (1, Some(&Operand::$operand(value))) => Some(value),
+            Some(arguments) => match (arguments.len(), arguments.get(0)) {
+                (1, Some(&Number::$argument(value))) => Some(value),
                 _ => None,
             },
             _ => None,
         }
     );
-    ($operation:expr) => (operand!($operation, Integer));
+    ($operation:expr) => (argument!($operation, Integer));
 );
 
 fn read_encoding<T: Band>(_: &mut T, operations: &Operations) -> Result<Encoding> {
-    Ok(match operand!(operations.get(Operator::Encoding)) {
+    Ok(match argument!(operations.get(Operator::Encoding)) {
         Some(0) => Encoding::Standard,
         Some(1) => Encoding::Expert,
         Some(_) => unimplemented!(),
@@ -83,7 +83,7 @@ fn read_encoding<T: Band>(_: &mut T, operations: &Operations) -> Result<Encoding
 fn read_charset<T: Band>(band: &mut T, operations: &Operations, glyphs: usize)
                           -> Result<Charset> {
 
-    Ok(match operand!(operations.get(Operator::charset)) {
+    Ok(match argument!(operations.get(Operator::charset)) {
         Some(0) => Charset::ISOAdobe,
         Some(1) => Charset::Expert,
         Some(2) => Charset::ExpertSubset,
@@ -96,13 +96,13 @@ fn read_charset<T: Band>(band: &mut T, operations: &Operations, glyphs: usize)
 }
 
 fn read_charstrings<T: Band>(band: &mut T, operations: &Operations)
-                              -> Result<CharstringIndex> {
+                             -> Result<CharstringIndex> {
 
-    let offset = match operand!(operations.get(Operator::CharStrings)) {
+    let offset = match argument!(operations.get(Operator::CharStrings)) {
         Some(offset) => offset as u64,
         _ => raise!("failed to process an operation"),
     };
-    let kind = match operand!(operations.get(Operator::CharstringType)) {
+    let kind = match argument!(operations.get(Operator::CharstringType)) {
         Some(kind) => kind,
         _ => raise!("failed to process an operation"),
     };
@@ -115,4 +115,5 @@ pub mod primitive;
 
 use self::compound::{Charset, Encoding, Header};
 use self::compound::{CharstringIndex, DictionaryIndex, NameIndex, StringIndex, SubroutineIndex};
-use self::compound::{Operator, Operand, Operations};
+use self::compound::{Operator, Operations};
+use self::primitive::Number;

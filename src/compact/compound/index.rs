@@ -3,7 +3,7 @@ use std::io::Cursor;
 use Result;
 use band::{Band, ParametrizedValue, Value};
 use compact::compound::Operations;
-use compact::primitive::{Integer, Offset, OffsetSize, StringID};
+use compact::primitive::{Offset, OffsetSize, StringID};
 
 table_define! {
     pub Index {
@@ -78,7 +78,7 @@ macro_rules! index_implement {
 
 index_define! {
     pub CharstringIndex {
-        kind: Integer,
+        kind: i32,
     }
 }
 
@@ -88,7 +88,7 @@ index!(StringIndex);
 index!(SubroutineIndex);
 
 impl CharstringIndex {
-    pub fn read<T: Band>(band: &mut T, kind: Integer) -> Result<Self> {
+    pub fn read<T: Band>(band: &mut T, kind: i32) -> Result<Self> {
         match kind {
             2 => {},
             _ => raise!("found char-string data with an unknown format"),

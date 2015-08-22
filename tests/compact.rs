@@ -25,14 +25,15 @@ fn names() {
 
 #[test]
 fn dictionaries() {
-    use postscript::compact::compound::{Operand, Operator};
+    use postscript::compact::compound::Operator;
+    use postscript::compact::primitive::Number;
     use std::collections::HashMap;
 
-    macro_rules! operations(
-        ($($operator:ident => [$($operand:ident($number:expr)),*],)*) => ({
-            let mut operations = HashMap::new();
-            $(operations.insert(Operator::$operator, vec![$(Operand::$operand($number)),*]);)*
-            operations
+    macro_rules! arguments(
+        ($($operator:ident => [$($argument:ident($number:expr)),*],)*) => ({
+            let mut arguments = HashMap::new();
+            $(arguments.insert(Operator::$operator, vec![$(Number::$argument($number)),*]);)*
+            arguments
         });
     );
 
@@ -42,7 +43,7 @@ fn dictionaries() {
     assert_eq!(index.count, 1);
     assert_eq!(index.offSize, 1);
     assert_eq!(index.offset, &[1, 45]);
-    assert_eq!(&*index.get(0).unwrap().unwrap(), &operations!(
+    assert_eq!(&*index.get(0).unwrap().unwrap(), &arguments!(
         version => [Integer(709)], Notice => [Integer(710)], Copyright => [Integer(711)],
         FullName => [Integer(712)], FamilyName => [Integer(712)], Weight => [Integer(388)],
         FontBBox => [Integer(-178), Integer(-335), Integer(1138), Integer(918)],

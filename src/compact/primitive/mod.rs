@@ -51,10 +51,8 @@ impl ParametrizedValue<usize> for Vec<u8> {
     }
 }
 
-mod integer;
+mod number;
 mod offset;
-mod real;
 
-pub use self::integer::Integer;
+pub use self::number::Number;
 pub use self::offset::Offset;
-pub use self::real::Real;
