@@ -78,6 +78,7 @@ macro_rules! index_implement {
 
 index_define! {
     pub CharstringIndex {
+        format: i32,
     }
 }
 
@@ -88,8 +89,8 @@ index!(SubroutineIndex);
 impl CharstringIndex {
     pub fn read<T: Band>(band: &mut T, format: i32) -> Result<Self> {
         Ok(match format {
-            2 => CharstringIndex { index: try!(Value::read(band)) },
-            _ => raise!("found char-string data with an unknown format"),
+            2 => CharstringIndex { index: try!(Value::read(band)), format: format },
+            _ => raise!("found an unknown charstring format"),
         })
     }
 
@@ -132,6 +133,21 @@ impl SubroutineIndex {
         };
         let mut band = Cursor::new(chunk);
         Ok(Some(try!(Value::read(&mut band))))
+    }
+
+    pub fn get_biased(&self, mut i: isize, format: i32)
+                      -> Result<Option<type2::compound::Operations>> {
+
+        let bias = match (format, self.count) {
+            (1, _) => 0,
+            (2, count) if count < 1240 => 107,
+            (2, count) if count < 33900 => 1131,
+            (2, _) => 32768,
+            _ => raise!("found an unknown bias format"),
+        };
+        i = i + bias;
+        assert!(i >= 0);
+        self.get(i as usize)
     }
 }
 
