@@ -77,7 +77,7 @@ macro_rules! index_implement {
 }
 
 index_define! {
-    pub CharStringIndex {
+    pub CharstringIndex {
         kind: Integer,
     }
 }
@@ -87,14 +87,14 @@ index!(NameIndex);
 index!(StringIndex);
 index!(SubroutineIndex);
 
-impl CharStringIndex {
+impl CharstringIndex {
     pub fn read<T: Band>(band: &mut T, kind: Integer) -> Result<Self> {
         match kind {
             2 => {},
             _ => raise!("found char-string data with an unknown format"),
         }
         let index = try!(Value::read(band));
-        Ok(CharStringIndex { index: index, kind: kind })
+        Ok(CharstringIndex { index: index, kind: kind })
     }
 }
 

@@ -16,7 +16,7 @@ pub struct FontSet {
     pub subroutines: SubroutineIndex,
     pub encodings: Vec<Encoding>,
     pub charsets: Vec<Charset>,
-    pub char_strings: Vec<CharStringIndex>,
+    pub charstrings: Vec<CharstringIndex>,
 }
 
 impl FontSet {
@@ -37,12 +37,12 @@ impl Value for FontSet {
 
         let mut encodings = vec![];
         let mut charsets = vec![];
-        let mut char_strings = vec![];
+        let mut charstrings = vec![];
         for i in 0..(dictionaries.count as usize) {
             let dictionary = try!(dictionaries.get(i)).unwrap();
             encodings.push(try!(read_encoding(band, &dictionary)));
-            char_strings.push(try!(read_char_strings(band, &dictionary)));
-            charsets.push(try!(read_charset(band, &dictionary, char_strings[i].count as usize)));
+            charstrings.push(try!(read_charstrings(band, &dictionary)));
+            charsets.push(try!(read_charset(band, &dictionary, charstrings[i].count as usize)));
         }
 
         Ok(FontSet {
@@ -53,7 +53,7 @@ impl Value for FontSet {
             subroutines: subroutines,
             encodings: encodings,
             charsets: charsets,
-            char_strings: char_strings,
+            charstrings: charstrings,
         })
     }
 }
@@ -95,8 +95,8 @@ fn read_charset<T: Band>(band: &mut T, operations: &Operations, glyphs: usize)
     })
 }
 
-fn read_char_strings<T: Band>(band: &mut T, operations: &Operations)
-                              -> Result<CharStringIndex> {
+fn read_charstrings<T: Band>(band: &mut T, operations: &Operations)
+                              -> Result<CharstringIndex> {
 
     let offset = match operand!(operations.get(Operator::CharStrings)) {
         Some(offset) => offset as u64,
@@ -107,12 +107,12 @@ fn read_char_strings<T: Band>(band: &mut T, operations: &Operations)
         _ => raise!("failed to process an operation"),
     };
     try!(band.jump(offset as u64));
-    Ok(try!(CharStringIndex::read(band, kind)))
+    Ok(try!(CharstringIndex::read(band, kind)))
 }
 
 pub mod compound;
 pub mod primitive;
 
 use self::compound::{Charset, Encoding, Header};
-use self::compound::{CharStringIndex, DictionaryIndex, NameIndex, StringIndex, SubroutineIndex};
+use self::compound::{CharstringIndex, DictionaryIndex, NameIndex, StringIndex, SubroutineIndex};
 use self::compound::{Operator, Operand, Operations};

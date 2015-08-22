@@ -103,9 +103,9 @@ fn charsets() {
 }
 
 #[test]
-fn char_strings() {
+fn charstrings() {
     let set = FontSet::read(&mut read()).unwrap();
-    let vector = &set.char_strings;
+    let vector = &set.charstrings;
 
     assert_eq!(vector.len(), 1);
     assert_eq!(vector[0].count, 547);
