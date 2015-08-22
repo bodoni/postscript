@@ -1,45 +1,6 @@
-use Result;
-use band::{Band, Value};
 use type2::primitive::Number;
 
 pub type Operation = (Operator, Vec<Number>);
-
-pub type Operations = Vec<Operation>;
-
-impl Value for Operation {
-    fn read<T: Band>(band: &mut T) -> Result<Self> {
-        let mut arguments = vec![];
-        loop {
-            match try!(band.peek::<u8>()) {
-                0x1c | 0x20...0xff => arguments.push(try!(Value::read(band))),
-                code => {
-                    let code = if code == 0x0c {
-                        try!(band.take::<u16>())
-                    } else {
-                        try!(band.take::<u8>()) as u16
-                    };
-                    let operator = match Operator::get(code) {
-                        Some(operator) => operator,
-                        _ => raise!("found an unknown operator ({:#x})", code),
-                    };
-                    return Ok((operator, arguments));
-                },
-            }
-        }
-    }
-}
-
-impl Value for Operations {
-    fn read<T: Band>(band: &mut T) -> Result<Self> {
-        let size = try!(band.count());
-        let mut operations = vec![];
-        while try!(band.position()) < size {
-            let (operator, arguments) = try!(Value::read(band));
-            operations.push((operator, arguments));
-        }
-        Ok(operations)
-    }
-}
 
 macro_rules! operator {
     (pub $name:ident { $($code:pat => $variant:ident,)+ }) => (

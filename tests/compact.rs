@@ -73,12 +73,6 @@ fn subroutines() {
     let index = &set.subroutines;
 
     assert_eq!(index.len(), 181);
-    assert_eq!(index.get(69).unwrap().unwrap(), type2_operations!(
-        (HHCurveTo, [Integer(28), Integer(-29), Integer(-26), Integer(15), Integer(-31)]),
-        (HVCurveTo, [Integer(-53), Integer(-43), Integer(-42), Integer(-68), Integer(-7),
-                     Integer(1), Integer(-10), Integer(1), Integer(-6)]),
-        (Return, []),
-    ));
 }
 
 #[test]
@@ -119,14 +113,6 @@ fn charstrings() {
 
     assert_eq!(vector.len(), 1);
     assert_eq!(vector[0].len(), 547);
-    assert_eq!(vector[0].get(15).unwrap().unwrap(), type2_operations!(
-        (CallGSubr, [Integer(-25)]), (HStemHM, []),
-        (HintMask, [Integer(124), Integer(51), Integer(384), Integer(51)]),
-        (RMoveTo, [Integer(33), Integer(695), Integer(669)]), (HLineTo, [Integer(-241)]),
-        (HintMask, []), (CallGSubr, [Integer(17), Integer(0)]), (HintMask, []),
-        (CallSubr, [Integer(33), Integer(-82)]), (HintMask, []),
-        (CallSubr, [Integer(-47), Integer(-38)]),
-    ));
 }
 
 #[test]

@@ -2,4 +2,4 @@
 
 mod operation;
 
-pub use self::operation::{Operation, Operations, Operator};
+pub use self::operation::{Operation, Operator};

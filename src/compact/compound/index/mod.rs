@@ -2,8 +2,8 @@ use std::io::Cursor;
 
 use Result;
 use band::{Band, ParametrizedValue, Value};
+use compact::compound::Operations;
 use compact::primitive::{Offset, OffsetSize};
-use {compact, type2};
 
 pub type Index = Vec<Vec<u8>>;
 
@@ -71,15 +71,6 @@ index!(TopDictionaries);
 index!(Names);
 index!(Subroutines);
 
-impl Charstrings {
-    pub fn get(&self, i: usize) -> Result<Option<type2::compound::Operations>> {
-        if i >= self.len() {
-            return Ok(None);
-        }
-        Ok(Some(try!(Value::read(&mut Cursor::new(&*self.index[i])))))
-    }
-}
-
 impl ParametrizedValue<i32> for Charstrings {
     fn read<T: Band>(band: &mut T, format: i32) -> Result<Self> {
         Ok(match format {
@@ -90,7 +81,7 @@ impl ParametrizedValue<i32> for Charstrings {
 }
 
 impl TopDictionaries {
-    pub fn into_vec(self) -> Result<Vec<compact::compound::Operations>> {
+    pub fn into_vec(self) -> Result<Vec<Operations>> {
         let TopDictionaries { index } = self;
         let mut vector = Vec::with_capacity(index.len());
         for chunk in index {
@@ -111,30 +102,6 @@ impl Names {
             });
         }
         Ok(vector)
-    }
-}
-
-impl Subroutines {
-    pub fn get(&self, i: usize) -> Result<Option<type2::compound::Operations>> {
-        if i >= self.len() {
-            return Ok(None);
-        }
-        Ok(Some(try!(Value::read(&mut Cursor::new(&*self.index[i])))))
-    }
-
-    pub fn get_biased(&self, mut i: isize, format: i32)
-                      -> Result<Option<type2::compound::Operations>> {
-
-        let bias = match (format, self.len()) {
-            (1, _) => 0,
-            (2, count) if count < 1240 => 107,
-            (2, count) if count < 33900 => 1131,
-            (2, _) => 32768,
-            _ => raise!("found an unknown bias format"),
-        };
-        i = i + bias;
-        assert!(i >= 0);
-        self.get(i as usize)
     }
 }
 
