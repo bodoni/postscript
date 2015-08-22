@@ -83,7 +83,7 @@ fn read_encoding<T: Band>(_: &mut T, operations: &Operations) -> Result<Encoding
 fn read_charset<T: Band>(band: &mut T, operations: &Operations, glyphs: usize)
                           -> Result<Charset> {
 
-    Ok(match argument!(operations.get(Operator::charset)) {
+    Ok(match argument!(operations.get(Operator::Charset)) {
         Some(0) => Charset::ISOAdobe,
         Some(1) => Charset::Expert,
         Some(2) => Charset::ExpertSubset,
@@ -98,7 +98,7 @@ fn read_charset<T: Band>(band: &mut T, operations: &Operations, glyphs: usize)
 fn read_charstrings<T: Band>(band: &mut T, operations: &Operations)
                              -> Result<CharstringIndex> {
 
-    let offset = match argument!(operations.get(Operator::CharStrings)) {
+    let offset = match argument!(operations.get(Operator::Charstrings)) {
         Some(offset) => offset as u64,
         _ => raise!("failed to process an operation"),
     };

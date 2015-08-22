@@ -65,7 +65,6 @@ macro_rules! operator {
 
 macro_rules! operator_define {
     (pub $name:ident { $($variant:ident,)* }) => (
-        #[allow(non_camel_case_types)]
         #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
         pub enum $name { $($variant,)* }
     );
@@ -100,7 +99,7 @@ macro_rules! operator_default(
 
 operator! {
     pub Operator {
-        0x00 => version [],
+        0x00 => Version [],
         0x01 => Notice [],
         0x02 => FullName [],
         0x03 => FamilyName [],
@@ -112,26 +111,26 @@ operator! {
         0x09 => FamilyOtherBlues [],
         0x0a => StdHW [],
         0x0b => StdVW [],
-        // 0x0c => escape,
+        // 0x0c => Escape,
         0x0d => UniqueID [],
         0x0e => XUID [],
-        0x0f => charset [Integer(0)],
+        0x0f => Charset [Integer(0)],
         0x10 => Encoding [Integer(0)],
-        0x11 => CharStrings [],
+        0x11 => Charstrings [],
         0x12 => Private [],
         0x13 => Subrs [],
-        0x14 => defaultWidthX [Integer(0)],
-        0x15 => nominalWidthX [Integer(0)],
+        0x14 => DefaultWidthX [Integer(0)],
+        0x15 => NominalWidthX [Integer(0)],
         // 0x16...0x1b => Reserved,
-        // 0x1c => shortint,
-        // 0x1d => longint,
+        // 0x1c => ShortInt,
+        // 0x1d => LongInt,
         // 0x1e => BCD,
         // 0x1f => Reserved,
         // 0x20...0xf6 => <numbers>,
         // 0xf7...0xfe => <numbers>,
         // 0xff => Reserved,
         0x0c00 => Copyright [],
-        0x0c01 => isFixedPitch [Integer(false as i32)],
+        0x0c01 => IsFixedPitch [Integer(false as i32)],
         0x0c02 => ItalicAngle [Integer(0)],
         0x0c03 => UnderlinePosition [Integer(-100)],
         0x0c04 => UnderlineThickness [Integer(50)],
@@ -148,7 +147,7 @@ operator! {
         // 0x0c0f...0x0c10 => Reserved,
         0x0c11 => LanguageGroup [Integer(0)],
         0x0c12 => ExpansionFactor [Real(0.06)],
-        0x0c13 => initialRandomSeed [Integer(0)],
+        0x0c13 => InitialRandomSeed [Integer(0)],
         0x0c14 => SyntheticBase [],
         0x0c15 => PostScript [],
         0x0c16 => BaseFontName [],
