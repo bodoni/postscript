@@ -98,7 +98,7 @@ operator! {
         0x19 => rlinecurve,
         0x1a => vvcurveto,
         0x1b => hhcurveto,
-        0x1c => shortint,
+        // 0x1c => shortint,
         0x1d => callgsubr,
         0x1e => vhcurveto,
         0x1f => hvcurveto,
