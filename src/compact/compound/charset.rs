@@ -1,5 +1,5 @@
 use Result;
-use band::{Band, Value};
+use band::{Band, ParametrizedValue, Value};
 use compact::primitive::{GlyphID, StringID};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -24,16 +24,6 @@ table! {
 }
 
 impl Charset {
-    #[doc(hidden)]
-    pub fn read<T: Band>(band: &mut T, glyphs: usize) -> Result<Self> {
-        Ok(match try!(band.peek::<u8>()) {
-            0 => unimplemented!(),
-            1 => Charset::Format1(try!(Charset1::read(band, glyphs))),
-            2 => unimplemented!(),
-            _ => raise!("found a char set with an unknown format"),
-        })
-    }
-
     #[inline]
     pub fn get(&self, gid: GlyphID) -> Option<&'static str> {
         match self {
@@ -42,6 +32,17 @@ impl Charset {
             &Charset::ExpertSubset => get_expert_subset(gid),
             _ => unimplemented!(),
         }
+    }
+}
+
+impl ParametrizedValue<usize> for Charset {
+    fn read<T: Band>(band: &mut T, glyphs: usize) -> Result<Self> {
+        Ok(match try!(band.peek::<u8>()) {
+            0 => unimplemented!(),
+            1 => Charset::Format1(try!(Charset1::read(band, glyphs))),
+            2 => unimplemented!(),
+            _ => raise!("found a char set with an unknown format"),
+        })
     }
 }
 

@@ -95,14 +95,14 @@ fn read_charset<T: Band>(band: &mut T, operations: &Operations, glyphs: usize) -
         2 => Ok(Charset::ExpertSubset),
         offset => {
             try!(band.jump(offset as u64));
-            Charset::read(band, glyphs)
+            ParametrizedValue::read(band, glyphs)
         },
     }
 }
 
 fn read_charstrings<T: Band>(band: &mut T, operations: &Operations) -> Result<CharstringIndex> {
     try!(band.jump(get_single!(operations, Charstrings) as u64));
-    CharstringIndex::read(band, get_single!(operations, CharstringType))
+    ParametrizedValue::read(band, get_single!(operations, CharstringType))
 }
 
 fn read_private_dictionary<T: Band>(band: &mut T, operations: &Operations) -> Result<Operations> {

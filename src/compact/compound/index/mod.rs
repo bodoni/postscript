@@ -87,13 +87,6 @@ index!(NameIndex);
 index!(SubroutineIndex);
 
 impl CharstringIndex {
-    pub fn read<T: Band>(band: &mut T, format: i32) -> Result<Self> {
-        Ok(match format {
-            2 => CharstringIndex { index: try!(Value::read(band)), format: format },
-            _ => raise!("found an unknown charstring format"),
-        })
-    }
-
     pub fn get(&self, i: usize) -> Result<Option<type2::compound::Operations>> {
         let chunk = match self.index.get(i) {
             Some(chunk) => chunk,
@@ -101,6 +94,15 @@ impl CharstringIndex {
         };
         let mut band = Cursor::new(chunk);
         Ok(Some(try!(Value::read(&mut band))))
+    }
+}
+
+impl ParametrizedValue<i32> for CharstringIndex {
+    fn read<T: Band>(band: &mut T, format: i32) -> Result<Self> {
+        Ok(match format {
+            2 => CharstringIndex { index: try!(Value::read(band)), format: format },
+            _ => raise!("found an unknown charstring format"),
+        })
     }
 }
 
