@@ -24,7 +24,7 @@ fn names() {
 }
 
 #[test]
-fn dictionaries() {
+fn top_dictionaries() {
     use postscript::compact::compound::Operator;
     use postscript::compact::primitive::Number;
     use std::collections::HashMap;
@@ -38,7 +38,7 @@ fn dictionaries() {
     );
 
     let set = FontSet::read(&mut read()).unwrap();
-    let index = &set.dictionaries;
+    let index = &set.top_dictionaries;
 
     assert_eq!(index.count, 1);
     assert_eq!(index.offSize, 1);

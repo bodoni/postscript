@@ -82,7 +82,7 @@ index_define! {
     }
 }
 
-index!(DictionaryIndex);
+index!(TopDictionaryIndex);
 index!(NameIndex);
 index!(SubroutineIndex);
 
@@ -106,7 +106,7 @@ impl ParametrizedValue<i32> for CharstringIndex {
     }
 }
 
-impl DictionaryIndex {
+impl TopDictionaryIndex {
     pub fn get(&self, i: usize) -> Result<Option<compact::compound::Operations>> {
         let chunk = match self.index.get(i) {
             Some(chunk) => chunk,

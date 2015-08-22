@@ -11,7 +11,7 @@ use band::{Band, ParametrizedValue, Value};
 pub struct FontSet {
     pub header: Header,
     pub names: NameIndex,
-    pub dictionaries: DictionaryIndex,
+    pub top_dictionaries: TopDictionaryIndex,
     pub strings: StringIndex,
     pub subroutines: SubroutineIndex,
     pub encodings: Vec<Encoding>,
@@ -32,7 +32,7 @@ impl Value for FontSet {
         let header = try!(Header::read(band));
         try!(band.jump(header.hdrSize as u64));
         let names = try!(NameIndex::read(band));
-        let dictionaries = try!(DictionaryIndex::read(band));
+        let top_dictionaries = try!(TopDictionaryIndex::read(band));
         let strings = try!(StringIndex::read(band));
         let subroutines = try!(SubroutineIndex::read(band));
 
@@ -40,8 +40,8 @@ impl Value for FontSet {
         let mut charsets = vec![];
         let mut charstrings = vec![];
         let mut private_dictionaries = vec![];
-        for i in 0..(dictionaries.count as usize) {
-            let dictionary = try!(dictionaries.get(i)).unwrap();
+        for i in 0..(top_dictionaries.count as usize) {
+            let dictionary = try!(top_dictionaries.get(i)).unwrap();
             encodings.push(try!(read_encoding(band, &dictionary)));
             charstrings.push(try!(read_charstrings(band, &dictionary)));
             charsets.push(try!(read_charset(band, &dictionary, charstrings[i].count as usize)));
@@ -51,7 +51,7 @@ impl Value for FontSet {
         Ok(FontSet {
             header: header,
             names: names,
-            dictionaries: dictionaries,
+            top_dictionaries: top_dictionaries,
             strings: strings,
             subroutines: subroutines,
             encodings: encodings,
@@ -116,6 +116,6 @@ pub mod compound;
 pub mod primitive;
 
 use self::compound::{Charset, Encoding, Header};
-use self::compound::{CharstringIndex, DictionaryIndex, NameIndex, StringIndex, SubroutineIndex};
+use self::compound::{CharstringIndex, NameIndex, StringIndex, SubroutineIndex, TopDictionaryIndex};
 use self::compound::{Operator, Operations};
 use self::primitive::Number;
