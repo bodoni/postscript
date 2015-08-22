@@ -1,6 +1,27 @@
 use postscript::compact::FontSet;
 use std::io::Cursor;
 
+macro_rules! compact_operations(
+    ($($operator:ident => [$($argument:ident($number:expr)),*],)*) => ({
+        use postscript::compact::compound::Operator;
+        use postscript::compact::primitive::Number;
+        use std::collections::HashMap;
+        let mut operations = HashMap::new();
+        $(operations.insert(Operator::$operator, vec![$(Number::$argument($number)),*]);)*
+        operations
+    });
+);
+
+macro_rules! type2_operations(
+    ($(($operator:ident, [$($argument:ident($number:expr)),*]),)*) => ({
+        use postscript::type2::compound::Operator;
+        use postscript::type2::primitive::Number;
+        let mut operations = vec![];
+        $(operations.push((Operator::$operator, vec![$(Number::$argument($number)),*]));)*
+        operations
+    });
+);
+
 #[test]
 fn header() {
     let set = FontSet::read(&mut read()).unwrap();
@@ -25,25 +46,13 @@ fn names() {
 
 #[test]
 fn top_dictionaries() {
-    use postscript::compact::compound::Operator;
-    use postscript::compact::primitive::Number;
-    use std::collections::HashMap;
-
-    macro_rules! operations(
-        ($($operator:ident => [$($argument:ident($number:expr)),*],)*) => ({
-            let mut operations = HashMap::new();
-            $(operations.insert(Operator::$operator, vec![$(Number::$argument($number)),*]);)*
-            operations
-        });
-    );
-
     let set = FontSet::read(&mut read()).unwrap();
     let index = &set.top_dictionaries;
 
     assert_eq!(index.count, 1);
     assert_eq!(index.offSize, 1);
     assert_eq!(index.offset, &[1, 45]);
-    assert_eq!(&*index.get(0).unwrap().unwrap(), &operations!(
+    assert_eq!(&*index.get(0).unwrap().unwrap(), &compact_operations!(
         Version => [Integer(709)], Notice => [Integer(710)], Copyright => [Integer(711)],
         FullName => [Integer(712)], FamilyName => [Integer(712)], Weight => [Integer(388)],
         FontBBox => [Integer(-178), Integer(-335), Integer(1138), Integer(918)],
@@ -65,23 +74,12 @@ fn strings() {
 
 #[test]
 fn subroutines() {
-    use postscript::type2::compound::Operator;
-    use postscript::type2::primitive::Number;
-
-    macro_rules! operations(
-        ($(($operator:ident, [$($argument:ident($number:expr)),*]),)*) => ({
-            let mut operations = vec![];
-            $(operations.push((Operator::$operator, vec![$(Number::$argument($number)),*]));)*
-            operations
-        });
-    );
-
     let set = FontSet::read(&mut read()).unwrap();
     let index = &set.subroutines;
 
     assert_eq!(index.count, 181);
     assert_eq!(index.offSize, 2);
-    assert_eq!(index.get(69).unwrap().unwrap(), operations!(
+    assert_eq!(index.get(69).unwrap().unwrap(), type2_operations!(
         (HHCurveTo, [Integer(28), Integer(-29), Integer(-26), Integer(15), Integer(-31)]),
         (HVCurveTo, [Integer(-53), Integer(-43), Integer(-42), Integer(-68), Integer(-7),
                      Integer(1), Integer(-10), Integer(1), Integer(-6)]),
@@ -122,24 +120,13 @@ fn charsets() {
 
 #[test]
 fn charstrings() {
-    use postscript::type2::compound::Operator;
-    use postscript::type2::primitive::Number;
-
-    macro_rules! operations(
-        ($(($operator:ident, [$($argument:ident($number:expr)),*]),)*) => ({
-            let mut operations = vec![];
-            $(operations.push((Operator::$operator, vec![$(Number::$argument($number)),*]));)*
-            operations
-        });
-    );
-
     let set = FontSet::read(&mut read()).unwrap();
     let vector = &set.charstrings;
 
     assert_eq!(vector.len(), 1);
     assert_eq!(vector[0].count, 547);
     assert_eq!(vector[0].offSize, 2);
-    assert_eq!(vector[0].get(15).unwrap().unwrap(), operations!(
+    assert_eq!(vector[0].get(15).unwrap().unwrap(), type2_operations!(
         (CallGSubr, [Integer(-25)]), (HStemHM, []),
         (HintMask, [Integer(124), Integer(51), Integer(384), Integer(51)]),
         (RMoveTo, [Integer(33), Integer(695), Integer(669)]), (HLineTo, [Integer(-241)]),
@@ -147,6 +134,19 @@ fn charstrings() {
         (CallSubr, [Integer(33), Integer(-82)]), (HintMask, []),
         (CallSubr, [Integer(-47), Integer(-38)]),
     ));
+}
+
+#[test]
+fn private_dictionaries() {
+    use postscript::compact::compound::Operator;
+    use postscript::compact::primitive::Number;
+
+    let set = FontSet::read(&mut read()).unwrap();
+    let vector = &set.private_dictionaries;
+
+    assert_eq!(vector.len(), 1);
+    assert_eq!(vector[0].len(), 13);
+    assert_eq!(vector[0].get(Operator::BlueScale).unwrap(), &[Number::Real(0.0375)]);
 }
 
 fn read() -> Cursor<Vec<u8>> {
