@@ -1,6 +1,7 @@
 use type2::primitive::Number;
 
 pub type Operation = (Operator, Vec<Number>);
+pub type Operations = Vec<Operation>;
 
 macro_rules! operator {
     (pub $name:ident { $($code:pat => $variant:ident,)+ }) => (
