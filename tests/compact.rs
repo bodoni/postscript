@@ -1,5 +1,6 @@
 use postscript::compact::FontSet;
-use std::io::Cursor;
+
+use read;
 
 macro_rules! compact_operations(
     ($($operator:ident => [$($argument:ident($number:expr)),*],)*) => ({
@@ -126,15 +127,4 @@ fn private_dictionaries() {
     assert_eq!(vector.len(), 1);
     assert_eq!(vector[0].len(), 13);
     assert_eq!(vector[0].get(Operator::BlueScale).unwrap(), &[Number::Real(0.0375)]);
-}
-
-fn read() -> Cursor<Vec<u8>> {
-    use std::fs::File;
-    use std::io::{Read, Seek, SeekFrom};
-
-    let mut file = File::open("tests/fixtures/SourceSerifPro-Regular.otf").unwrap();
-    file.seek(SeekFrom::Start(17732)).unwrap();
-    let mut buffer = vec![0; 37728];
-    assert_eq!(file.read(&mut buffer).unwrap(), buffer.len());
-    Cursor::new(buffer)
 }
