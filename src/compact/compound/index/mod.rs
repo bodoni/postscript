@@ -2,7 +2,6 @@ use std::io::Cursor;
 
 use Result;
 use band::{Band, ParametrizedValue, Value};
-use compact::compound::Operations;
 use compact::primitive::{Offset, OffsetSize};
 
 table_define! {
@@ -91,7 +90,7 @@ impl ParametrizedValue<i32> for Charstrings {
 }
 
 impl TopDictionaries {
-    pub fn into_vec(self) -> Result<Vec<Operations>> {
+    pub fn into_vec(self) -> Result<Vec<::compact::compound::Operations>> {
         let TopDictionaries { index: Index { data, .. } } = self;
         let mut vector = Vec::with_capacity(data.len());
         for chunk in data {
