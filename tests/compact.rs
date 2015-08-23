@@ -69,9 +69,9 @@ fn strings() {
 }
 
 #[test]
-fn subroutines() {
+fn global_subroutines() {
     let set = FontSet::read(&mut read()).unwrap();
-    let index = &set.subroutines;
+    let index = &set.global_subroutines;
 
     assert_eq!(index.len(), 181);
 }
@@ -127,4 +127,13 @@ fn private_dictionaries() {
     assert_eq!(vector.len(), 1);
     assert_eq!(vector[0].len(), 13);
     assert_eq!(vector[0].get(Operator::BlueScale).unwrap(), &[Number::Real(0.0375)]);
+}
+
+#[test]
+fn local_subroutines() {
+    let set = FontSet::read(&mut read()).unwrap();
+    let vector = &set.local_subroutines;
+
+    assert_eq!(vector.len(), 1);
+    assert_eq!(vector[0].len(), 180);
 }

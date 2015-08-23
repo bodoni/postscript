@@ -13,11 +13,12 @@ pub struct FontSet {
     pub names: Vec<String>,
     pub top_dictionaries: Vec<Operations>,
     pub strings: Strings,
-    pub subroutines: Subroutines,
+    pub global_subroutines: Subroutines,
     pub encodings: Vec<Encoding>,
     pub charsets: Vec<Charset>,
     pub charstrings: Vec<Charstrings>,
     pub private_dictionaries: Vec<Operations>,
+    pub local_subroutines: Vec<Subroutines>,
 }
 
 impl FontSet {
@@ -34,17 +35,24 @@ impl Value for FontSet {
         let names = try!(try!(Names::read(band)).into_vec());
         let top_dictionaries = try!(try!(TopDictionaries::read(band)).into_vec());
         let strings = try!(Strings::read(band));
-        let subroutines = try!(Subroutines::read(band));
+        let global_subroutines = try!(Subroutines::read(band));
 
         let mut encodings = vec![];
         let mut charsets = vec![];
         let mut charstrings = vec![];
         let mut private_dictionaries = vec![];
-        for (i, dictionary) in top_dictionaries.iter().enumerate() {
-            encodings.push(try!(read_encoding(band, dictionary)));
-            charstrings.push(try!(read_charstrings(band, dictionary)));
-            charsets.push(try!(read_charset(band, dictionary, charstrings[i].len())));
-            private_dictionaries.push(try!(read_private_dictionary(band, dictionary)));
+        let mut local_subroutines = vec![];
+        for (i, top) in top_dictionaries.iter().enumerate() {
+            encodings.push(try!(read_encoding(band, top)));
+            charstrings.push(try!(read_charstrings(band, top)));
+
+            let glyphs = charstrings[i].len();
+            charsets.push(try!(read_charset(band, top, glyphs)));
+
+            private_dictionaries.push(try!(read_private_dictionary(band, top)));
+
+            let private = &private_dictionaries[i];
+            local_subroutines.push(try!(read_local_subroutines(band, top, private)));
         }
 
         Ok(FontSet {
@@ -52,11 +60,12 @@ impl Value for FontSet {
             names: names,
             top_dictionaries: top_dictionaries,
             strings: strings,
-            subroutines: subroutines,
+            global_subroutines: global_subroutines,
             encodings: encodings,
             charsets: charsets,
             charstrings: charstrings,
             private_dictionaries: private_dictionaries,
+            local_subroutines: local_subroutines,
         })
     }
 }
@@ -79,16 +88,16 @@ macro_rules! get_double(
     );
 );
 
-fn read_encoding<T: Band>(_: &mut T, operations: &Operations) -> Result<Encoding> {
-    Ok(match get_single!(operations, Encoding) {
+fn read_encoding<T: Band>(_: &mut T, top: &Operations) -> Result<Encoding> {
+    Ok(match get_single!(top, Encoding) {
         0 => Encoding::Standard,
         1 => Encoding::Expert,
         _ => unimplemented!(),
     })
 }
 
-fn read_charset<T: Band>(band: &mut T, operations: &Operations, glyphs: usize) -> Result<Charset> {
-    match get_single!(operations, Charset) {
+fn read_charset<T: Band>(band: &mut T, top: &Operations, glyphs: usize) -> Result<Charset> {
+    match get_single!(top, Charset) {
         0 => Ok(Charset::ISOAdobe),
         1 => Ok(Charset::Expert),
         2 => Ok(Charset::ExpertSubset),
@@ -99,16 +108,25 @@ fn read_charset<T: Band>(band: &mut T, operations: &Operations, glyphs: usize) -
     }
 }
 
-fn read_charstrings<T: Band>(band: &mut T, operations: &Operations) -> Result<Charstrings> {
-    try!(band.jump(get_single!(operations, Charstrings) as u64));
-    ParametrizedValue::read(band, get_single!(operations, CharstringType))
+fn read_charstrings<T: Band>(band: &mut T, top: &Operations) -> Result<Charstrings> {
+    try!(band.jump(get_single!(top, Charstrings) as u64));
+    ParametrizedValue::read(band, get_single!(top, CharstringType))
 }
 
-fn read_private_dictionary<T: Band>(band: &mut T, operations: &Operations) -> Result<Operations> {
-    let (size, offset) = get_double!(operations, Private);
+fn read_private_dictionary<T: Band>(band: &mut T, top: &Operations) -> Result<Operations> {
+    let (size, offset) = get_double!(top, Private);
     try!(band.jump(offset as u64));
     let chunk: Vec<u8> = try!(ParametrizedValue::read(band, size as usize));
     Value::read(&mut Cursor::new(chunk))
+}
+
+fn read_local_subroutines<T: Band>(band: &mut T, top: &Operations, private: &Operations)
+                                   -> Result<Subroutines> {
+
+    let (_, mut offset) = get_double!(top, Private);
+    offset += get_single!(private, Subrs);
+    try!(band.jump(offset as u64));
+    Value::read(band)
 }
 
 pub mod compound;
