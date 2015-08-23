@@ -73,7 +73,6 @@ macro_rules! index_implement {
 
 index_define! {
     pub Charstrings {
-        format: i32,
     }
 }
 
@@ -85,7 +84,7 @@ index!(Subroutines);
 impl ParametrizedValue<i32> for Charstrings {
     fn read<T: Band>(band: &mut T, format: i32) -> Result<Self> {
         Ok(match format {
-            2 => Charstrings { index: try!(Value::read(band)), format: format },
+            2 => Charstrings { index: try!(Value::read(band)) },
             _ => raise!("found an unknown charstring format"),
         })
     }
