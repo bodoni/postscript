@@ -10,14 +10,14 @@ use type2::primitive::Number;
 pub struct Program<'l> {
     band: Cursor<&'l [u8]>,
     size: usize,
-    local: &'l [Vec<u8>],
     global: &'l [Vec<u8>],
+    local: &'l [Vec<u8>],
     stack: Vec<Number>,
 }
 
 impl<'l> Program<'l> {
     #[inline]
-    pub fn new(code: &'l [u8], local: &'l [Vec<u8>], global: &'l [Vec<u8>]) -> Program<'l> {
+    pub fn new(code: &'l [u8], global: &'l [Vec<u8>], local: &'l [Vec<u8>]) -> Program<'l> {
         Program {
             band: Cursor::new(code),
             size: code.len(),
