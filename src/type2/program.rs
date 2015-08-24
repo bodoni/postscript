@@ -34,19 +34,19 @@ impl<'l> Program<'l> {
         let stack = &mut self.stack;
 
         macro_rules! even(() => (stack.len() % 2 == 1));
-        macro_rules! flush(
-            () => (mem::replace(stack, vec![]));
+        macro_rules! take(
+            (..) => (mem::replace(stack, vec![]));
             ($from:expr, ..) => ({
                 if $from > stack.len() {
                     raise!("expected more arguments");
                 }
-                flush!()[$from..].to_vec()
+                take!(..)[$from..].to_vec()
             });
             (.., $until:expr) => ({
                 if $until > stack.len() {
                     raise!("expected more arguments");
                 }
-                flush!()[..$until].to_vec()
+                take!(..)[..$until].to_vec()
             });
         );
 
@@ -68,10 +68,10 @@ impl<'l> Program<'l> {
             };
             match operator {
                 HStem | VStem | HStemHM | VStemHM => {
-                    return Ok(Some((operator, if even!() { flush!(1, ..) } else { flush!() })));
+                    return Ok(Some((operator, if even!() { take!(1, ..) } else { take!(..) })));
                 },
                 VMoveTo | HMoveTo => {
-                    return Ok(Some((operator, flush!(.., 1))));
+                    return Ok(Some((operator, take!(.., 1))));
                 },
                 RLineTo => {},
                 HLineTo => {},
@@ -116,7 +116,7 @@ impl<'l> Program<'l> {
                 HFlex1 => {},
                 Flex1 => {},
             }
-            return Ok(Some((operator, flush!())));
+            return Ok(Some((operator, take!(..))));
         }
     }
 }
