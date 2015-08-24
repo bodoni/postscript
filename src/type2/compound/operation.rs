@@ -43,7 +43,7 @@ operator! {
         // 0x09 => Reserved,
         0x0a => CallSubr,
         0x0b => Return,
-        0x0c => Escape,
+        // 0x0c => Escape,
         // 0x0d => Reserved,
         0x0e => EndChar,
         // 0x0f => Reserved,

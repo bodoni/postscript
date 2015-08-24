@@ -65,7 +65,6 @@ impl<'l> Program<'l> {
                 RRCurveTo => done!(),
                 CallSubr => {},
                 Return => {},
-                Escape => {},
                 EndChar => {},
                 HStemHM => done!(),
                 HintMask => {},
