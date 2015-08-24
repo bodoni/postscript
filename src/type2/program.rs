@@ -35,38 +35,7 @@ impl<'l> Program<'l> {
 
         macro_rules! flush(
             () => (mem::replace(stack, vec![]));
-            (all) => ({
-                if stack.len() == 0 {
-                    raise!("expected more arguments");
-                }
-                flush!()
-            });
-            (all, modulo $modulo:expr) => ({
-                let count = stack.len();
-                if count == 0 || count % $modulo != 0 {
-                    raise!("found a wrong number of arguments");
-                }
-                flush!()
-            });
-            (all, [$addition:expr] modulo $modulo:expr) => ({
-                let count = stack.len();
-                if count == 0 || ((count + $addition) % $modulo != 0 && count % $modulo != 0) {
-                    raise!("found a wrong number of arguments");
-                }
-                flush!()
-            });
-            (from $from:expr) => ({
-                if stack.len() <= $from {
-                    raise!("expected more arguments");
-                }
-                flush!()[$from..].to_vec()
-            });
-            (until $until:expr) => ({
-                if stack.len() < $until  {
-                    raise!("expected more arguments");
-                }
-                flush!()[..$until].to_vec()
-            });
+            ($from:expr, ...) => (flush!()[$from..].to_vec());
         );
 
         if try!(Band::position(band)) == self.size as u64 {
@@ -85,34 +54,32 @@ impl<'l> Program<'l> {
                 Some(operator) => operator,
                 _ => raise!("found an unknown operator ({:#x})", code),
             };
-            macro_rules! done(
-                ($arguments:expr) => (return Ok(Some((operator, $arguments))));
-            );
+            macro_rules! done(() => (return Ok(Some((operator, flush!())))));
             match operator {
-                HStem | VStem | HStemHM | VStemHM => {
-                    if stack.len() % 2 == 0 {
-                        done!(flush!(all));
-                    } else {
-                        done!(flush!(from 1));
-                    }
-                },
-                VMoveTo | HMoveTo => done!(flush!(until 1)),
-                RLineTo => done!(flush!(all, modulo 2)),
-                HLineTo | VLineTo => done!(flush!(all)),
-                RRCurveTo => done!(flush!(all, modulo 6)),
+                HStem => done!(),
+                VStem => done!(),
+                VMoveTo => done!(),
+                RLineTo => done!(),
+                HLineTo => done!(),
+                VLineTo => done!(),
+                RRCurveTo => done!(),
                 CallSubr => {},
                 Return => {},
                 Escape => {},
                 EndChar => {},
+                HStemHM => done!(),
                 HintMask => {},
                 CntrMask => {},
-                RMoveTo => {},
-                RCurveLine => {},
-                RLineCurve => {},
-                VVCurveTo | HHCurveTo => done!(flush!(all, [1] modulo 4)),
+                RMoveTo => done!(),
+                HMoveTo => done!(),
+                VStemHM => done!(),
+                RCurveLine => done!(),
+                RLineCurve => done!(),
+                VVCurveTo => done!(),
+                HHCurveTo => done!(),
                 CallGSubr => {},
-                VHCurveTo => {},
-                HVCurveTo => {},
+                VHCurveTo => done!(),
+                HVCurveTo => done!(),
                 And => {},
                 Or => {},
                 Not => {},
@@ -138,7 +105,7 @@ impl<'l> Program<'l> {
                 HFlex1 => {},
                 Flex1 => {},
             }
-            done!(flush!(all));
+            done!();
         }
     }
 }
