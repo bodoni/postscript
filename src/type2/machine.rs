@@ -5,33 +5,37 @@ use band::Band;
 use type2::compound::{Operation, Operator};
 use type2::primitive::Number;
 
-#[allow(dead_code)]
-pub struct Program<'l> {
-    band: Cursor<&'l [u8]>,
-    size: usize,
+pub struct Machine<'l> {
     global: &'l [Vec<u8>],
     local: &'l [Vec<u8>],
     stack: Vec<Number>,
 }
 
-impl<'l> Program<'l> {
+pub struct Program<'l> {
+    machine: &'l mut Machine<'l>,
+    band: Cursor<&'l [u8]>,
+    size: usize,
+}
+
+impl<'l> Machine<'l> {
     #[inline]
-    pub fn new(code: &'l [u8], global: &'l [Vec<u8>], local: &'l [Vec<u8>]) -> Program<'l> {
-        Program {
-            band: Cursor::new(code),
-            size: code.len(),
-            global: global,
-            local: local,
-            stack: vec![],
-        }
+    pub fn new(global: &'l [Vec<u8>], local: &'l [Vec<u8>]) -> Machine<'l> {
+        Machine { global: global, local: local, stack: vec![] }
     }
 
+    #[inline]
+    pub fn execute(&'l mut self, code: &'l [u8]) -> Program<'l> {
+        Program { machine: self, band: Cursor::new(code), size: code.len() }
+    }
+}
+
+impl<'l> Program<'l> {
     pub fn next(&mut self) -> Result<Option<Operation>> {
         use std::mem;
         use type2::compound::Operator::*;
 
+        let stack = &mut self.machine.stack;
         let band = &mut self.band;
-        let stack = &mut self.stack;
 
         macro_rules! done(() => (try!(Band::position(band)) == self.size as u64));
         macro_rules! flush(() => (mem::replace(stack, vec![])));

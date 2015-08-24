@@ -3,6 +3,6 @@
 pub mod compound;
 pub mod primitive;
 
-mod program;
+mod machine;
 
-pub use self::program::Program;
+pub use self::machine::{Machine, Program};
