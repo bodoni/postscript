@@ -28,6 +28,8 @@ impl<'l> Program<'l> {
     }
 
     pub fn next(&mut self) -> Result<Option<Operation>> {
+        use type2::compound::Operator::*;
+
         let band = &mut self.band;
         let stack = &mut self.stack;
         if try!(Band::position(band)) == self.size as u64 {
@@ -46,6 +48,56 @@ impl<'l> Program<'l> {
                 Some(operator) => operator,
                 _ => raise!("found an unknown operator ({:#x})", code),
             };
+            match operator {
+                HStem => {},
+                VStem => {},
+                VMoveTo => {},
+                RLineTo => {},
+                HLineTo => {},
+                VLineTo => {},
+                RRCurveTo => {},
+                CallSubr => {},
+                Return => {},
+                Escape => {},
+                EndChar => {},
+                HStemHM => {},
+                HintMask => {},
+                CntrMask => {},
+                RMoveTo => {},
+                HMoveTo => {},
+                VStemHM => {},
+                RCurveLine => {},
+                RLineCurve => {},
+                VVCurveTo => {},
+                HHCurveTo => {},
+                CallGSubr => {},
+                VHCurveTo => {},
+                HVCurveTo => {},
+                And => {},
+                Or => {},
+                Not => {},
+                Abs => {},
+                Add => {},
+                Sub => {},
+                Div => {},
+                Neg => {},
+                Eq => {},
+                Drop => {},
+                Put => {},
+                Get => {},
+                IfElse => {},
+                Random => {},
+                Mul => {},
+                Sqrt => {},
+                Dup => {},
+                Exch => {},
+                Index => {},
+                Roll => {},
+                HFlex => {},
+                Flex => {},
+                HFlex1 => {},
+                Flex1 => {},
+            }
             return Ok(Some((operator, mem::replace(stack, vec![]))));
         }
     }
