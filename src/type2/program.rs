@@ -1,5 +1,4 @@
 use std::io::Cursor;
-use std::mem;
 
 use Result;
 use band::Band;
@@ -28,17 +27,16 @@ impl<'l> Program<'l> {
     }
 
     pub fn next(&mut self) -> Result<Option<Operation>> {
+        use std::mem;
         use type2::compound::Operator::*;
 
         let band = &mut self.band;
         let stack = &mut self.stack;
 
-        macro_rules! flush(
-            () => (mem::replace(stack, vec![]));
-            ($from:expr, ...) => (flush!()[$from..].to_vec());
-        );
+        macro_rules! done(() => (try!(Band::position(band)) == self.size as u64));
+        macro_rules! flush(() => (mem::replace(stack, vec![])));
 
-        if try!(Band::position(band)) == self.size as u64 {
+        if done!() {
             return Ok(None);
         }
         loop {
@@ -54,31 +52,17 @@ impl<'l> Program<'l> {
                 Some(operator) => operator,
                 _ => raise!("found an unknown operator ({:#x})", code),
             };
-            macro_rules! done(() => (return Ok(Some((operator, flush!())))));
             match operator {
-                HStem => done!(),
-                VStem => done!(),
-                VMoveTo => done!(),
-                RLineTo => done!(),
-                HLineTo => done!(),
-                VLineTo => done!(),
-                RRCurveTo => done!(),
                 CallSubr => {},
                 Return => {},
-                EndChar => {},
-                HStemHM => done!(),
+                EndChar => {
+                    if !done!() {
+                        raise!("found trailing data after the end operator");
+                    }
+                },
                 HintMask => {},
                 CntrMask => {},
-                RMoveTo => done!(),
-                HMoveTo => done!(),
-                VStemHM => done!(),
-                RCurveLine => done!(),
-                RLineCurve => done!(),
-                VVCurveTo => done!(),
-                HHCurveTo => done!(),
                 CallGSubr => {},
-                VHCurveTo => done!(),
-                HVCurveTo => done!(),
                 And => {},
                 Or => {},
                 Not => {},
@@ -99,12 +83,9 @@ impl<'l> Program<'l> {
                 Exch => {},
                 Index => {},
                 Roll => {},
-                HFlex => {},
-                Flex => {},
-                HFlex1 => {},
-                Flex1 => {},
+                _ => {},
             }
-            done!();
+            return Ok(Some((operator, flush!())));
         }
     }
 }
