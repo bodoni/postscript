@@ -12,10 +12,10 @@ fn machine() {
     let local = &set.local_subroutines[0];
 
     let mut machine = Machine::new(global, local);
-    let mut program = machine.execute(code);
+    let mut routine = machine.execute(code);
 
     let mut operations = vec![];
-    while let Some(operation) = program.next().unwrap() {
+    while let Some(operation) = routine.next().unwrap() {
         operations.push(operation);
     }
 

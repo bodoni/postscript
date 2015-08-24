@@ -5,4 +5,4 @@ pub mod primitive;
 
 mod machine;
 
-pub use self::machine::{Machine, Program};
+pub use self::machine::{Machine, Routine};

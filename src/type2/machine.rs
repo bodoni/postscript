@@ -11,7 +11,7 @@ pub struct Machine<'l> {
     stack: Vec<Number>,
 }
 
-pub struct Program<'l> {
+pub struct Routine<'l> {
     machine: &'l mut Machine<'l>,
     band: Cursor<&'l [u8]>,
     size: usize,
@@ -24,12 +24,12 @@ impl<'l> Machine<'l> {
     }
 
     #[inline]
-    pub fn execute(&'l mut self, code: &'l [u8]) -> Program<'l> {
-        Program { machine: self, band: Cursor::new(code), size: code.len() }
+    pub fn execute(&'l mut self, code: &'l [u8]) -> Routine<'l> {
+        Routine { machine: self, band: Cursor::new(code), size: code.len() }
     }
 }
 
-impl<'l> Program<'l> {
+impl<'l> Routine<'l> {
     pub fn next(&mut self) -> Result<Option<Operation>> {
         use std::mem;
         use type2::compound::Operator::*;
