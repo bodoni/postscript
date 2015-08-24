@@ -34,23 +34,30 @@ impl<'l> Routine<'l> {
         use std::mem;
         use type2::compound::Operator::*;
 
-        let stack = &mut self.machine.stack;
-        let band = &mut self.band;
-
-        macro_rules! done(() => (try!(Band::position(band)) == self.size as u64));
-        macro_rules! flush(() => (mem::replace(stack, vec![])));
+        macro_rules! done(() => (try!(Band::position(&mut self.band)) == self.size as u64));
+        macro_rules! flush(() => (mem::replace(&mut self.machine.stack, vec![])));
+        macro_rules! peek(
+            ($kind:ty) => (try!(self.band.peek::<$kind>()));
+        );
+        macro_rules! push(
+            ($argument:expr) => (self.machine.stack.push($argument))
+        );
+        macro_rules! take(
+            () => (try!(self.band.take()));
+            ($kind:ty) => (try!(self.band.take::<$kind>()));
+        );
 
         if done!() {
             return Ok(None);
         }
         loop {
-            let code = match try!(band.peek::<u8>()) {
+            let code = match peek!(u8) {
                 0x1c | 0x20...0xff => {
-                    stack.push(try!(band.take()));
+                    push!(take!());
                     continue;
                 },
-                code if code == 0x0c => try!(band.take::<u16>()),
-                _ => try!(band.take::<u8>()) as u16,
+                code if code == 0x0c => take!(u16),
+                _ => take!(u8) as u16,
             };
             let operator = match Operator::get(code) {
                 Some(operator) => operator,
