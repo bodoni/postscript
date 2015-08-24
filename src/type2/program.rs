@@ -32,6 +32,16 @@ impl<'l> Program<'l> {
 
         let band = &mut self.band;
         let stack = &mut self.stack;
+
+        macro_rules! even(() => (stack.len() % 2 == 1));
+        macro_rules! flush(
+            () => (mem::replace(stack, vec![]));
+            ($from:expr) => ({
+                let arguments = flush!();
+                arguments[1..].to_vec()
+            });
+        );
+
         if try!(Band::position(band)) == self.size as u64 {
             return Ok(None);
         }
@@ -49,8 +59,9 @@ impl<'l> Program<'l> {
                 _ => raise!("found an unknown operator ({:#x})", code),
             };
             match operator {
-                HStem => {},
-                VStem => {},
+                HStem | VStem | HStemHM | VStemHM => {
+                    return Ok(Some((operator, if even!() { flush!(1) } else { flush!() })));
+                },
                 VMoveTo => {},
                 RLineTo => {},
                 HLineTo => {},
@@ -60,12 +71,10 @@ impl<'l> Program<'l> {
                 Return => {},
                 Escape => {},
                 EndChar => {},
-                HStemHM => {},
                 HintMask => {},
                 CntrMask => {},
                 RMoveTo => {},
                 HMoveTo => {},
-                VStemHM => {},
                 RCurveLine => {},
                 RLineCurve => {},
                 VVCurveTo => {},
