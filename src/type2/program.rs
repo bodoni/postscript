@@ -33,20 +33,32 @@ impl<'l> Program<'l> {
         let band = &mut self.band;
         let stack = &mut self.stack;
 
-        macro_rules! even(() => (stack.len() % 2 == 1));
-        macro_rules! take(
-            (..) => (mem::replace(stack, vec![]));
-            ($from:expr, ..) => ({
-                if $from > stack.len() {
+        macro_rules! flush(
+            () => (mem::replace(stack, vec![]));
+            (all) => ({
+                if stack.len() == 0 {
                     raise!("expected more arguments");
                 }
-                take!(..)[$from..].to_vec()
+                flush!()
             });
-            (.., $until:expr) => ({
-                if $until > stack.len() {
+            (all, even) => ({
+                let count = stack.len();
+                if count == 0 || count % 2 != 0 {
+                    raise!("expected an even number of arguments");
+                }
+                flush!()
+            });
+            (from $from:expr) => ({
+                if stack.len() <= $from {
                     raise!("expected more arguments");
                 }
-                take!(..)[..$until].to_vec()
+                flush!()[$from..].to_vec()
+            });
+            (until $until:expr) => ({
+                if stack.len() < $until  {
+                    raise!("expected more arguments");
+                }
+                flush!()[..$until].to_vec()
             });
         );
 
@@ -66,14 +78,19 @@ impl<'l> Program<'l> {
                 Some(operator) => operator,
                 _ => raise!("found an unknown operator ({:#x})", code),
             };
+            macro_rules! done(
+                ($arguments:expr) => (return Ok(Some((operator, $arguments))));
+            );
             match operator {
                 HStem | VStem | HStemHM | VStemHM => {
-                    return Ok(Some((operator, if even!() { take!(1, ..) } else { take!(..) })));
+                    if stack.len() % 2 == 0 {
+                        done!(flush!(all));
+                    } else {
+                        done!(flush!(from 1));
+                    }
                 },
-                VMoveTo | HMoveTo => {
-                    return Ok(Some((operator, take!(.., 1))));
-                },
-                RLineTo => {},
+                VMoveTo | HMoveTo => done!(flush!(until 1)),
+                RLineTo => done!(flush!(all, even)),
                 HLineTo => {},
                 VLineTo => {},
                 RRCurveTo => {},
@@ -116,7 +133,7 @@ impl<'l> Program<'l> {
                 HFlex1 => {},
                 Flex1 => {},
             }
-            return Ok(Some((operator, take!(..))));
+            done!(flush!(all));
         }
     }
 }
