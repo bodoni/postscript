@@ -24,8 +24,17 @@ impl<'l> Machine<'l> {
     }
 
     #[inline]
-    pub fn execute(&'l mut self, code: &'l [u8]) -> Routine<'l> {
+    pub fn start(&'l mut self, code: &'l [u8]) -> Routine<'l> {
         Routine { machine: self, band: Cursor::new(code), size: code.len() }
+    }
+
+    pub fn execute(&'l mut self, code: &'l [u8]) -> Result<Vec<Operation>> {
+        let mut routine = self.start(code);
+        let mut operations = vec![];
+        while let Some(operation) = try!(routine.next()) {
+            operations.push(operation);
+        }
+        Ok(operations)
     }
 }
 
@@ -34,13 +43,17 @@ impl<'l> Routine<'l> {
         use std::mem;
         use type2::compound::Operator::*;
 
-        macro_rules! done(() => (try!(Band::position(&mut self.band)) == self.size as u64));
-        macro_rules! flush(() => (mem::replace(&mut self.machine.stack, vec![])));
+        macro_rules! done(
+            () => (try!(Band::position(&mut self.band)) == self.size as u64);
+        );
+        macro_rules! dump(
+            () => (mem::replace(&mut self.machine.stack, vec![]));
+        );
         macro_rules! peek(
             ($kind:ty) => (try!(self.band.peek::<$kind>()));
         );
         macro_rules! push(
-            ($argument:expr) => (self.machine.stack.push($argument))
+            ($argument:expr) => (self.machine.stack.push($argument));
         );
         macro_rules! take(
             () => (try!(self.band.take()));
@@ -96,7 +109,7 @@ impl<'l> Routine<'l> {
                 Roll => {},
                 _ => {},
             }
-            return Ok(Some((operator, flush!())));
+            return Ok(Some((operator, dump!())));
         }
     }
 }
