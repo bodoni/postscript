@@ -41,10 +41,17 @@ impl<'l> Program<'l> {
                 }
                 flush!()
             });
-            (all, even) => ({
+            (all, modulo $modulo:expr) => ({
                 let count = stack.len();
-                if count == 0 || count % 2 != 0 {
-                    raise!("expected an even number of arguments");
+                if count == 0 || count % $modulo != 0 {
+                    raise!("found a wrong number of arguments");
+                }
+                flush!()
+            });
+            (all, [$addition:expr] modulo $modulo:expr) => ({
+                let count = stack.len();
+                if count == 0 || ((count + $addition) % $modulo != 0 && count % $modulo != 0) {
+                    raise!("found a wrong number of arguments");
                 }
                 flush!()
             });
@@ -90,10 +97,9 @@ impl<'l> Program<'l> {
                     }
                 },
                 VMoveTo | HMoveTo => done!(flush!(until 1)),
-                RLineTo => done!(flush!(all, even)),
-                HLineTo => {},
-                VLineTo => {},
-                RRCurveTo => {},
+                RLineTo => done!(flush!(all, modulo 2)),
+                HLineTo | VLineTo => done!(flush!(all)),
+                RRCurveTo => done!(flush!(all, modulo 6)),
                 CallSubr => {},
                 Return => {},
                 Escape => {},
@@ -103,8 +109,7 @@ impl<'l> Program<'l> {
                 RMoveTo => {},
                 RCurveLine => {},
                 RLineCurve => {},
-                VVCurveTo => {},
-                HHCurveTo => {},
+                VVCurveTo | HHCurveTo => done!(flush!(all, [1] modulo 4)),
                 CallGSubr => {},
                 VHCurveTo => {},
                 HVCurveTo => {},
