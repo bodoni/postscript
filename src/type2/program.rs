@@ -51,11 +51,15 @@ impl<'l> Program<'l> {
     fn process(&mut self, operator: Operator) -> Result<Option<Operation>> {
         use type2::compound::Operator::*;
         return match operator {
+            // HStem => {},
+            // VStem => {},
             CallSubr => self.call(false),
             Return => self.recall(),
             EndChar => self.unwind(),
+            // HStemHM => {},
             // HintMask => {},
             // CntrMask => {},
+            // VStemHM => {},
             CallGSubr => self.call(true),
             // And => {},
             // Or => {},
