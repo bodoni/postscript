@@ -1,76 +1,46 @@
+#![allow(dead_code)]
+
 use std::io::Cursor;
+use std::mem;
+use std::ops::{Deref, DerefMut};
 
 use Result;
 use band::Band;
 use type2::compound::{Operation, Operator};
 use type2::primitive::Number;
 
-pub struct Machine<'l> {
+pub struct Program<'l> {
+    routine: Routine<'l>,
     global: &'l [Vec<u8>],
     local: &'l [Vec<u8>],
     stack: Vec<Number>,
 }
 
-pub struct Routine<'l> {
-    machine: &'l mut Machine<'l>,
+struct Routine<'l> {
     band: Cursor<&'l [u8]>,
     size: usize,
 }
 
-impl<'l> Machine<'l> {
+impl<'l> Program<'l> {
     #[inline]
-    pub fn new(global: &'l [Vec<u8>], local: &'l [Vec<u8>]) -> Machine<'l> {
-        Machine { global: global, local: local, stack: vec![] }
+    pub fn new(code: &'l [u8], global: &'l [Vec<u8>], local: &'l [Vec<u8>]) -> Program<'l> {
+        Program { routine: Routine::new(code), global: global, local: local, stack: vec![] }
     }
 
-    #[inline]
-    pub fn start(&'l mut self, code: &'l [u8]) -> Routine<'l> {
-        Routine { machine: self, band: Cursor::new(code), size: code.len() }
-    }
-
-    pub fn execute(&'l mut self, code: &'l [u8]) -> Result<Vec<Operation>> {
-        let mut routine = self.start(code);
-        let mut operations = vec![];
-        while let Some(operation) = try!(routine.next()) {
-            operations.push(operation);
-        }
-        Ok(operations)
-    }
-}
-
-impl<'l> Routine<'l> {
     pub fn next(&mut self) -> Result<Option<Operation>> {
-        use std::mem;
         use type2::compound::Operator::*;
 
-        macro_rules! done(
-            () => (try!(Band::position(&mut self.band)) == self.size as u64);
-        );
-        macro_rules! dump(
-            () => (mem::replace(&mut self.machine.stack, vec![]));
-        );
-        macro_rules! peek(
-            ($kind:ty) => (try!(self.band.peek::<$kind>()));
-        );
-        macro_rules! push(
-            ($argument:expr) => (self.machine.stack.push($argument));
-        );
-        macro_rules! take(
-            () => (try!(self.band.take()));
-            ($kind:ty) => (try!(self.band.take::<$kind>()));
-        );
-
-        if done!() {
+        if try!(self.routine.done()) {
             return Ok(None);
         }
         loop {
-            let code = match peek!(u8) {
+            let code = match try!(self.routine.peek::<u8>()) {
                 0x1c | 0x20...0xff => {
-                    push!(take!());
+                    self.stack.push(try!(self.routine.take()));
                     continue;
                 },
-                code if code == 0x0c => take!(u16),
-                _ => take!(u8) as u16,
+                code if code == 0x0c => try!(self.routine.take::<u16>()),
+                _ => try!(self.routine.take::<u8>()) as u16,
             };
             let operator = match Operator::get(code) {
                 Some(operator) => operator,
@@ -80,7 +50,7 @@ impl<'l> Routine<'l> {
                 CallSubr => {},
                 Return => {},
                 EndChar => {
-                    if !done!() {
+                    if try!(self.routine.done()) {
                         raise!("found trailing data after the end operator");
                     }
                 },
@@ -109,7 +79,40 @@ impl<'l> Routine<'l> {
                 Roll => {},
                 _ => {},
             }
-            return Ok(Some((operator, dump!())));
+            return Ok(Some((operator, mem::replace(&mut self.stack, vec![]))));
         }
     }
+}
+
+impl<'l> Routine<'l> {
+    #[inline]
+    fn new(code: &'l [u8]) -> Routine<'l> {
+        Routine { band: Cursor::new(code), size: code.len() }
+    }
+
+    #[inline]
+    fn done(&mut self) -> Result<bool> {
+        Ok(try!(Band::position(&mut self.band)) == self.size as u64)
+    }
+}
+
+impl<'l> Deref for Routine<'l> {
+    type Target = Cursor<&'l [u8]>;
+
+    #[inline]
+    fn deref(&self) -> &Self::Target {
+        &self.band
+    }
+}
+
+impl<'l> DerefMut for Routine<'l> {
+    #[inline]
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.band
+    }
+}
+
+#[inline]
+fn bias(count: usize) -> usize {
+    if count < 1240 { 107 } else if count < 33900 { 1131 } else { 32768 }
 }
