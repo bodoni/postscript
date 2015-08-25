@@ -19,6 +19,7 @@ pub struct Program<'l> {
 struct Routine<'l> {
     band: Cursor<&'l [u8]>,
     size: usize,
+    caller: Option<Box<Routine<'l>>>,
 }
 
 impl<'l> Program<'l> {
@@ -47,7 +48,20 @@ impl<'l> Program<'l> {
                 _ => raise!("found an unknown operator ({:#x})", code),
             };
             match operator {
-                CallSubr => {},
+                CallSubr => match self.stack.pop() {
+                    Some(Number::Integer(address)) => {
+                        let count = self.local.len();
+                        let i = address + bias(count);
+                        if i < 0 || i as usize >= count {
+                            raise!("failed to find a local subroutine");
+                        }
+                        let routine = Routine::new(&self.local[i as usize]);
+                        let routine = mem::replace(&mut self.routine, routine);
+                        self.routine.caller = Some(Box::new(routine));
+                        return self.next();
+                    },
+                    _ => raise!("expected an argument"),
+                },
                 Return => {},
                 EndChar => {
                     if try!(self.routine.done()) {
@@ -87,7 +101,7 @@ impl<'l> Program<'l> {
 impl<'l> Routine<'l> {
     #[inline]
     fn new(code: &'l [u8]) -> Routine<'l> {
-        Routine { band: Cursor::new(code), size: code.len() }
+        Routine { band: Cursor::new(code), size: code.len(), caller: None }
     }
 
     #[inline]
@@ -113,6 +127,6 @@ impl<'l> DerefMut for Routine<'l> {
 }
 
 #[inline]
-fn bias(count: usize) -> usize {
+fn bias(count: usize) -> i32 {
     if count < 1240 { 107 } else if count < 33900 { 1131 } else { 32768 }
 }
