@@ -3,12 +3,12 @@ use postscript::compact::FontSet;
 use read;
 
 macro_rules! operations(
-    ($($operator:ident => [$($argument:ident($number:expr)),*],)*) => ({
+    ($($operator:ident => [$($number:expr),*],)*) => ({
         use postscript::compact::compound::Operator;
         use postscript::compact::primitive::Number;
         use std::collections::HashMap;
         let mut operations = HashMap::new();
-        $(operations.insert(Operator::$operator, vec![$(Number::$argument($number)),*]);)*
+        $(operations.insert(Operator::$operator, vec![$(Number::Integer($number)),*]);)*
         operations
     });
 );
@@ -40,16 +40,16 @@ fn top_dictionaries() {
 
     assert_eq!(vector.len(), 1);
     assert_eq!(&*vector[0], &operations!(
-        Version => [Integer(709)],
-        Notice => [Integer(710)],
-        Copyright => [Integer(711)],
-        FullName => [Integer(712)],
-        FamilyName => [Integer(712)],
-        Weight => [Integer(388)],
-        FontBBox => [Integer(-178), Integer(-335), Integer(1138), Integer(918)],
-        Charset => [Integer(8340)],
-        Charstrings => [Integer(8917)],
-        Private => [Integer(65), Integer(33671)],
+        Version => [709],
+        Notice => [710],
+        Copyright => [711],
+        FullName => [712],
+        FamilyName => [712],
+        Weight => [388],
+        FontBBox => [-178, -335, 1138, 918],
+        Charset => [8340],
+        Charstrings => [8917],
+        Private => [65, 33671],
     ));
 }
 
