@@ -74,7 +74,12 @@ impl<'l> Program<'l> {
                 // Div => {},
                 // Neg => {},
                 // Eq => {},
-                // Drop => {},
+                Drop => {
+                    if let None = self.stack.pop() {
+                        raise!("expected an argument in the stack");
+                    }
+                    return self.next();
+                },
                 // Put => {},
                 // Get => {},
                 // IfElse => {},
