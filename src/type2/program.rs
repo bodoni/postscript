@@ -5,7 +5,7 @@ use std::mem;
 use std::ops::{Deref, DerefMut};
 
 use Result;
-use band::Band;
+use band::{Band, ParametrizedValue};
 use type2::compound::{Operation, Operator};
 use type2::primitive::Number;
 
@@ -60,9 +60,10 @@ impl<'l> Program<'l> {
                 CallSubr | CallGSubr => return self.call(operator),
                 Return => return self.recall(),
                 EndChar => return self.unwind(),
-                HintMask => {
-                },
-                CntrMask => {
+                HintMask | CntrMask => {
+                    self.stems += self.stack.len() >> 1;
+                    let _: Vec<u8> = try!(ParametrizedValue::read(&mut *self.routine,
+                                                                  (self.stems + 7) >> 3));
                 },
                 // And => {},
                 // Or => {},
@@ -126,7 +127,7 @@ impl<'l> Program<'l> {
 
     fn unwind(&mut self) -> Result<Option<Operation>> {
         while let Some(caller) = self.routine.caller.take() {
-            if try!(self.routine.done()) {
+            if !try!(self.routine.done()) {
                 raise!("found trailing data after the end operator");
             }
             mem::replace(&mut self.routine, *caller);
