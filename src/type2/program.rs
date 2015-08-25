@@ -40,10 +40,25 @@ impl<'l> Program<'l> {
         if try!(self.routine.done()) {
             return Ok(None);
         }
+        macro_rules! push(($argument:expr) => ({
+            let argument = $argument;
+            self.stack.push(argument);
+        }));
+        macro_rules! pop(() => (match self.stack.pop() {
+            Some(value) => value,
+            _ => raise!("expected an argument in the stack"),
+        }));
+        macro_rules! top(() => ({
+            let count = self.stack.len();
+            if count == 0 {
+                raise!("expected an argument in the stack");
+            }
+            self.stack[count - 1]
+        }));
         loop {
             let code = match try!(self.routine.peek::<u8>()) {
                 0x1c | 0x20...0xff => {
-                    self.stack.push(try!(self.routine.take()));
+                    push!(try!(self.routine.take()));
                     continue;
                 },
                 code if code == 0x0c => try!(self.routine.take::<u16>()),
@@ -67,17 +82,24 @@ impl<'l> Program<'l> {
                 },
                 // And => {},
                 // Or => {},
-                // Not => {},
-                // Abs => {},
+                Not => {
+                    push!(!pop!());
+                    return self.next();
+                },
+                Abs => {
+                    push!(pop!().abs());
+                    return self.next();
+                },
                 // Add => {},
                 // Sub => {},
                 // Div => {},
-                // Neg => {},
+                Neg => {
+                    push!(-pop!());
+                    return self.next();
+                },
                 // Eq => {},
                 Drop => {
-                    if let None = self.stack.pop() {
-                        raise!("expected an argument in the stack");
-                    }
+                    pop!();
                     return self.next();
                 },
                 // Put => {},
@@ -85,8 +107,14 @@ impl<'l> Program<'l> {
                 // IfElse => {},
                 // Random => {},
                 // Mul => {},
-                // Sqrt => {},
-                // Dup => {},
+                Sqrt => {
+                    push!(pop!().sqrt());
+                    return self.next();
+                },
+                Dup => {
+                    push!(top!());
+                    return self.next();
+                },
                 // Exch => {},
                 // Index => {},
                 // Roll => {},

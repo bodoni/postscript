@@ -1,3 +1,5 @@
+use std::ops::{Neg, Not};
+
 use Result;
 use band::{Band, Value};
 
@@ -10,19 +12,35 @@ pub enum Number {
 use self::Number::*;
 
 impl Number {
-    #[inline(always)]
-    pub fn as_i32(&self) -> i32 {
+    #[inline]
+    pub fn abs(self) -> Number {
         match self {
-            &Integer(value) => value,
-            &Real(value) => value as i32,
+            Integer(value) => Integer(value.abs()),
+            Real(value) => Real(value.abs()),
         }
     }
 
-    #[inline(always)]
+    #[inline]
+    pub fn as_i32(&self) -> i32 {
+        match *self {
+            Integer(value) => value,
+            Real(value) => value as i32,
+        }
+    }
+
+    #[inline]
     pub fn as_f32(&self) -> f32 {
+        match *self {
+            Integer(value) => value as f32,
+            Real(value) => value,
+        }
+    }
+
+    #[inline]
+    pub fn sqrt(self) -> Number {
         match self {
-            &Integer(value) => value as f32,
-            &Real(value) => value,
+            Integer(value) => Integer((value as f32).sqrt() as i32),
+            Real(value) => Real(value.sqrt()),
         }
     }
 }
@@ -40,6 +58,30 @@ impl Value for Number {
             0xff => Real(FIXED_SCALING * (read!(u32) as f32)),
             _ => raise!("found a malformed number"),
         })
+    }
+}
+
+impl Neg for Number {
+    type Output = Self;
+
+    #[inline]
+    fn neg(self) -> Self::Output {
+        match self {
+            Integer(value) => Integer(-value),
+            Real(value) => Real(-value),
+        }
+    }
+}
+
+impl Not for Number {
+    type Output = Self;
+
+    #[inline]
+    fn not(self) -> Self::Output {
+        match self {
+            Integer(value) => Integer(if value != 0 { 1 } else { 0 }),
+            Real(value) => Integer(if value != 0.0 { 1 } else { 0 }),
+        }
     }
 }
 
