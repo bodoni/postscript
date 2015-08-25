@@ -14,6 +14,7 @@ pub struct Program<'l> {
     global: &'l [Vec<u8>],
     local: &'l [Vec<u8>],
     stack: Vec<Number>,
+    hints: usize,
 }
 
 struct Routine<'l> {
@@ -25,7 +26,13 @@ struct Routine<'l> {
 impl<'l> Program<'l> {
     #[inline]
     pub fn new(code: &'l [u8], global: &'l [Vec<u8>], local: &'l [Vec<u8>]) -> Program<'l> {
-        Program { routine: Routine::new(code), global: global, local: local, stack: vec![] }
+        Program {
+            routine: Routine::new(code),
+            global: global,
+            local: local,
+            stack: vec![],
+            hints: 0,
+        }
     }
 
     pub fn next(&mut self) -> Result<Option<Operation>> {
@@ -50,17 +57,19 @@ impl<'l> Program<'l> {
 
     fn process(&mut self, operator: Operator) -> Result<Option<Operation>> {
         use type2::compound::Operator::*;
-        return match operator {
-            // HStem => {},
-            // VStem => {},
-            CallSubr => self.call(false),
-            Return => self.recall(),
-            EndChar => self.unwind(),
-            // HStemHM => {},
-            // HintMask => {},
-            // CntrMask => {},
-            // VStemHM => {},
-            CallGSubr => self.call(true),
+        match operator {
+            HStem => self.hints += 1,
+            VStem => self.hints += 1,
+            CallSubr => return self.call(false),
+            Return => return self.recall(),
+            EndChar => return self.unwind(),
+            HStemHM => self.hints += 1,
+            HintMask => {
+            },
+            CntrMask => {
+            },
+            VStemHM => self.hints += 1,
+            CallGSubr => return self.call(true),
             // And => {},
             // Or => {},
             // Not => {},
@@ -81,8 +90,9 @@ impl<'l> Program<'l> {
             // Exch => {},
             // Index => {},
             // Roll => {},
-            _ => Ok(Some((operator, mem::replace(&mut self.stack, vec![])))),
+            _ => {},
         };
+        Ok(Some((operator, mem::replace(&mut self.stack, vec![]))))
     }
 
     fn call(&mut self, global: bool) -> Result<Option<Operation>> {
