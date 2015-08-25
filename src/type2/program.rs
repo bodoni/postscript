@@ -50,40 +50,40 @@ impl<'l> Program<'l> {
 
     fn process(&mut self, operator: Operator) -> Result<Option<Operation>> {
         use type2::compound::Operator::*;
-        match operator {
-            CallSubr => return self.call(false),
-            Return => {},
+        return match operator {
+            CallSubr => self.call(false),
+            Return => self.back(),
             EndChar => {
                 if try!(self.routine.done()) {
                     raise!("found trailing data after the end operator");
                 }
+                Ok(None)
             },
-            HintMask => {},
-            CntrMask => {},
-            CallGSubr => return self.call(true),
-            And => {},
-            Or => {},
-            Not => {},
-            Abs => {},
-            Add => {},
-            Sub => {},
-            Div => {},
-            Neg => {},
-            Eq => {},
-            Drop => {},
-            Put => {},
-            Get => {},
-            IfElse => {},
-            Random => {},
-            Mul => {},
-            Sqrt => {},
-            Dup => {},
-            Exch => {},
-            Index => {},
-            Roll => {},
-            _ => {},
-        }
-        Ok(Some((operator, mem::replace(&mut self.stack, vec![]))))
+            // HintMask => {},
+            // CntrMask => {},
+            CallGSubr => self.call(true),
+            // And => {},
+            // Or => {},
+            // Not => {},
+            // Abs => {},
+            // Add => {},
+            // Sub => {},
+            // Div => {},
+            // Neg => {},
+            // Eq => {},
+            // Drop => {},
+            // Put => {},
+            // Get => {},
+            // IfElse => {},
+            // Random => {},
+            // Mul => {},
+            // Sqrt => {},
+            // Dup => {},
+            // Exch => {},
+            // Index => {},
+            // Roll => {},
+            _ => Ok(Some((operator, mem::replace(&mut self.stack, vec![])))),
+        };
     }
 
     fn call(&mut self, global: bool) -> Result<Option<Operation>> {
@@ -108,6 +108,15 @@ impl<'l> Program<'l> {
         };
         mem::swap(&mut self.routine, &mut routine);
         self.routine.caller = Some(Box::new(routine));
+        self.next()
+    }
+
+    fn back(&mut self) -> Result<Option<Operation>> {
+        let routine = match self.routine.caller.take() {
+            Some(routine) => routine,
+            _ => raise!("found a return operator without a caller"),
+        };
+        mem::replace(&mut self.routine, *routine);
         self.next()
     }
 }
