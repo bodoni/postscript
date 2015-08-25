@@ -14,7 +14,7 @@ pub struct Program<'l> {
     global: &'l [Vec<u8>],
     local: &'l [Vec<u8>],
     stack: Vec<Number>,
-    hints: usize,
+    stems: usize,
 }
 
 struct Routine<'l> {
@@ -31,11 +31,12 @@ impl<'l> Program<'l> {
             global: global,
             local: local,
             stack: vec![],
-            hints: 0,
+            stems: 0,
         }
     }
 
     pub fn next(&mut self) -> Result<Option<Operation>> {
+        use type2::compound::Operator::*;
         if try!(self.routine.done()) {
             return Ok(None);
         }
@@ -48,59 +49,53 @@ impl<'l> Program<'l> {
                 code if code == 0x0c => try!(self.routine.take::<u16>()),
                 _ => try!(self.routine.take::<u8>()) as u16,
             };
-            match Operator::get(code) {
-                Some(operator) => return self.process(operator),
+            let operator = match Operator::get(code) {
+                Some(operator) => operator,
                 _ => raise!("found an unknown operator ({:#x})", code),
-            }
+            };
+            match operator {
+                HStem | VStem | HStemHM | VStemHM => {
+                    self.stems += self.stack.len() >> 1;
+                },
+                CallSubr | CallGSubr => return self.call(operator),
+                Return => return self.recall(),
+                EndChar => return self.unwind(),
+                HintMask => {
+                },
+                CntrMask => {
+                },
+                // And => {},
+                // Or => {},
+                // Not => {},
+                // Abs => {},
+                // Add => {},
+                // Sub => {},
+                // Div => {},
+                // Neg => {},
+                // Eq => {},
+                // Drop => {},
+                // Put => {},
+                // Get => {},
+                // IfElse => {},
+                // Random => {},
+                // Mul => {},
+                // Sqrt => {},
+                // Dup => {},
+                // Exch => {},
+                // Index => {},
+                // Roll => {},
+                _ => {},
+            };
+            return Ok(Some((operator, mem::replace(&mut self.stack, vec![]))));
         }
     }
 
-    fn process(&mut self, operator: Operator) -> Result<Option<Operation>> {
-        use type2::compound::Operator::*;
-        match operator {
-            HStem => self.hints += 1,
-            VStem => self.hints += 1,
-            CallSubr => return self.call(false),
-            Return => return self.recall(),
-            EndChar => return self.unwind(),
-            HStemHM => self.hints += 1,
-            HintMask => {
-            },
-            CntrMask => {
-            },
-            VStemHM => self.hints += 1,
-            CallGSubr => return self.call(true),
-            // And => {},
-            // Or => {},
-            // Not => {},
-            // Abs => {},
-            // Add => {},
-            // Sub => {},
-            // Div => {},
-            // Neg => {},
-            // Eq => {},
-            // Drop => {},
-            // Put => {},
-            // Get => {},
-            // IfElse => {},
-            // Random => {},
-            // Mul => {},
-            // Sqrt => {},
-            // Dup => {},
-            // Exch => {},
-            // Index => {},
-            // Roll => {},
-            _ => {},
-        };
-        Ok(Some((operator, mem::replace(&mut self.stack, vec![]))))
-    }
-
-    fn call(&mut self, global: bool) -> Result<Option<Operation>> {
+    fn call(&mut self, operator: Operator) -> Result<Option<Operation>> {
         let address = match self.stack.pop() {
             Some(Number::Integer(address)) => address,
             _ => raise!("expected an argument"),
         };
-        let mut routine = if global {
+        let mut routine = if let Operator::CallGSubr = operator {
             let count = self.global.len();
             let i = address + bias(count);
             if i < 0 || i as usize >= count {
