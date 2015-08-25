@@ -52,13 +52,8 @@ impl<'l> Program<'l> {
         use type2::compound::Operator::*;
         return match operator {
             CallSubr => self.call(false),
-            Return => self.back(),
-            EndChar => {
-                if try!(self.routine.done()) {
-                    raise!("found trailing data after the end operator");
-                }
-                Ok(None)
-            },
+            Return => self.recall(),
+            EndChar => self.unwind(),
             // HintMask => {},
             // CntrMask => {},
             CallGSubr => self.call(true),
@@ -111,13 +106,23 @@ impl<'l> Program<'l> {
         self.next()
     }
 
-    fn back(&mut self) -> Result<Option<Operation>> {
-        let routine = match self.routine.caller.take() {
-            Some(routine) => routine,
+    fn recall(&mut self) -> Result<Option<Operation>> {
+        let caller = match self.routine.caller.take() {
+            Some(caller) => caller,
             _ => raise!("found a return operator without a caller"),
         };
-        mem::replace(&mut self.routine, *routine);
+        mem::replace(&mut self.routine, *caller);
         self.next()
+    }
+
+    fn unwind(&mut self) -> Result<Option<Operation>> {
+        while let Some(caller) = self.routine.caller.take() {
+            if try!(self.routine.done()) {
+                raise!("found trailing data after the end operator");
+            }
+            mem::replace(&mut self.routine, *caller);
+        }
+        Ok(None)
     }
 }
 
