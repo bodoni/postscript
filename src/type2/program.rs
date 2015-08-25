@@ -29,8 +29,6 @@ impl<'l> Program<'l> {
     }
 
     pub fn next(&mut self) -> Result<Option<Operation>> {
-        use type2::compound::Operator::*;
-
         if try!(self.routine.done()) {
             return Ok(None);
         }
@@ -43,58 +41,74 @@ impl<'l> Program<'l> {
                 code if code == 0x0c => try!(self.routine.take::<u16>()),
                 _ => try!(self.routine.take::<u8>()) as u16,
             };
-            let operator = match Operator::get(code) {
-                Some(operator) => operator,
+            match Operator::get(code) {
+                Some(operator) => return self.process(operator),
                 _ => raise!("found an unknown operator ({:#x})", code),
-            };
-            match operator {
-                CallSubr => match self.stack.pop() {
-                    Some(Number::Integer(address)) => {
-                        let count = self.local.len();
-                        let i = address + bias(count);
-                        if i < 0 || i as usize >= count {
-                            raise!("failed to find a local subroutine");
-                        }
-                        let routine = Routine::new(&self.local[i as usize]);
-                        let routine = mem::replace(&mut self.routine, routine);
-                        self.routine.caller = Some(Box::new(routine));
-                        return self.next();
-                    },
-                    _ => raise!("expected an argument"),
-                },
-                Return => {},
-                EndChar => {
-                    if try!(self.routine.done()) {
-                        raise!("found trailing data after the end operator");
-                    }
-                },
-                HintMask => {},
-                CntrMask => {},
-                CallGSubr => {},
-                And => {},
-                Or => {},
-                Not => {},
-                Abs => {},
-                Add => {},
-                Sub => {},
-                Div => {},
-                Neg => {},
-                Eq => {},
-                Drop => {},
-                Put => {},
-                Get => {},
-                IfElse => {},
-                Random => {},
-                Mul => {},
-                Sqrt => {},
-                Dup => {},
-                Exch => {},
-                Index => {},
-                Roll => {},
-                _ => {},
             }
-            return Ok(Some((operator, mem::replace(&mut self.stack, vec![]))));
         }
+    }
+
+    fn process(&mut self, operator: Operator) -> Result<Option<Operation>> {
+        use type2::compound::Operator::*;
+        match operator {
+            CallSubr => return self.call(false),
+            Return => {},
+            EndChar => {
+                if try!(self.routine.done()) {
+                    raise!("found trailing data after the end operator");
+                }
+            },
+            HintMask => {},
+            CntrMask => {},
+            CallGSubr => return self.call(true),
+            And => {},
+            Or => {},
+            Not => {},
+            Abs => {},
+            Add => {},
+            Sub => {},
+            Div => {},
+            Neg => {},
+            Eq => {},
+            Drop => {},
+            Put => {},
+            Get => {},
+            IfElse => {},
+            Random => {},
+            Mul => {},
+            Sqrt => {},
+            Dup => {},
+            Exch => {},
+            Index => {},
+            Roll => {},
+            _ => {},
+        }
+        Ok(Some((operator, mem::replace(&mut self.stack, vec![]))))
+    }
+
+    fn call(&mut self, global: bool) -> Result<Option<Operation>> {
+        let address = match self.stack.pop() {
+            Some(Number::Integer(address)) => address,
+            _ => raise!("expected an argument"),
+        };
+        let mut routine = if global {
+            let count = self.global.len();
+            let i = address + bias(count);
+            if i < 0 || i as usize >= count {
+                raise!("failed to find a global subroutine");
+            }
+            Routine::new(&self.global[i as usize])
+        } else {
+            let count = self.local.len();
+            let i = address + bias(count);
+            if i < 0 || i as usize >= count {
+                raise!("failed to find a local subroutine");
+            }
+            Routine::new(&self.local[i as usize])
+        };
+        mem::swap(&mut self.routine, &mut routine);
+        self.routine.caller = Some(Box::new(routine));
+        self.next()
     }
 }
 
