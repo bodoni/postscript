@@ -27,21 +27,6 @@ macro_rules! table_read {
     );
 }
 
-macro_rules! deref {
-    ($structure:ident::$field:tt => $target:ty) => (itemize! {
-        impl ::std::ops::Deref for $structure {
-            type Target = $target;
-
-            #[inline]
-            fn deref(&self) -> &Self::Target {
-                &self.$field
-            }
-        }
-    });
-}
-
-macro_rules! itemize(($code:item) => ($code));
-
 mod charset;
 mod encoding;
 mod header;

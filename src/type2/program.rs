@@ -3,7 +3,6 @@
 use random::{self, Source};
 use std::io::Cursor;
 use std::mem;
-use std::ops::{Deref, DerefMut};
 
 use Result;
 use band::{Band, ValueExt};
@@ -189,21 +188,7 @@ impl<'l> Routine<'l> {
     }
 }
 
-impl<'l> Deref for Routine<'l> {
-    type Target = Cursor<&'l [u8]>;
-
-    #[inline]
-    fn deref(&self) -> &Self::Target {
-        &self.band
-    }
-}
-
-impl<'l> DerefMut for Routine<'l> {
-    #[inline]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.band
-    }
-}
+deref! { Routine<'l>::band => Cursor<&'l [u8]> }
 
 #[inline]
 fn bias(count: usize) -> i32 {

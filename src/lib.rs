@@ -8,10 +8,44 @@ pub type Error = std::io::Error;
 /// A result.
 pub type Result<T> = std::result::Result<T, Error>;
 
-macro_rules! raise(
-    ($message:expr) => (return Err(::Error::new(::std::io::ErrorKind::Other, $message)));
-    ($($argument:tt)+) => (raise!(format!($($argument)+)));
-);
+macro_rules! deref {
+    ($name:ident::$field:tt => $target:ty) => (itemize! {
+        impl ::std::ops::Deref for $name {
+            type Target = $target;
+
+            #[inline]
+            fn deref(&self) -> &Self::Target {
+                &self.$field
+            }
+        }
+
+        impl ::std::ops::DerefMut for $name {
+            #[inline]
+            fn deref_mut(&mut self) -> &mut Self::Target {
+                &mut self.$field
+            }
+        }
+    });
+    ($name:ident<$life:tt>::$field:tt => $target:ty) => (itemize! {
+        impl<$life> ::std::ops::Deref for $name<$life> {
+            type Target = $target;
+
+            #[inline]
+            fn deref(&self) -> &Self::Target {
+                &self.$field
+            }
+        }
+
+        impl<$life> ::std::ops::DerefMut for $name<$life> {
+            #[inline]
+            fn deref_mut(&mut self) -> &mut Self::Target {
+                &mut self.$field
+            }
+        }
+    });
+}
+
+macro_rules! itemize(($($chunk:item)*) => ($($chunk)*));
 
 macro_rules! number {
     ($name:ident) => (
@@ -122,6 +156,11 @@ macro_rules! number {
         }
     );
 }
+
+macro_rules! raise(
+    ($message:expr) => (return Err(::Error::new(::std::io::ErrorKind::Other, $message)));
+    ($($argument:tt)+) => (raise!(format!($($argument)+)));
+);
 
 mod band;
 
