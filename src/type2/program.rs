@@ -44,20 +44,26 @@ impl<'l> Program<'l> {
             return Ok(None);
         }
 
-        macro_rules! pop(() => (match self.stack.pop() {
-            Some(value) => value,
-            _ => raise!("expected an argument in the stack"),
-        }));
+        macro_rules! pop(
+            () => (match self.stack.pop() {
+                Some(value) => value,
+                _ => raise!("expected an argument"),
+            });
+            ($kind:ident) => (match self.stack.pop() {
+                Some(Number::$kind(value)) => value,
+                _ => raise!("expected an argument of a different type"),
+            });
+        );
         macro_rules! push(($argument:expr) => ({
             let argument = $argument;
             self.stack.push(argument);
         }));
-        macro_rules! top(() => ({
+        macro_rules! read(($index:expr) => ({
             let count = self.stack.len();
-            if count == 0 {
-                raise!("expected an argument in the stack");
+            if $index >= count {
+                raise!("expected more arguments");
             }
-            self.stack[count - 1]
+            self.stack[count - 1 - $index]
         }));
 
         loop {
@@ -120,9 +126,12 @@ impl<'l> Program<'l> {
                     push!(right);
                     push!(left);
                 },
-                Index => unimplemented!(),
+                Index => {
+                    let i = pop!(Integer);
+                    push!(read!(if i >= 0 { i as usize } else { 0 }));
+                },
                 Roll => unimplemented!(),
-                Dup => push!(top!()),
+                Dup => push!(read!(0)),
 
                 // Storage operators
                 Put => unimplemented!(),
