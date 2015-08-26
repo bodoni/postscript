@@ -62,140 +62,141 @@ impl<'l> Program<'l> {
             self.stack[length - 1 - $index]
         }));
 
+        let mut code;
         loop {
-            let code = match try!(self.routine.peek::<u8>()) {
-                0x1c | 0x20...0xff => {
-                    push!(try!(self.routine.take()));
-                    continue;
-                },
-                code if code == 0x0c => try!(self.routine.take::<u16>()),
-                _ => try!(self.routine.take::<u8>()) as u16,
-            };
-            let operator = try!(Operator::from(code));
-            match operator {
-                /// Path-construction operators
-                RMoveTo | HMoveTo | VMoveTo | RLineTo | HLineTo | VLineTo |
-                RRCurveTo | HHCurveTo | HVCurveTo | VHCurveTo | VVCurveTo |
-                RCurveLine | RLineCurve | Flex | Flex1 | HFlex | HFlex1 => {
-                    return Ok(Some((operator, flush!())));
-                },
-
-                /// Terminal operator
-                EndChar => {
-                    while let Some(caller) = self.routine.caller.take() {
-                        if !try!(self.routine.done()) {
-                            raise!("found trailing data after the end operator");
-                        }
-                        mem::replace(&mut self.routine, *caller);
-                    }
-                    return Ok(None);
-                },
-
-                /// Hint operators
-                HStem | VStem | HStemHM | VStemHM => {
-                    self.stems += self.stack.len() >> 1;
-                    return Ok(Some((operator, flush!())));
-                },
-                HintMask | CntrMask => {
-                    self.stems += self.stack.len() >> 1;
-                    let _: Vec<u8> = try!(ValueExt::read(&mut *self.routine,
-                                                         (self.stems + 7) >> 3));
-                    return Ok(Some((operator, flush!())));
-                },
-
-                /// Arithmetic operators
-                Abs => push!(pop!().abs()),
-                Add => push!(pop!() + pop!()),
-                Sub => {
-                    let (right, left) = (pop!(), pop!());
-                    push!(left - right);
-                },
-                Div => {
-                    let (right, left) = (pop!(), pop!());
-                    push!(left / right);
-                },
-                Neg => push!(-pop!()),
-                Random => unimplemented!(),
-                Mul => push!(pop!() * pop!()),
-                Sqrt => push!(pop!().sqrt()),
-                Drop => {
-                    pop!();
-                },
-                Exch => {
-                    let (right, left) = (pop!(), pop!());
-                    push!(right);
-                    push!(left);
-                },
-                Index => {
-                    let i = pop!(Integer);
-                    push!(read!(if i >= 0 { i as usize } else { 0 }));
-                },
-                Roll => {
-                    let (shift, span) = (pop!(Integer), pop!(Integer));
-                    let length = self.stack.len();
-                    if span < 0 {
-                        raise!("found an invalid argument");
-                    } else if span as usize > length {
-                        raise!("expected more arguments");
-                    } else if span > 0 {
-                        let position = length - span as usize;
-                        if shift > 0 {
-                            for _ in 0..shift {
-                                let argument = pop!();
-                                self.stack.insert(position, argument);
-                            }
-                        } else if shift < 0 {
-                            for _ in 0..(-shift) {
-                                push!(self.stack.remove(position));
-                            }
-                        }
-                    }
-                },
-                Dup => push!(read!(0)),
-
-                // Storage operators
-                Put => unimplemented!(),
-                Get => unimplemented!(),
-
-                /// Conditional operators
-                And => push!(pop!().and(pop!())),
-                Or => push!(pop!().or(pop!())),
-                Not => push!(!pop!()),
-                Eq => push!(pop!().equal(pop!())),
-                IfElse => {
-                    let (right, left, no, yes) = (pop!(), pop!(), pop!(), pop!());
-                    push!(if left <= right { yes } else { no });
-                },
-
-                /// Subroutine operators
-                CallSubr | CallGSubr => {
-                    let address = pop!(Integer);
-                    let mut routine = {
-                        let subroutines = if operator == CallSubr {
-                            &self.local
-                        } else {
-                            &self.global
-                        };
-                        let count = subroutines.len();
-                        let i = address + bias(count);
-                        if i < 0 || i as usize >= count {
-                            raise!("failed to find a subroutine");
-                        }
-                        Routine::new(&subroutines[i as usize])
-                    };
-                    mem::swap(&mut self.routine, &mut routine);
-                    self.routine.caller = Some(Box::new(routine));
-                },
-                Return => {
-                    let caller = match self.routine.caller.take() {
-                        Some(caller) => caller,
-                        _ => raise!("found a return operator without a caller"),
-                    };
-                    mem::replace(&mut self.routine, *caller);
-                },
-            };
-            return self.next();
+            code = try!(self.routine.peek::<u8>());
+            match code {
+                0x1c | 0x20...0xff => push!(try!(self.routine.take())),
+                _ => break,
+            }
         }
+        let operator = if code == 0x0c {
+            try!(Operator::from(try!(self.routine.take::<u16>())))
+        } else {
+            try!(Operator::from(try!(self.routine.take::<u8>()) as u16))
+        };
+        match operator {
+            /// Path-construction operators
+            RMoveTo | HMoveTo | VMoveTo | RLineTo | HLineTo | VLineTo |
+            RRCurveTo | HHCurveTo | HVCurveTo | VHCurveTo | VVCurveTo |
+            RCurveLine | RLineCurve | Flex | Flex1 | HFlex | HFlex1 => {
+                return Ok(Some((operator, flush!())));
+            },
+
+            /// Terminal operator
+            EndChar => {
+                while let Some(caller) = self.routine.caller.take() {
+                    if !try!(self.routine.done()) {
+                        raise!("found trailing data after the end operator");
+                    }
+                    mem::replace(&mut self.routine, *caller);
+                }
+                return Ok(None);
+            },
+
+            /// Hint operators
+            HStem | VStem | HStemHM | VStemHM => {
+                self.stems += self.stack.len() >> 1;
+                return Ok(Some((operator, flush!())));
+            },
+            HintMask | CntrMask => {
+                self.stems += self.stack.len() >> 1;
+                let _: Vec<u8> = try!(ValueExt::read(&mut *self.routine, (self.stems + 7) >> 3));
+                return Ok(Some((operator, flush!())));
+            },
+
+            /// Arithmetic operators
+            Abs => push!(pop!().abs()),
+            Add => push!(pop!() + pop!()),
+            Sub => {
+                let (right, left) = (pop!(), pop!());
+                push!(left - right);
+            },
+            Div => {
+                let (right, left) = (pop!(), pop!());
+                push!(left / right);
+            },
+            Neg => push!(-pop!()),
+            Random => unimplemented!(),
+            Mul => push!(pop!() * pop!()),
+            Sqrt => push!(pop!().sqrt()),
+            Drop => {
+                pop!();
+            },
+            Exch => {
+                let (right, left) = (pop!(), pop!());
+                push!(right);
+                push!(left);
+            },
+            Index => {
+                let i = pop!(Integer);
+                push!(read!(if i >= 0 { i as usize } else { 0 }));
+            },
+            Roll => {
+                let (shift, span) = (pop!(Integer), pop!(Integer));
+                let length = self.stack.len();
+                if span < 0 {
+                    raise!("found an invalid argument");
+                } else if span as usize > length {
+                    raise!("expected more arguments");
+                } else if span > 0 {
+                    let position = length - span as usize;
+                    if shift > 0 {
+                        for _ in 0..shift {
+                            let argument = pop!();
+                            self.stack.insert(position, argument);
+                        }
+                    } else if shift < 0 {
+                        for _ in 0..(-shift) {
+                            push!(self.stack.remove(position));
+                        }
+                    }
+                }
+            },
+            Dup => push!(read!(0)),
+
+            // Storage operators
+            Put => unimplemented!(),
+            Get => unimplemented!(),
+
+            /// Conditional operators
+            And => push!(pop!().and(pop!())),
+            Or => push!(pop!().or(pop!())),
+            Not => push!(!pop!()),
+            Eq => push!(pop!().equal(pop!())),
+            IfElse => {
+                let (right, left, no, yes) = (pop!(), pop!(), pop!(), pop!());
+                push!(if left <= right { yes } else { no });
+            },
+
+            /// Subroutine operators
+            CallSubr | CallGSubr => {
+                let address = pop!(Integer);
+                let mut routine = {
+                    let subroutines = if operator == CallSubr {
+                        &self.local
+                    } else {
+                        &self.global
+                    };
+                    let count = subroutines.len();
+                    let i = address + bias(count);
+                    if i < 0 || i as usize >= count {
+                        raise!("failed to find a subroutine");
+                    }
+                    Routine::new(&subroutines[i as usize])
+                };
+                mem::swap(&mut self.routine, &mut routine);
+                self.routine.caller = Some(Box::new(routine));
+            },
+            Return => {
+                let caller = match self.routine.caller.take() {
+                    Some(caller) => caller,
+                    _ => raise!("found a return operator without a caller"),
+                };
+                mem::replace(&mut self.routine, *caller);
+            },
+        };
+        self.next()
     }
 }
 
