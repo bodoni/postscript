@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use random::{self, Source};
 use std::io::Cursor;
 use std::mem;
 use std::ops::{Deref, DerefMut};
@@ -15,6 +16,7 @@ pub struct Program<'l> {
     local: &'l [Vec<u8>],
     stack: Vec<Number>,
     stems: usize,
+    source: Box<Source>,
 }
 
 struct Routine<'l> {
@@ -32,6 +34,7 @@ impl<'l> Program<'l> {
             local: local,
             stack: vec![],
             stems: 0,
+            source: Box::new(random::default()),
         }
     }
 
@@ -40,13 +43,14 @@ impl<'l> Program<'l> {
         if try!(self.routine.done()) {
             return Ok(None);
         }
-        macro_rules! push(($argument:expr) => ({
-            let argument = $argument;
-            self.stack.push(argument);
-        }));
+        macro_rules! next(() => (return self.next()));
         macro_rules! pop(() => (match self.stack.pop() {
             Some(value) => value,
             _ => raise!("expected an argument in the stack"),
+        }));
+        macro_rules! push(($argument:expr) => ({
+            let argument = $argument;
+            self.stack.push(argument);
         }));
         macro_rules! top(() => ({
             let count = self.stack.len();
@@ -84,36 +88,39 @@ impl<'l> Program<'l> {
                 // Or => {},
                 Not => {
                     push!(!pop!());
-                    return self.next();
+                    next!();
                 },
                 Abs => {
                     push!(pop!().abs());
-                    return self.next();
+                    next!();
                 },
                 // Add => {},
                 // Sub => {},
                 // Div => {},
                 Neg => {
                     push!(-pop!());
-                    return self.next();
+                    next!();
                 },
                 // Eq => {},
                 Drop => {
                     pop!();
-                    return self.next();
+                    next!();
                 },
                 // Put => {},
                 // Get => {},
                 // IfElse => {},
-                // Random => {},
+                Random => {
+                    push!(Number::Real(self.source.read_f64() as f32));
+                    next!();
+                },
                 // Mul => {},
                 Sqrt => {
                     push!(pop!().sqrt());
-                    return self.next();
+                    next!();
                 },
                 Dup => {
                     push!(top!());
-                    return self.next();
+                    next!();
                 },
                 // Exch => {},
                 // Index => {},
@@ -166,6 +173,10 @@ impl<'l> Program<'l> {
             mem::replace(&mut self.routine, *caller);
         }
         Ok(None)
+    }
+
+    pub fn seed(&mut self, seed: [u64; 2]) {
+        self.source = Box::new(random::default().seed(seed));
     }
 }
 
