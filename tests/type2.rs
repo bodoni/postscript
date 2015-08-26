@@ -14,7 +14,20 @@ macro_rules! operations(
 );
 
 #[test]
-fn program() {
+fn program_all() {
+    let set = FontSet::read(&mut read()).unwrap();
+    let global = &set.global_subroutines;
+    let local = &set.local_subroutines[0];
+
+    for code in set.charstrings[0].iter() {
+        let mut program = Program::new(code, global, local);
+        while let Some(..) = program.next().unwrap() {
+        }
+    }
+}
+
+#[test]
+fn program_one() {
     let set = FontSet::read(&mut read()).unwrap();
 
     let code = &set.charstrings[0][134];
