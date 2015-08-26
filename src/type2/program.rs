@@ -40,10 +40,11 @@ impl<'l> Program<'l> {
 
     pub fn next(&mut self) -> Result<Option<Operation>> {
         use type2::compound::Operator::*;
+
         if try!(self.routine.done()) {
             return Ok(None);
         }
-        macro_rules! next(() => (return self.next()));
+
         macro_rules! pop(() => (match self.stack.pop() {
             Some(value) => value,
             _ => raise!("expected an argument in the stack"),
@@ -59,6 +60,7 @@ impl<'l> Program<'l> {
             }
             self.stack[count - 1]
         }));
+
         loop {
             let code = match try!(self.routine.peek::<u8>()) {
                 0x1c | 0x20...0xff => {
@@ -72,9 +74,13 @@ impl<'l> Program<'l> {
                 Some(operator) => operator,
                 _ => raise!("found an unknown operator ({:#x})", code),
             };
+            macro_rules! flush(
+                () => (Ok(Some((operator, mem::replace(&mut self.stack, vec![])))));
+            );
             match operator {
                 HStem | VStem | HStemHM | VStemHM => {
                     self.stems += self.stack.len() >> 1;
+                    return flush!();
                 },
                 CallSubr | CallGSubr => return self.call(operator),
                 Return => return self.recall(),
@@ -83,71 +89,39 @@ impl<'l> Program<'l> {
                     self.stems += self.stack.len() >> 1;
                     let _: Vec<u8> = try!(ParametrizedValue::read(&mut *self.routine,
                                                                   (self.stems + 7) >> 3));
+                    return flush!();
                 },
-                And => {
-                    push!(pop!().and(pop!()));
-                    next!();
-                },
-                Or => {
-                    push!(pop!().or(pop!()));
-                    next!();
-                },
-                Not => {
-                    push!(!pop!());
-                    next!();
-                },
-                Abs => {
-                    push!(pop!().abs());
-                    next!();
-                },
-                Add => {
-                    push!(pop!() + pop!());
-                    next!();
-                },
+                And => push!(pop!().and(pop!())),
+                Or => push!(pop!().or(pop!())),
+                Not => push!(!pop!()),
+                Abs => push!(pop!().abs()),
+                Add => push!(pop!() + pop!()),
                 Sub => {
                     let (right, left) = (pop!(), pop!());
                     push!(left - right);
-                    next!();
                 },
                 Div => {
                     let (right, left) = (pop!(), pop!());
                     push!(left / right);
-                    next!();
                 },
-                Neg => {
-                    push!(-pop!());
-                    next!();
-                },
+                Neg => push!(-pop!()),
                 // Eq => {},
                 Drop => {
                     pop!();
-                    next!();
                 },
                 // Put => {},
                 // Get => {},
                 // IfElse => {},
-                Random => {
-                    push!(Number::Real(self.source.read_f64() as f32));
-                    next!();
-                },
-                Mul => {
-                    push!(pop!() * pop!());
-                    next!();
-                },
-                Sqrt => {
-                    push!(pop!().sqrt());
-                    next!();
-                },
-                Dup => {
-                    push!(top!());
-                    next!();
-                },
+                Random => push!(Number::Real(self.source.read_f64() as f32)),
+                Mul => push!(pop!() * pop!()),
+                Sqrt => push!(pop!().sqrt()),
+                Dup => push!(top!()),
                 // Exch => {},
                 // Index => {},
                 // Roll => {},
-                _ => {},
+                _ => return flush!(),
             };
-            return Ok(Some((operator, mem::replace(&mut self.stack, vec![]))));
+            return self.next();
         }
     }
 
