@@ -1,4 +1,4 @@
-use std::ops::{Neg, Not};
+use std::ops::{Add, Neg, Not};
 
 use Result;
 use band::{Band, Value};
@@ -58,6 +58,20 @@ impl Value for Number {
             0xff => Real(FIXED_SCALING * (read!(u32) as f32)),
             _ => raise!("found a malformed number"),
         })
+    }
+}
+
+impl Add for Number {
+    type Output = Self;
+
+    #[inline]
+    fn add(self, other: Self) -> Self::Output {
+        match (self, other) {
+            (Integer(one), Integer(other)) => Integer(one + other),
+            (Real(one), Real(other)) => Real(one + other),
+            (Integer(one), Real(other)) => Real(one as f32 + other),
+            (Real(one), Integer(other)) => Real(one + other as f32),
+        }
     }
 }
 

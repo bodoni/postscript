@@ -94,7 +94,10 @@ impl<'l> Program<'l> {
                     push!(pop!().abs());
                     next!();
                 },
-                // Add => {},
+                Add => {
+                    push!(pop!() + pop!());
+                    next!();
+                },
                 // Sub => {},
                 // Div => {},
                 Neg => {
