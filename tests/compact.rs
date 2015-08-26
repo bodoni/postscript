@@ -1,6 +1,4 @@
-use postscript::compact::FontSet;
-
-use read;
+use setup;
 
 macro_rules! operations(
     ($($operator:ident => [$($number:expr),*],)*) => ({
@@ -15,7 +13,7 @@ macro_rules! operations(
 
 #[test]
 fn header() {
-    let set = FontSet::read(&mut read()).unwrap();
+    let set = setup();
     let table = &set.header;
 
     assert_eq!(table.major, 1);
@@ -26,7 +24,7 @@ fn header() {
 
 #[test]
 fn names() {
-    let set = FontSet::read(&mut read()).unwrap();
+    let set = setup();
     let vector = &set.names;
 
     assert_eq!(vector.len(), 1);
@@ -35,7 +33,7 @@ fn names() {
 
 #[test]
 fn top_dictionaries() {
-    let set = FontSet::read(&mut read()).unwrap();
+    let set = setup();
     let vector = &set.top_dictionaries;
 
     assert_eq!(vector.len(), 1);
@@ -55,7 +53,7 @@ fn top_dictionaries() {
 
 #[test]
 fn strings() {
-    let set = FontSet::read(&mut read()).unwrap();
+    let set = setup();
     let index = &set.strings;
 
     assert_eq!(index.len(), 322);
@@ -65,7 +63,7 @@ fn strings() {
 
 #[test]
 fn global_subroutines() {
-    let set = FontSet::read(&mut read()).unwrap();
+    let set = setup();
     let index = &set.global_subroutines;
 
     assert_eq!(index.len(), 181);
@@ -75,7 +73,7 @@ fn global_subroutines() {
 fn encodings() {
     use postscript::compact::compound::Encoding;
 
-    let set = FontSet::read(&mut read()).unwrap();
+    let set = setup();
     let vector = &set.encodings;
     let strings = &set.strings;
 
@@ -92,7 +90,7 @@ fn encodings() {
 fn charsets() {
     use postscript::compact::compound::Charset;
 
-    let set = FontSet::read(&mut read()).unwrap();
+    let set = setup();
     let vector = &set.charsets;
 
     assert_eq!(vector.len(), 1);
@@ -104,7 +102,7 @@ fn charsets() {
 
 #[test]
 fn charstrings() {
-    let set = FontSet::read(&mut read()).unwrap();
+    let set = setup();
     let vector = &set.charstrings;
 
     assert_eq!(vector.len(), 1);
@@ -116,7 +114,7 @@ fn private_dictionaries() {
     use postscript::compact::compound::Operator;
     use postscript::compact::primitive::Number;
 
-    let set = FontSet::read(&mut read()).unwrap();
+    let set = setup();
     let vector = &set.private_dictionaries;
 
     assert_eq!(vector.len(), 1);
@@ -126,7 +124,7 @@ fn private_dictionaries() {
 
 #[test]
 fn local_subroutines() {
-    let set = FontSet::read(&mut read()).unwrap();
+    let set = setup();
     let vector = &set.local_subroutines;
 
     assert_eq!(vector.len(), 1);

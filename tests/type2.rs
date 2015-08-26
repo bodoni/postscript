@@ -1,7 +1,6 @@
-use postscript::compact::FontSet;
 use postscript::type2::Program;
 
-use read;
+use setup;
 
 macro_rules! operations(
     ($(($operator:ident, [$($number:expr),*]),)*) => ({
@@ -15,7 +14,7 @@ macro_rules! operations(
 
 #[test]
 fn program_all() {
-    let set = FontSet::read(&mut read()).unwrap();
+    let set = setup();
     let global = &set.global_subroutines;
     let local = &set.local_subroutines[0];
 
@@ -28,7 +27,7 @@ fn program_all() {
 
 #[test]
 fn program_one() {
-    let set = FontSet::read(&mut read()).unwrap();
+    let set = setup();
 
     let code = &set.charstrings[0][134];
     let global = &set.global_subroutines;
