@@ -21,6 +21,11 @@ impl Number {
     }
 
     #[inline]
+    pub fn and(self, other: Self) -> Number {
+        Integer(if !self.is_zero() && !other.is_zero() { 1 } else { 0 })
+    }
+
+    #[inline]
     pub fn as_i32(&self) -> i32 {
         match *self {
             Integer(value) => value,
@@ -34,6 +39,19 @@ impl Number {
             Integer(value) => value as f32,
             Real(value) => value,
         }
+    }
+
+    #[inline]
+    pub fn is_zero(&self) -> bool {
+        match *self {
+            Integer(value) => value == 0,
+            Real(value) => value == 0.0,
+        }
+    }
+
+    #[inline]
+    pub fn or(self, other: Self) -> Number {
+        Integer(if !self.is_zero() || !other.is_zero() { 1 } else { 0 })
     }
 
     #[inline]
@@ -120,10 +138,7 @@ impl Not for Number {
 
     #[inline]
     fn not(self) -> Self::Output {
-        match self {
-            Integer(value) => Integer(if value != 0 { 1 } else { 0 }),
-            Real(value) => Integer(if value != 0.0 { 1 } else { 0 }),
-        }
+        Integer(if self.is_zero() { 1 } else { 0 })
     }
 }
 

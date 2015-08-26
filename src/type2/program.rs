@@ -84,8 +84,14 @@ impl<'l> Program<'l> {
                     let _: Vec<u8> = try!(ParametrizedValue::read(&mut *self.routine,
                                                                   (self.stems + 7) >> 3));
                 },
-                // And => {},
-                // Or => {},
+                And => {
+                    push!(pop!().and(pop!()));
+                    next!();
+                },
+                Or => {
+                    push!(pop!().or(pop!()));
+                    next!();
+                },
                 Not => {
                     push!(!pop!());
                     next!();
