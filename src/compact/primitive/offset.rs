@@ -4,6 +4,7 @@ use Result;
 use band::{Band, ValueExt};
 use compact::primitive::OffsetSize;
 
+/// An offset.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Offset(pub u32);
 
@@ -18,6 +19,7 @@ macro_rules! assemble(
 );
 
 impl Offset {
+    /// Return the inner value.
     #[inline(always)]
     pub fn as_u32(&self) -> u32 {
         self.0

@@ -22,6 +22,7 @@ pub struct FontSet {
 }
 
 impl FontSet {
+    /// Parse a font set.
     #[inline]
     pub fn read<T: Read + Seek>(reader: &mut T) -> Result<Self> {
         Value::read(reader)

@@ -6,6 +6,7 @@ use band::{Band, ValueExt};
 use type2::compound::{Operation, Operator};
 use type2::primitive::Number;
 
+/// A program.
 pub struct Program<'l> {
     routine: Routine<'l>,
     global: &'l [Vec<u8>],
@@ -21,6 +22,7 @@ struct Routine<'l> {
 }
 
 impl<'l> Program<'l> {
+    /// Create a program.
     #[inline]
     pub fn new(code: &'l [u8], global: &'l [Vec<u8>], local: &'l [Vec<u8>]) -> Program<'l> {
         Program {
@@ -32,6 +34,7 @@ impl<'l> Program<'l> {
         }
     }
 
+    /// Return the next operation.
     pub fn next(&mut self) -> Result<Option<Operation>> {
         use type2::compound::Operator::*;
 

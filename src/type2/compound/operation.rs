@@ -1,7 +1,10 @@
 use Result;
 use type2::primitive::Number;
 
+/// An operation.
 pub type Operation = (Operator, Vec<Number>);
+
+/// A collection of operations.
 pub type Operations = Vec<Operation>;
 
 macro_rules! operator {
@@ -13,6 +16,7 @@ macro_rules! operator {
 
 macro_rules! operator_define {
     (pub $name:ident { $($variant:ident,)* }) => (
+        /// An operator.
         #[derive(Clone, Copy, Debug, Eq, PartialEq)]
         pub enum $name { $($variant,)* }
     );
@@ -20,6 +24,7 @@ macro_rules! operator_define {
 
 macro_rules! operator_implement {
     (pub $name:ident { $($code:pat => $variant:ident,)* }) => (impl $name {
+        #[doc(hidden)]
         pub fn from(code: u16) -> Result<Self> {
             use self::$name::*;
             Ok(match code {

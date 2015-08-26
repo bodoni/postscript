@@ -5,8 +5,13 @@ use std::mem;
 use Result;
 use band::{Band, Value, ValueExt};
 
+/// A glyph identifier.
 pub type GlyphID = u16;
+
+/// An offset size.
 pub type OffsetSize = u8;
+
+/// A string identifier.
 pub type StringID = u16;
 
 macro_rules! fill(

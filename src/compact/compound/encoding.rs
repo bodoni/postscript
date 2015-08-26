@@ -1,5 +1,6 @@
 use compact::primitive::{GlyphID, StringID};
 
+/// An encoding.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Encoding {
     Standard,
@@ -7,6 +8,7 @@ pub enum Encoding {
 }
 
 impl Encoding {
+    /// Return the string identifier of a glyph.
     #[inline]
     pub fn get(&self, gid: GlyphID) -> Option<StringID> {
         match *self {

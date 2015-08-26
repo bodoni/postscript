@@ -2,6 +2,7 @@ use Result;
 use band::{Band, Value, ValueExt};
 use compact::primitive::{GlyphID, StringID};
 
+/// A character set.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Charset {
     ISOAdobe,
@@ -24,6 +25,7 @@ table! {
 }
 
 impl Charset {
+    /// Return the name of a glyph.
     #[inline]
     pub fn get(&self, gid: GlyphID) -> Option<&'static str> {
         match self {

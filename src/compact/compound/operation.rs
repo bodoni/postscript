@@ -4,8 +4,10 @@ use Result;
 use band::{Band, Value};
 use compact::primitive::Number;
 
+/// An operation.
 pub type Operation = (Operator, Vec<Number>);
 
+/// A collection of operations.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Operations(pub HashMap<Operator, Vec<Number>>);
 
@@ -83,6 +85,7 @@ macro_rules! operator {
 
 macro_rules! operator_define {
     (pub $name:ident { $($variant:ident,)* }) => (
+        /// An operator.
         #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
         pub enum $name { $($variant,)* }
     );
@@ -90,6 +93,7 @@ macro_rules! operator_define {
 
 macro_rules! operator_implement {
     (pub $name:ident { $($code:pat => $variant:ident $default:tt,)* }) => (impl $name {
+        #[doc(hidden)]
         pub fn from(code: u16) -> Result<Self> {
             use self::$name::*;
             Ok(match code {
@@ -98,6 +102,7 @@ macro_rules! operator_implement {
             })
         }
 
+        /// Return the default arguments.
         pub fn default(&self) -> Option<&'static [Number]> {
             use self::$name::*;
             match *self {

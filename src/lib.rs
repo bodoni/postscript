@@ -47,13 +47,17 @@ macro_rules! itemize(($($chunk:item)*) => ($($chunk)*));
 
 macro_rules! number {
     ($name:ident) => (
+        /// A number.
         #[derive(Clone, Copy, Debug, PartialEq)]
         pub enum $name {
+            /// An integer number.
             Integer(i32),
+            /// A floating-point number.
             Real(f32),
         }
 
         impl $name {
+            /// Return the inner value, converting to `i32` if needed.
             #[inline]
             pub fn as_i32(&self) -> i32 {
                 use self::$name::*;
@@ -63,6 +67,7 @@ macro_rules! number {
                 }
             }
 
+            /// Return the inner value, converting to `f32` if needed.
             #[inline]
             pub fn as_f32(&self) -> f32 {
                 use self::$name::*;
