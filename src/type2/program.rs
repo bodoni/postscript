@@ -71,7 +71,7 @@ impl<'l> Program<'l> {
                 code if code == 0x0c => try!(self.routine.take::<u16>()),
                 _ => try!(self.routine.take::<u8>()) as u16,
             };
-            let operator = match Operator::get(code) {
+            let operator = match Operator::from(code) {
                 Some(operator) => operator,
                 _ => raise!("found an unknown operator ({:#x})", code),
             };

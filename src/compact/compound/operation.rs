@@ -21,7 +21,7 @@ impl Value for Operation {
                     } else {
                         try!(band.take::<u8>()) as u16
                     };
-                    let operator = match Operator::get(code) {
+                    let operator = match Operator::from(code) {
                         Some(operator) => operator,
                         _ => raise!("found an unknown operator ({:#x})", code),
                     };
@@ -94,7 +94,7 @@ macro_rules! operator_define {
 
 macro_rules! operator_implement {
     (pub $name:ident { $($code:pat => $variant:ident $default:tt,)* }) => (impl $name {
-        pub fn get(code: u16) -> Option<Self> {
+        pub fn from(code: u16) -> Option<Self> {
             use self::$name::*;
             Some(match code {
                 $($code => $variant,)+

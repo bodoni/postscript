@@ -19,7 +19,7 @@ macro_rules! operator_define {
 
 macro_rules! operator_implement {
     (pub $name:ident { $($code:pat => $variant:ident,)* }) => (impl $name {
-        pub fn get(code: u16) -> Option<Self> {
+        pub fn from(code: u16) -> Option<Self> {
             use self::$name::*;
             Some(match code {
                 $($code => $variant,)+
