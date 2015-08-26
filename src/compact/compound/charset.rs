@@ -2,7 +2,7 @@ use Result;
 use band::{Band, Value, ValueExt};
 use compact::primitive::{GlyphID, StringID};
 
-/// A character set.
+/// A charset.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Charset {
     ISOAdobe,
@@ -11,6 +11,7 @@ pub enum Charset {
     Format1(Charset1),
 }
 
+/// A charset of Format 1.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Charset1 {
     pub format: u8,
@@ -18,6 +19,7 @@ pub struct Charset1 {
 }
 
 table! {
+    #[doc = "An range of a charset of Format 1."]
     pub CharsetRange1 {
         first (StringID),
         nLeft (u8      ),

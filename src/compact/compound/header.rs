@@ -1,6 +1,7 @@
 use compact::primitive::OffsetSize;
 
 table! {
+    #[doc = "A header."]
     #[derive(Copy)]
     pub Header {
         major   (u8        ),

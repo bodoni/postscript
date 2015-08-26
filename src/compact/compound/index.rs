@@ -6,6 +6,7 @@ use compact::compound::Operations;
 use compact::primitive::{Offset, OffsetSize, StringID};
 
 table_define! {
+    #[doc = "An index."]
     pub Index {
         count   (u16         ),
         offSize (OffsetSize  ),
@@ -41,19 +42,18 @@ impl Value for Index {
 deref! { Index::data => [Vec<u8>] }
 
 macro_rules! index {
-    ($(#[$attribute:meta])* $structure:ident) => (
-        index_define! { $(#[$attribute])* pub $structure {} }
+    ($(#[$attribute:meta])* pub $structure:ident) => (
+        index_define! { $(#[$attribute])* pub $structure }
         index_implement! { $structure }
     );
 }
 
 macro_rules! index_define {
-    ($(#[$attribute:meta])* pub $structure:ident { $($field:ident: $kind:ty,)* }) => (
+    ($(#[$attribute:meta])* pub $structure:ident) => (
         $(#[$attribute])*
         #[derive(Clone, Debug, Default, Eq, PartialEq)]
         pub struct $structure {
             index: ::compact::compound::Index,
-            $($field: $kind,)*
         }
 
         deref! { $structure::index => ::compact::compound::Index }
@@ -72,14 +72,29 @@ macro_rules! index_implement {
 }
 
 index_define! {
-    pub Charstrings {
-    }
+    #[doc = "A charstrings index."]
+    pub Charstrings
 }
 
-index!(TopDictionaries);
-index!(Names);
-index!(Strings);
-index!(Subroutines);
+index! {
+    #[doc = "A top-dictionaries index."]
+    pub TopDictionaries
+}
+
+index! {
+    #[doc = "A names index."]
+    pub Names
+}
+
+index! {
+    #[doc = "A strings index."]
+    pub Strings
+}
+
+index! {
+    #[doc = "A subroutines index."]
+    pub Subroutines
+}
 
 impl ValueExt<i32> for Charstrings {
     fn read<T: Band>(band: &mut T, format: i32) -> Result<Self> {
@@ -91,6 +106,7 @@ impl ValueExt<i32> for Charstrings {
 }
 
 impl TopDictionaries {
+    #[doc(hidden)]
     pub fn into_vec(self) -> Result<Vec<Operations>> {
         let TopDictionaries { index: Index { data, .. } } = self;
         let mut vector = Vec::with_capacity(data.len());
@@ -102,6 +118,7 @@ impl TopDictionaries {
 }
 
 impl Names {
+    #[doc(hidden)]
     pub fn into_vec(self) -> Result<Vec<String>> {
         let Names { index: Index { data, .. } } = self;
         let mut vector = Vec::with_capacity(data.len());
@@ -116,6 +133,7 @@ impl Names {
 }
 
 impl Strings {
+    /// Return the string corresponding to a string identifier.
     pub fn get(&self, sid: StringID) -> Option<String> {
         match sid as usize {
             i if i < NUMBER_OF_STANDARD_STRINGS => {

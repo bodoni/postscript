@@ -31,6 +31,7 @@ impl Value for Operation {
 }
 
 impl Operations {
+    /// Return the arguments of an operation.
     #[inline]
     pub fn get(&self, operator: Operator) -> Option<&[Number]> {
         match self.0.get(&operator) {
@@ -39,6 +40,7 @@ impl Operations {
         }
     }
 
+    #[doc(hidden)]
     #[inline]
     pub fn get_single(&self, operator: Operator) -> Option<Number> {
         self.get(operator).and_then(|arguments| {
@@ -50,6 +52,7 @@ impl Operations {
         })
     }
 
+    #[doc(hidden)]
     #[inline]
     pub fn get_double(&self, operator: Operator) -> Option<(Number, Number)> {
         self.get(operator).and_then(|arguments| {
