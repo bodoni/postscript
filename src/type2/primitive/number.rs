@@ -1,9 +1,10 @@
 use std::ops::{Add, Div, Mul, Neg, Not, Sub};
+use std::cmp::{Ordering, PartialOrd};
 
 use Result;
 use band::{Band, Value};
 
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Number {
     Integer(i32),
     Real(f32),
@@ -27,17 +28,17 @@ impl Number {
 
     #[inline]
     pub fn as_i32(&self) -> i32 {
-        match *self {
-            Integer(value) => value,
-            Real(value) => value as i32,
+        match self {
+            &Integer(value) => value,
+            &Real(value) => value as i32,
         }
     }
 
     #[inline]
     pub fn as_f32(&self) -> f32 {
-        match *self {
-            Integer(value) => value as f32,
-            Real(value) => value,
+        match self {
+            &Integer(value) => value as f32,
+            &Real(value) => value,
         }
     }
 
@@ -62,39 +63,6 @@ impl Number {
             Integer(value) => Integer((value as f32).sqrt() as i32),
             Real(value) => Real(value.sqrt()),
         }
-    }
-}
-
-impl Value for Number {
-    fn read<T: Band>(band: &mut T) -> Result<Self> {
-        const FIXED_SCALING: f32 = 1f32 / (1 << 16) as f32;
-        macro_rules! read(($kind:ident) => (try!(band.take::<$kind>())));
-        let first = read!(u8);
-        Ok(match first {
-            0x20...0xf6 => Integer(first as i32 - 139),
-            0xf7...0xfa => Integer((first as i32 - 247) * 256 + read!(u8) as i32 + 108),
-            0xfb...0xfe => Integer(-(first as i32 - 251) * 256 - read!(u8) as i32 - 108),
-            0x1c => Integer(read!(u16) as i16 as i32),
-            0xff => Real(FIXED_SCALING * (read!(u32) as f32)),
-            _ => raise!("found a malformed number"),
-        })
-    }
-}
-
-impl From<Number> for bool {
-    #[inline(always)]
-    fn from(number: Number) -> bool {
-        match number {
-            Integer(value) => value == 0,
-            Real(value) => value == 0.0,
-        }
-    }
-}
-
-impl From<bool> for Number {
-    #[inline(always)]
-    fn from(yes: bool) -> Number {
-        if yes { Integer(1) } else { Integer(0) }
     }
 }
 
@@ -161,12 +129,57 @@ impl Not for Number {
     }
 }
 
+impl PartialOrd for Number {
+    #[inline]
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match (self, other) {
+            (&Integer(one), &Integer(other)) => one.partial_cmp(&other),
+            (&Real(one), &Real(other)) => one.partial_cmp(&other),
+            (&Integer(one), &Real(other)) => (one as f32).partial_cmp(&other),
+            (&Real(one), &Integer(other)) => one.partial_cmp(&(other as f32)),
+        }
+    }
+}
+
 impl Sub for Number {
     type Output = Self;
 
     #[inline(always)]
     fn sub(self, other: Self) -> Self::Output {
         self + (-other)
+    }
+}
+
+impl Value for Number {
+    fn read<T: Band>(band: &mut T) -> Result<Self> {
+        const FIXED_SCALING: f32 = 1f32 / (1 << 16) as f32;
+        macro_rules! read(($kind:ident) => (try!(band.take::<$kind>())));
+        let first = read!(u8);
+        Ok(match first {
+            0x20...0xf6 => Integer(first as i32 - 139),
+            0xf7...0xfa => Integer((first as i32 - 247) * 256 + read!(u8) as i32 + 108),
+            0xfb...0xfe => Integer(-(first as i32 - 251) * 256 - read!(u8) as i32 - 108),
+            0x1c => Integer(read!(u16) as i16 as i32),
+            0xff => Real(FIXED_SCALING * (read!(u32) as f32)),
+            _ => raise!("found a malformed number"),
+        })
+    }
+}
+
+impl From<Number> for bool {
+    #[inline(always)]
+    fn from(number: Number) -> bool {
+        match number {
+            Integer(value) => value == 0,
+            Real(value) => value == 0.0,
+        }
+    }
+}
+
+impl From<bool> for Number {
+    #[inline(always)]
+    fn from(yes: bool) -> Number {
+        if yes { Integer(1) } else { Integer(0) }
     }
 }
 

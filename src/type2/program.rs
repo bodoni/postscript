@@ -111,7 +111,10 @@ impl<'l> Program<'l> {
                 },
                 // Put => {},
                 // Get => {},
-                // IfElse => {},
+                IfElse => {
+                    let (right, left, no, yes) = (pop!(), pop!(), pop!(), pop!());
+                    push!(if left <= right { yes } else { no });
+                },
                 Random => push!(Number::Real(self.source.read_f64() as f32)),
                 Mul => push!(pop!() * pop!()),
                 Sqrt => push!(pop!().sqrt()),
