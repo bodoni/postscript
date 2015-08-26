@@ -1,5 +1,5 @@
 use Result;
-use band::{Band, ParametrizedValue, Value};
+use band::{Band, Value, ValueExt};
 use compact::primitive::{GlyphID, StringID};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -35,7 +35,7 @@ impl Charset {
     }
 }
 
-impl ParametrizedValue<usize> for Charset {
+impl ValueExt<usize> for Charset {
     fn read<T: Band>(band: &mut T, glyphs: usize) -> Result<Self> {
         Ok(match try!(band.peek::<u8>()) {
             0 => unimplemented!(),

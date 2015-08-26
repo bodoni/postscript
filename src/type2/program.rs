@@ -6,7 +6,7 @@ use std::mem;
 use std::ops::{Deref, DerefMut};
 
 use Result;
-use band::{Band, ParametrizedValue};
+use band::{Band, ValueExt};
 use type2::compound::{Operation, Operator};
 use type2::primitive::Number;
 
@@ -87,8 +87,8 @@ impl<'l> Program<'l> {
                 EndChar => return self.unwind(),
                 HintMask | CntrMask => {
                     self.stems += self.stack.len() >> 1;
-                    let _: Vec<u8> = try!(ParametrizedValue::read(&mut *self.routine,
-                                                                  (self.stems + 7) >> 3));
+                    let _: Vec<u8> = try!(ValueExt::read(&mut *self.routine,
+                                                         (self.stems + 7) >> 3));
                     return flush!();
                 },
                 And => push!(pop!().and(pop!())),

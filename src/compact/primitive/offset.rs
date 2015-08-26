@@ -1,7 +1,7 @@
 use std::mem;
 
 use Result;
-use band::{Band, ParametrizedValue};
+use band::{Band, ValueExt};
 use compact::primitive::OffsetSize;
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -24,7 +24,7 @@ impl Offset {
     }
 }
 
-impl ParametrizedValue<OffsetSize> for Offset {
+impl ValueExt<OffsetSize> for Offset {
     fn read<T: Band>(band: &mut T, size: OffsetSize) -> Result<Self> {
         Ok(Offset(match size {
             1 => try!(band.take::<u8>()) as u32,
@@ -41,7 +41,7 @@ impl ParametrizedValue<OffsetSize> for Offset {
 
 #[cfg(test)]
 mod tests {
-    use band::ParametrizedValue;
+    use band::ValueExt;
     use compact::primitive::Offset;
     use std::io::Cursor;
 

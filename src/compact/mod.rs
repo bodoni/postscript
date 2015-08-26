@@ -5,7 +5,7 @@
 use std::io::{Cursor, Read, Seek};
 
 use Result;
-use band::{Band, ParametrizedValue, Value};
+use band::{Band, Value, ValueExt};
 
 /// A font set.
 pub struct FontSet {
@@ -103,20 +103,20 @@ fn read_charset<T: Band>(band: &mut T, top: &Operations, glyphs: usize) -> Resul
         2 => Ok(Charset::ExpertSubset),
         offset => {
             try!(band.jump(offset as u64));
-            ParametrizedValue::read(band, glyphs)
+            ValueExt::read(band, glyphs)
         },
     }
 }
 
 fn read_charstrings<T: Band>(band: &mut T, top: &Operations) -> Result<Charstrings> {
     try!(band.jump(get_single!(top, Charstrings) as u64));
-    ParametrizedValue::read(band, get_single!(top, CharstringType))
+    ValueExt::read(band, get_single!(top, CharstringType))
 }
 
 fn read_private_dictionary<T: Band>(band: &mut T, top: &Operations) -> Result<Operations> {
     let (size, offset) = get_double!(top, Private);
     try!(band.jump(offset as u64));
-    let chunk: Vec<u8> = try!(ParametrizedValue::read(band, size as usize));
+    let chunk: Vec<u8> = try!(ValueExt::read(band, size as usize));
     Value::read(&mut Cursor::new(chunk))
 }
 

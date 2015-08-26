@@ -40,7 +40,7 @@ pub trait Value: Sized {
 }
 
 #[doc(hidden)]
-pub trait ParametrizedValue<P>: Sized {
+pub trait ValueExt<P>: Sized {
     fn read<T: Band>(&mut T, P) -> Result<Self>;
 }
 

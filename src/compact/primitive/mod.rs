@@ -3,7 +3,7 @@
 use std::mem;
 
 use Result;
-use band::{Band, ParametrizedValue, Value};
+use band::{Band, Value, ValueExt};
 
 pub type GlyphID = u16;
 pub type OffsetSize = u8;
@@ -42,7 +42,7 @@ implement!(u8, 1);
 implement!(u16, 2);
 implement!(u32, 4);
 
-impl ParametrizedValue<usize> for Vec<u8> {
+impl ValueExt<usize> for Vec<u8> {
     fn read<T: Band>(band: &mut T, count: usize) -> Result<Self> {
         let mut values = Vec::with_capacity(count);
         unsafe { values.set_len(count) };

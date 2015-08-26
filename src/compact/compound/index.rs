@@ -1,7 +1,7 @@
 use std::io::Cursor;
 
 use Result;
-use band::{Band, ParametrizedValue, Value};
+use band::{Band, Value, ValueExt};
 use compact::compound::Operations;
 use compact::primitive::{Offset, OffsetSize, StringID};
 
@@ -32,7 +32,7 @@ impl Value for Index {
         let mut data = Vec::with_capacity(count as usize);
         for i in 0..(count as usize) {
             let size = (offset[i + 1].as_u32() - offset[i].as_u32()) as usize;
-            data.push(try!(ParametrizedValue::read(band, size)));
+            data.push(try!(ValueExt::read(band, size)));
         }
         Ok(Index { count: count, offSize: offSize, offset: offset, data: data })
     }
@@ -81,7 +81,7 @@ index!(Names);
 index!(Strings);
 index!(Subroutines);
 
-impl ParametrizedValue<i32> for Charstrings {
+impl ValueExt<i32> for Charstrings {
     fn read<T: Band>(band: &mut T, format: i32) -> Result<Self> {
         Ok(match format {
             2 => Charstrings { index: try!(Value::read(band)) },
