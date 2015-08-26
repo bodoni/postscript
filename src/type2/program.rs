@@ -55,11 +55,11 @@ impl<'l> Program<'l> {
             self.stack.push(argument);
         }));
         macro_rules! read(($index:expr) => ({
-            let count = self.stack.len();
-            if $index >= count {
+            let length = self.stack.len();
+            if $index >= length {
                 raise!("expected more arguments");
             }
-            self.stack[count - 1 - $index]
+            self.stack[length - 1 - $index]
         }));
 
         loop {
@@ -121,7 +121,9 @@ impl<'l> Program<'l> {
                 Random => unimplemented!(),
                 Mul => push!(pop!() * pop!()),
                 Sqrt => push!(pop!().sqrt()),
-                Drop => { pop!(); },
+                Drop => {
+                    pop!();
+                },
                 Exch => {
                     let (right, left) = (pop!(), pop!());
                     push!(right);
@@ -131,7 +133,27 @@ impl<'l> Program<'l> {
                     let i = pop!(Integer);
                     push!(read!(if i >= 0 { i as usize } else { 0 }));
                 },
-                Roll => unimplemented!(),
+                Roll => {
+                    let (shift, span) = (pop!(Integer), pop!(Integer));
+                    let length = self.stack.len();
+                    if span < 0 {
+                        raise!("found an invalid argument");
+                    } else if span as usize > length {
+                        raise!("expected more arguments");
+                    } else if span > 0 {
+                        let position = length - span as usize;
+                        if shift > 0 {
+                            for _ in 0..shift {
+                                let argument = pop!();
+                                self.stack.insert(position, argument);
+                            }
+                        } else if shift < 0 {
+                            for _ in 0..(-shift) {
+                                push!(self.stack.remove(position));
+                            }
+                        }
+                    }
+                },
                 Dup => push!(read!(0)),
 
                 // Storage operators
