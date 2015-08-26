@@ -1,3 +1,4 @@
+use Result;
 use type2::primitive::Number;
 
 pub type Operation = (Operator, Vec<Number>);
@@ -19,11 +20,11 @@ macro_rules! operator_define {
 
 macro_rules! operator_implement {
     (pub $name:ident { $($code:pat => $variant:ident,)* }) => (impl $name {
-        pub fn from(code: u16) -> Option<Self> {
+        pub fn from(code: u16) -> Result<Self> {
             use self::$name::*;
-            Some(match code {
+            Ok(match code {
                 $($code => $variant,)+
-                _ => return None,
+                _ => raise!("found an unknown operator ({:#x})", code),
             })
         }
     });

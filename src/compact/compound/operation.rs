@@ -21,11 +21,7 @@ impl Value for Operation {
                     } else {
                         try!(band.take::<u8>()) as u16
                     };
-                    let operator = match Operator::from(code) {
-                        Some(operator) => operator,
-                        _ => raise!("found an unknown operator ({:#x})", code),
-                    };
-                    return Ok((operator, arguments));
+                    return Ok((try!(Operator::from(code)), arguments));
                 },
             }
         }
@@ -94,11 +90,11 @@ macro_rules! operator_define {
 
 macro_rules! operator_implement {
     (pub $name:ident { $($code:pat => $variant:ident $default:tt,)* }) => (impl $name {
-        pub fn from(code: u16) -> Option<Self> {
+        pub fn from(code: u16) -> Result<Self> {
             use self::$name::*;
-            Some(match code {
+            Ok(match code {
                 $($code => $variant,)+
-                _ => return None,
+                _ => raise!("found an unknown operator ({:#x})", code),
             })
         }
 
