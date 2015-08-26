@@ -154,7 +154,24 @@ impl<'l> Program<'l> {
                 },
 
                 /// Subroutine operators
-                CallSubr | CallGSubr => return self.call(operator),
+                CallSubr | CallGSubr => {
+                    let address = pop!(Integer);
+                    let mut routine = {
+                        let subroutines = if operator == CallSubr {
+                            &self.local
+                        } else {
+                            &self.global
+                        };
+                        let count = subroutines.len();
+                        let i = address + bias(count);
+                        if i < 0 || i as usize >= count {
+                            raise!("failed to find a global subroutine");
+                        }
+                        Routine::new(&subroutines[i as usize])
+                    };
+                    mem::swap(&mut self.routine, &mut routine);
+                    self.routine.caller = Some(Box::new(routine));
+                },
                 Return => {
                     let caller = match self.routine.caller.take() {
                         Some(caller) => caller,
@@ -169,31 +186,6 @@ impl<'l> Program<'l> {
 
     pub fn seed(&mut self, seed: [u64; 2]) {
         self.source = Box::new(random::default().seed(seed));
-    }
-
-    fn call(&mut self, operator: Operator) -> Result<Option<Operation>> {
-        let address = match self.stack.pop() {
-            Some(Number::Integer(address)) => address,
-            _ => raise!("expected an argument"),
-        };
-        let mut routine = if let Operator::CallGSubr = operator {
-            let count = self.global.len();
-            let i = address + bias(count);
-            if i < 0 || i as usize >= count {
-                raise!("failed to find a global subroutine");
-            }
-            Routine::new(&self.global[i as usize])
-        } else {
-            let count = self.local.len();
-            let i = address + bias(count);
-            if i < 0 || i as usize >= count {
-                raise!("failed to find a local subroutine");
-            }
-            Routine::new(&self.local[i as usize])
-        };
-        mem::swap(&mut self.routine, &mut routine);
-        self.routine.caller = Some(Box::new(routine));
-        self.next()
     }
 }
 
