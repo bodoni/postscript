@@ -98,8 +98,16 @@ impl<'l> Program<'l> {
                     push!(pop!() + pop!());
                     next!();
                 },
-                // Sub => {},
-                // Div => {},
+                Sub => {
+                    let (right, left) = (pop!(), pop!());
+                    push!(left - right);
+                    next!();
+                },
+                Div => {
+                    let (right, left) = (pop!(), pop!());
+                    push!(left / right);
+                    next!();
+                },
                 Neg => {
                     push!(-pop!());
                     next!();
@@ -116,7 +124,10 @@ impl<'l> Program<'l> {
                     push!(Number::Real(self.source.read_f64() as f32));
                     next!();
                 },
-                // Mul => {},
+                Mul => {
+                    push!(pop!() * pop!());
+                    next!();
+                },
                 Sqrt => {
                     push!(pop!().sqrt());
                     next!();

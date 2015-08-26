@@ -1,4 +1,4 @@
-use std::ops::{Add, Neg, Not};
+use std::ops::{Add, Div, Mul, Neg, Not, Sub};
 
 use Result;
 use band::{Band, Value};
@@ -75,6 +75,34 @@ impl Add for Number {
     }
 }
 
+impl Div for Number {
+    type Output = Self;
+
+    #[inline(always)]
+    fn div(self, other: Self) -> Self::Output {
+        match (self, other) {
+            (Integer(one), Integer(other)) => Integer(one / other),
+            (Real(one), Real(other)) => Real(one / other),
+            (Integer(one), Real(other)) => Real(one as f32 / other),
+            (Real(one), Integer(other)) => Real(one / other as f32),
+        }
+    }
+}
+
+impl Mul for Number {
+    type Output = Self;
+
+    #[inline(always)]
+    fn mul(self, other: Self) -> Self::Output {
+        match (self, other) {
+            (Integer(one), Integer(other)) => Integer(one * other),
+            (Real(one), Real(other)) => Real(one * other),
+            (Integer(one), Real(other)) => Real(one as f32 * other),
+            (Real(one), Integer(other)) => Real(one * other as f32),
+        }
+    }
+}
+
 impl Neg for Number {
     type Output = Self;
 
@@ -96,6 +124,15 @@ impl Not for Number {
             Integer(value) => Integer(if value != 0 { 1 } else { 0 }),
             Real(value) => Integer(if value != 0.0 { 1 } else { 0 }),
         }
+    }
+}
+
+impl Sub for Number {
+    type Output = Self;
+
+    #[inline(always)]
+    fn sub(self, other: Self) -> Self::Output {
+        self + (-other)
     }
 }
 
