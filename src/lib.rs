@@ -52,7 +52,7 @@ macro_rules! number {
         pub enum $name {
             /// An integer number.
             Integer(i32),
-            /// A floating-point number.
+            /// A real number.
             Real(f32),
         }
 
