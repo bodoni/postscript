@@ -89,7 +89,15 @@ impl<'l> Program<'l> {
                 },
 
                 /// Terminal operator
-                EndChar => return self.unwind(),
+                EndChar => {
+                    while let Some(caller) = self.routine.caller.take() {
+                        if !try!(self.routine.done()) {
+                            raise!("found trailing data after the end operator");
+                        }
+                        mem::replace(&mut self.routine, *caller);
+                    }
+                    return Ok(None);
+                },
 
                 /// Hint operators
                 HStem | VStem | HStemHM | VStemHM => {
@@ -147,7 +155,13 @@ impl<'l> Program<'l> {
 
                 /// Subroutine operators
                 CallSubr | CallGSubr => return self.call(operator),
-                Return => return self.recall(),
+                Return => {
+                    let caller = match self.routine.caller.take() {
+                        Some(caller) => caller,
+                        _ => raise!("found a return operator without a caller"),
+                    };
+                    mem::replace(&mut self.routine, *caller);
+                },
             };
             return self.next();
         }
@@ -180,25 +194,6 @@ impl<'l> Program<'l> {
         mem::swap(&mut self.routine, &mut routine);
         self.routine.caller = Some(Box::new(routine));
         self.next()
-    }
-
-    fn recall(&mut self) -> Result<Option<Operation>> {
-        let caller = match self.routine.caller.take() {
-            Some(caller) => caller,
-            _ => raise!("found a return operator without a caller"),
-        };
-        mem::replace(&mut self.routine, *caller);
-        self.next()
-    }
-
-    fn unwind(&mut self) -> Result<Option<Operation>> {
-        while let Some(caller) = self.routine.caller.take() {
-            if !try!(self.routine.done()) {
-                raise!("found trailing data after the end operator");
-            }
-            mem::replace(&mut self.routine, *caller);
-        }
-        Ok(None)
     }
 }
 
