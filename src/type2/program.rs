@@ -77,12 +77,12 @@ impl<'l> Program<'l> {
                 () => (Ok(Some((operator, mem::replace(&mut self.stack, vec![])))));
             );
             match operator {
-                /// Path construction operators
+                /// Path-construction operators
                 RMoveTo | HMoveTo | VMoveTo | RLineTo | HLineTo | VLineTo |
                 RRCurveTo | HHCurveTo | HVCurveTo | VHCurveTo | VVCurveTo |
-                RCurveLine | RLineCurve | Flex | HFlex | Flex1 | HFlex1 => return flush!(),
+                RCurveLine | RLineCurve | Flex | Flex1 | HFlex | HFlex1 => return flush!(),
 
-                /// Operator for finishing a path
+                /// Terminal operator
                 EndChar => return self.unwind(),
 
                 /// Hint operators
