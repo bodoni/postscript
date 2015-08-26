@@ -77,22 +77,27 @@ impl<'l> Program<'l> {
                 () => (Ok(Some((operator, mem::replace(&mut self.stack, vec![])))));
             );
             match operator {
+                /// Path construction operators
+                RMoveTo | HMoveTo | VMoveTo | RLineTo | HLineTo | VLineTo |
+                RRCurveTo | HHCurveTo | HVCurveTo | VHCurveTo | VVCurveTo |
+                RCurveLine | RLineCurve | Flex | HFlex | Flex1 | HFlex1 => return flush!(),
+
+                /// Operator for finishing a path
+                EndChar => return self.unwind(),
+
+                /// Hint operators
                 HStem | VStem | HStemHM | VStemHM => {
                     self.stems += self.stack.len() >> 1;
                     return flush!();
                 },
-                CallSubr | CallGSubr => return self.call(operator),
-                Return => return self.recall(),
-                EndChar => return self.unwind(),
                 HintMask | CntrMask => {
                     self.stems += self.stack.len() >> 1;
                     let _: Vec<u8> = try!(ValueExt::read(&mut *self.routine,
                                                          (self.stems + 7) >> 3));
                     return flush!();
                 },
-                And => push!(pop!().and(pop!())),
-                Or => push!(pop!().or(pop!())),
-                Not => push!(!pop!()),
+
+                /// Arithmetic operators
                 Abs => push!(pop!().abs()),
                 Add => push!(pop!() + pop!()),
                 Sub => {
@@ -104,24 +109,38 @@ impl<'l> Program<'l> {
                     push!(left / right);
                 },
                 Neg => push!(-pop!()),
-                Eq => push!(pop!().equal(pop!())),
+                Random => push!(Number::Real(self.source.read_f64() as f32)),
+                Mul => push!(pop!() * pop!()),
+                Sqrt => push!(pop!().sqrt()),
                 Drop => {
                     pop!();
                 },
-                // Put => {},
-                // Get => {},
+                Exch => {
+                    let (right, left) = (pop!(), pop!());
+                    push!(right);
+                    push!(left);
+                },
+                Index => unimplemented!(),
+                Roll => unimplemented!(),
+                Dup => push!(top!()),
+
+                // Storage operators
+                Put => unimplemented!(),
+                Get => unimplemented!(),
+
+                /// Conditional operators
+                And => push!(pop!().and(pop!())),
+                Or => push!(pop!().or(pop!())),
+                Not => push!(!pop!()),
+                Eq => push!(pop!().equal(pop!())),
                 IfElse => {
                     let (right, left, no, yes) = (pop!(), pop!(), pop!(), pop!());
                     push!(if left <= right { yes } else { no });
                 },
-                Random => push!(Number::Real(self.source.read_f64() as f32)),
-                Mul => push!(pop!() * pop!()),
-                Sqrt => push!(pop!().sqrt()),
-                Dup => push!(top!()),
-                // Exch => {},
-                // Index => {},
-                // Roll => {},
-                _ => return flush!(),
+
+                /// Subroutine operators
+                CallSubr | CallGSubr => return self.call(operator),
+                Return => return self.recall(),
             };
             return self.next();
         }
