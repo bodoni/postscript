@@ -22,7 +22,7 @@ impl Number {
 
     #[inline]
     pub fn and(self, other: Self) -> Number {
-        Integer(if !self.is_zero() && !other.is_zero() { 1 } else { 0 })
+        (!bool::from(self) && !bool::from(other)).into()
     }
 
     #[inline]
@@ -42,16 +42,18 @@ impl Number {
     }
 
     #[inline]
-    pub fn is_zero(&self) -> bool {
-        match *self {
-            Integer(value) => value == 0,
-            Real(value) => value == 0.0,
-        }
+    pub fn equal(self, other: Self) -> Number {
+        match (self, other) {
+            (Integer(one), Integer(other)) => one == other,
+            (Real(one), Real(other)) => one == other,
+            (Integer(one), Real(other)) => one as f32 == other,
+            (Real(one), Integer(other)) => one == other as f32,
+        }.into()
     }
 
     #[inline]
     pub fn or(self, other: Self) -> Number {
-        Integer(if !self.is_zero() || !other.is_zero() { 1 } else { 0 })
+        (!bool::from(self) || !bool::from(other)).into()
     }
 
     #[inline]
@@ -79,6 +81,23 @@ impl Value for Number {
     }
 }
 
+impl From<Number> for bool {
+    #[inline(always)]
+    fn from(number: Number) -> bool {
+        match number {
+            Integer(value) => value == 0,
+            Real(value) => value == 0.0,
+        }
+    }
+}
+
+impl From<bool> for Number {
+    #[inline(always)]
+    fn from(yes: bool) -> Number {
+        if yes { Integer(1) } else { Integer(0) }
+    }
+}
+
 impl Add for Number {
     type Output = Self;
 
@@ -96,7 +115,7 @@ impl Add for Number {
 impl Div for Number {
     type Output = Self;
 
-    #[inline(always)]
+    #[inline]
     fn div(self, other: Self) -> Self::Output {
         match (self, other) {
             (Integer(one), Integer(other)) => Integer(one / other),
@@ -110,7 +129,7 @@ impl Div for Number {
 impl Mul for Number {
     type Output = Self;
 
-    #[inline(always)]
+    #[inline]
     fn mul(self, other: Self) -> Self::Output {
         match (self, other) {
             (Integer(one), Integer(other)) => Integer(one * other),
@@ -138,7 +157,7 @@ impl Not for Number {
 
     #[inline]
     fn not(self) -> Self::Output {
-        Integer(if self.is_zero() { 1 } else { 0 })
+        (!bool::from(self)).into()
     }
 }
 

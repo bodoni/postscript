@@ -105,7 +105,7 @@ impl<'l> Program<'l> {
                     push!(left / right);
                 },
                 Neg => push!(-pop!()),
-                // Eq => {},
+                Eq => push!(pop!().equal(pop!())),
                 Drop => {
                     pop!();
                 },
