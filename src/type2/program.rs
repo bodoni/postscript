@@ -44,6 +44,7 @@ impl<'l> Program<'l> {
             return Ok(None);
         }
 
+        macro_rules! flush(() => (mem::replace(&mut self.stack, vec![])));
         macro_rules! pop(
             () => (match self.stack.pop() {
                 Some(value) => value,
@@ -79,14 +80,13 @@ impl<'l> Program<'l> {
                 Some(operator) => operator,
                 _ => raise!("found an unknown operator ({:#x})", code),
             };
-            macro_rules! flush(
-                () => (Ok(Some((operator, mem::replace(&mut self.stack, vec![])))));
-            );
             match operator {
                 /// Path-construction operators
                 RMoveTo | HMoveTo | VMoveTo | RLineTo | HLineTo | VLineTo |
                 RRCurveTo | HHCurveTo | HVCurveTo | VHCurveTo | VVCurveTo |
-                RCurveLine | RLineCurve | Flex | Flex1 | HFlex | HFlex1 => return flush!(),
+                RCurveLine | RLineCurve | Flex | Flex1 | HFlex | HFlex1 => {
+                    return Ok(Some((operator, flush!())));
+                },
 
                 /// Terminal operator
                 EndChar => return self.unwind(),
@@ -94,13 +94,13 @@ impl<'l> Program<'l> {
                 /// Hint operators
                 HStem | VStem | HStemHM | VStemHM => {
                     self.stems += self.stack.len() >> 1;
-                    return flush!();
+                    return Ok(Some((operator, flush!())));
                 },
                 HintMask | CntrMask => {
                     self.stems += self.stack.len() >> 1;
                     let _: Vec<u8> = try!(ValueExt::read(&mut *self.routine,
                                                          (self.stems + 7) >> 3));
-                    return flush!();
+                    return Ok(Some((operator, flush!())));
                 },
 
                 /// Arithmetic operators
@@ -118,9 +118,7 @@ impl<'l> Program<'l> {
                 Random => push!(Number::Real(self.source.read_f64() as f32)),
                 Mul => push!(pop!() * pop!()),
                 Sqrt => push!(pop!().sqrt()),
-                Drop => {
-                    pop!();
-                },
+                Drop => { pop!(); },
                 Exch => {
                     let (right, left) = (pop!(), pop!());
                     push!(right);
