@@ -1,7 +1,5 @@
 //! The compact font format.
 
-#![allow(non_snake_case)]
-
 use std::io::{Cursor, Read, Seek};
 
 use Result;
@@ -32,7 +30,7 @@ impl FontSet {
 impl Value for FontSet {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
         let header = try!(Header::read(band));
-        try!(band.jump(header.hdrSize as u64));
+        try!(band.jump(header.header_size as u64));
         let names = try!(try!(Names::read(band)).into_vec());
         let top_dictionaries = try!(try!(TopDictionaries::read(band)).into_vec());
         let strings = try!(Strings::read(band));

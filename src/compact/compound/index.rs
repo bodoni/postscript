@@ -8,10 +8,10 @@ use compact::primitive::{Offset, OffsetSize, StringID};
 table_define! {
     #[doc = "An index."]
     pub Index {
-        count   (u16         ),
-        offSize (OffsetSize  ),
-        offset  (Vec<Offset> ),
-        data    (Vec<Vec<u8>>),
+        count       (u16         ),
+        offset_size (OffsetSize  ),
+        offsets     (Vec<Offset> ),
+        data        (Vec<Vec<u8>>),
     }
 }
 
@@ -21,21 +21,21 @@ impl Value for Index {
         if count == 0 {
             return Ok(Index::default());
         }
-        let offSize = try!(band.take::<OffsetSize>());
-        let mut offset = Vec::with_capacity(count as usize + 1);
+        let offset_size = try!(band.take::<OffsetSize>());
+        let mut offsets = Vec::with_capacity(count as usize + 1);
         for i in 0..(count as usize + 1) {
-            let value = try!(Offset::read(band, offSize));
-            if i == 0 && value != Offset(1) || i > 0 && value <= offset[i - 1] {
+            let offset = try!(Offset::read(band, offset_size));
+            if i == 0 && offset != Offset(1) || i > 0 && offset <= offsets[i - 1] {
                 raise!("found a malformed index");
             }
-            offset.push(value);
+            offsets.push(offset);
         }
         let mut data = Vec::with_capacity(count as usize);
         for i in 0..(count as usize) {
-            let size = (offset[i + 1].as_u32() - offset[i].as_u32()) as usize;
+            let size = (offsets[i + 1].as_u32() - offsets[i].as_u32()) as usize;
             data.push(try!(ValueExt::read(band, size)));
         }
-        Ok(Index { count: count, offSize: offSize, offset: offset, data: data })
+        Ok(Index { count: count, offset_size: offset_size, offsets: offsets, data: data })
     }
 }
 

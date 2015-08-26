@@ -15,14 +15,14 @@ pub enum Charset {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Charset1 {
     pub format: u8,
-    pub Range1: Vec<CharsetRange1>,
+    pub ranges: Vec<CharsetRange1>,
 }
 
 table! {
     #[doc = "An range of a charset of Format 1."]
     pub CharsetRange1 {
         first (StringID),
-        nLeft (u8      ),
+        left  (u8      ),
     }
 }
 
@@ -54,17 +54,17 @@ impl Charset1 {
     fn read<T: Band>(band: &mut T, glyphs: usize) -> Result<Self> {
         let format = try!(band.take::<u8>());
         debug_assert_eq!(format, 1);
-        let mut Range1 = vec![];
+        let mut ranges = vec![];
         let mut found = 0 + 1;
         while found < glyphs {
             let range = try!(CharsetRange1::read(band));
-            found += 1 + range.nLeft as usize;
-            Range1.push(range);
+            found += 1 + range.left as usize;
+            ranges.push(range);
         }
         if found != glyphs {
             raise!("found a malformed char set");
         }
-        Ok(Charset1 { format: format, Range1: Range1 })
+        Ok(Charset1 { format: format, ranges: ranges })
     }
 }
 
