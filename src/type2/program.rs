@@ -144,8 +144,7 @@ impl<'l> Program<'l> {
                         let position = length - span as usize;
                         if shift > 0 {
                             for _ in 0..shift {
-                                let argument = pop!();
-                                self.stack.insert(position, argument);
+                                push!(self.stack.swap_remove(position));
                             }
                         } else if shift < 0 {
                             for _ in 0..(-shift) {
