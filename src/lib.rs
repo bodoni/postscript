@@ -1,7 +1,5 @@
 //! Parser for PostScript fonts.
 
-extern crate random;
-
 /// An error.
 pub type Error = std::io::Error;
 

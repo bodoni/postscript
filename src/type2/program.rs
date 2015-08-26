@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 
-use random::{self, Source};
 use std::io::Cursor;
 use std::mem;
 
@@ -15,7 +14,6 @@ pub struct Program<'l> {
     local: &'l [Vec<u8>],
     stack: Vec<Number>,
     stems: usize,
-    source: Box<Source>,
 }
 
 struct Routine<'l> {
@@ -33,7 +31,6 @@ impl<'l> Program<'l> {
             local: local,
             stack: vec![],
             stems: 0,
-            source: Box::new(random::default()),
         }
     }
 
@@ -123,7 +120,7 @@ impl<'l> Program<'l> {
                     push!(left / right);
                 },
                 Neg => push!(-pop!()),
-                Random => push!(Number::Real(self.source.read_f64() as f32)),
+                Random => unimplemented!(),
                 Mul => push!(pop!() * pop!()),
                 Sqrt => push!(pop!().sqrt()),
                 Drop => { pop!(); },
@@ -182,10 +179,6 @@ impl<'l> Program<'l> {
             };
             return self.next();
         }
-    }
-
-    pub fn seed(&mut self, seed: [u64; 2]) {
-        self.source = Box::new(random::default().seed(seed));
     }
 }
 
