@@ -1,31 +1,9 @@
 use Result;
 use band::{Band, Value};
 
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-pub enum Number {
-    Integer(i32),
-    Real(f32),
-}
+number!(Number);
 
 use self::Number::*;
-
-impl Number {
-    #[inline(always)]
-    pub fn as_i32(&self) -> i32 {
-        match self {
-            &Integer(value) => value,
-            &Real(value) => value as i32,
-        }
-    }
-
-    #[inline(always)]
-    pub fn as_f32(&self) -> f32 {
-        match self {
-            &Integer(value) => value as f32,
-            &Real(value) => value,
-        }
-    }
-}
 
 impl Value for Number {
     fn read<T: Band>(band: &mut T) -> Result<Self> {
