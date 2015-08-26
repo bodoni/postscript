@@ -131,6 +131,10 @@ impl<'l> Program<'l> {
         }
     }
 
+    pub fn seed(&mut self, seed: [u64; 2]) {
+        self.source = Box::new(random::default().seed(seed));
+    }
+
     fn call(&mut self, operator: Operator) -> Result<Option<Operation>> {
         let address = match self.stack.pop() {
             Some(Number::Integer(address)) => address,
@@ -173,10 +177,6 @@ impl<'l> Program<'l> {
             mem::replace(&mut self.routine, *caller);
         }
         Ok(None)
-    }
-
-    pub fn seed(&mut self, seed: [u64; 2]) {
-        self.source = Box::new(random::default().seed(seed));
     }
 }
 
