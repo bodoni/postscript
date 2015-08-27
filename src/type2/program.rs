@@ -2,7 +2,7 @@ use std::io::Cursor;
 use std::mem;
 
 use Result;
-use band::{Band, ValueExt};
+use tape::{Tape, ValueExt};
 use type2::compound::{Operation, Operator};
 use type2::primitive::Number;
 
@@ -16,7 +16,7 @@ pub struct Program<'l> {
 }
 
 struct Routine<'l> {
-    band: Cursor<&'l [u8]>,
+    tape: Cursor<&'l [u8]>,
     size: usize,
     caller: Option<Box<Routine<'l>>>,
 }
@@ -206,16 +206,16 @@ impl<'l> Program<'l> {
 impl<'l> Routine<'l> {
     #[inline]
     fn new(code: &'l [u8]) -> Routine<'l> {
-        Routine { band: Cursor::new(code), size: code.len(), caller: None }
+        Routine { tape: Cursor::new(code), size: code.len(), caller: None }
     }
 
     #[inline]
     fn done(&mut self) -> Result<bool> {
-        Ok(try!(Band::position(&mut self.band)) == self.size as u64)
+        Ok(try!(Tape::position(&mut self.tape)) == self.size as u64)
     }
 }
 
-deref! { Routine<'l>::band => Cursor<&'l [u8]> }
+deref! { Routine<'l>::tape => Cursor<&'l [u8]> }
 
 #[inline]
 fn bias(count: usize) -> i32 {

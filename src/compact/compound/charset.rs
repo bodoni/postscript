@@ -1,6 +1,6 @@
 use Result;
-use band::{Band, Value, ValueExt};
 use compact::primitive::{GlyphID, StringID};
+use tape::{Tape, Value, ValueExt};
 
 /// A charset.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -40,10 +40,10 @@ impl Charset {
 }
 
 impl ValueExt<usize> for Charset {
-    fn read<T: Band>(band: &mut T, glyphs: usize) -> Result<Self> {
-        Ok(match try!(band.peek::<u8>()) {
+    fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
+        Ok(match try!(tape.peek::<u8>()) {
             0 => unimplemented!(),
-            1 => Charset::Format1(try!(Charset1::read(band, glyphs))),
+            1 => Charset::Format1(try!(Charset1::read(tape, glyphs))),
             2 => unimplemented!(),
             _ => raise!("found a char set with an unknown format"),
         })
@@ -51,13 +51,13 @@ impl ValueExt<usize> for Charset {
 }
 
 impl Charset1 {
-    fn read<T: Band>(band: &mut T, glyphs: usize) -> Result<Self> {
-        let format = try!(band.take::<u8>());
+    fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
+        let format = try!(tape.take::<u8>());
         debug_assert_eq!(format, 1);
         let mut ranges = vec![];
         let mut found = 0 + 1;
         while found < glyphs {
-            let range = try!(CharsetRange1::read(band));
+            let range = try!(CharsetRange1::read(tape));
             found += 1 + range.left as usize;
             ranges.push(range);
         }

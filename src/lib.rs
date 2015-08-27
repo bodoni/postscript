@@ -165,7 +165,7 @@ macro_rules! raise(
     ($($argument:tt)+) => (raise!(format!($($argument)+)));
 );
 
-mod band;
+mod tape;
 
 pub mod compact;
 pub mod type2;

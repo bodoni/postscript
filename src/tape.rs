@@ -3,7 +3,7 @@ use std::io::{Read, Seek, SeekFrom};
 use Result;
 
 #[doc(hidden)]
-pub trait Band: Read + Seek + Sized {
+pub trait Tape: Read + Seek + Sized {
     fn count(&mut self) -> Result<u64> {
         let current = try!(self.position());
         let end = self.seek(SeekFrom::End(0));
@@ -36,13 +36,13 @@ pub trait Band: Read + Seek + Sized {
 
 #[doc(hidden)]
 pub trait Value: Sized {
-    fn read<T: Band>(&mut T) -> Result<Self>;
+    fn read<T: Tape>(&mut T) -> Result<Self>;
 }
 
 #[doc(hidden)]
 pub trait ValueExt<P>: Sized {
-    fn read<T: Band>(&mut T, P) -> Result<Self>;
+    fn read<T: Tape>(&mut T, P) -> Result<Self>;
 }
 
-impl<T: Read + Seek> Band for T {
+impl<T: Read + Seek> Tape for T {
 }

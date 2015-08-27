@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use Result;
-use band::{Band, Value};
+use tape::{Tape, Value};
 use compact::primitive::Number;
 
 /// An operation.
@@ -12,16 +12,16 @@ pub type Operation = (Operator, Vec<Number>);
 pub struct Operations(pub HashMap<Operator, Vec<Number>>);
 
 impl Value for Operation {
-    fn read<T: Band>(band: &mut T) -> Result<Self> {
+    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
         let mut arguments = vec![];
         loop {
-            match try!(band.peek::<u8>()) {
-                0x1c | 0x1d | 0x1e | 0x20...0xfe => arguments.push(try!(Value::read(band))),
+            match try!(tape.peek::<u8>()) {
+                0x1c | 0x1d | 0x1e | 0x20...0xfe => arguments.push(try!(Value::read(tape))),
                 code => {
                     let code = if code == 0x0c {
-                        try!(band.take::<u16>())
+                        try!(tape.take::<u16>())
                     } else {
-                        try!(band.take::<u8>()) as u16
+                        try!(tape.take::<u8>()) as u16
                     };
                     return Ok((try!(Operator::from(code)), arguments));
                 },
@@ -66,11 +66,11 @@ impl Operations {
 }
 
 impl Value for Operations {
-    fn read<T: Band>(band: &mut T) -> Result<Self> {
-        let size = try!(band.count());
+    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+        let size = try!(tape.count());
         let mut map = HashMap::new();
-        while try!(band.position()) < size {
-            let (operator, arguments) = try!(Value::read(band));
+        while try!(tape.position()) < size {
+            let (operator, arguments) = try!(Value::read(tape));
             map.insert(operator, arguments);
         }
         Ok(Operations(map))

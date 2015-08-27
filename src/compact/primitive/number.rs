@@ -1,13 +1,13 @@
 use Result;
-use band::{Band, Value};
+use tape::{Tape, Value};
 
 number!(Number);
 
 use self::Number::*;
 
 impl Value for Number {
-    fn read<T: Band>(band: &mut T) -> Result<Self> {
-        macro_rules! read(($kind:ident) => (try!(band.take::<$kind>())));
+    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+        macro_rules! read(($kind:ident) => (try!(tape.take::<$kind>())));
         let first = read!(u8);
         Ok(match first {
             0x20...0xf6 => Integer(first as i32 - 139),
@@ -15,20 +15,20 @@ impl Value for Number {
             0xfb...0xfe => Integer(-(first as i32 - 251) * 256 - read!(u8) as i32 - 108),
             0x1c => Integer(read!(u16) as i16 as i32),
             0x1d => Integer(read!(u32) as i32),
-            0x1e => Real(try!(read_real(band))),
+            0x1e => Real(try!(read_real(tape))),
             _ => raise!("found a malformed number"),
         })
     }
 }
 
-fn read_real<T: Band>(band: &mut T) -> Result<f32> {
+fn read_real<T: Tape>(tape: &mut T) -> Result<f32> {
     let mut buffer = String::new();
     let mut byte = 0;
     let mut high = true;
     loop {
         let nibble = match high {
             true => {
-                byte = try!(band.take::<u8>());
+                byte = try!(tape.take::<u8>());
                 byte >> 4
             },
             false => byte & 0x0f,
@@ -52,50 +52,50 @@ fn read_real<T: Band>(band: &mut T) -> Result<f32> {
 
 #[cfg(test)]
 mod tests {
-    use band::Value;
+    use tape::Value;
     use compact::primitive::Number;
     use std::io::Cursor;
 
     #[test]
     fn integer() {
-        macro_rules! read(($band:expr) => (Number::read(&mut $band).unwrap().as_i32()));
+        macro_rules! read(($tape:expr) => (Number::read(&mut $tape).unwrap().as_i32()));
 
-        let mut band = Cursor::new(vec![0x8b]);
-        assert_eq!(read!(band), 0);
+        let mut tape = Cursor::new(vec![0x8b]);
+        assert_eq!(read!(tape), 0);
 
-        let mut band = Cursor::new(vec![0xef]);
-        assert_eq!(read!(band), 100);
+        let mut tape = Cursor::new(vec![0xef]);
+        assert_eq!(read!(tape), 100);
 
-        let mut band = Cursor::new(vec![0x27]);
-        assert_eq!(read!(band), -100);
+        let mut tape = Cursor::new(vec![0x27]);
+        assert_eq!(read!(tape), -100);
 
-        let mut band = Cursor::new(vec![0xfa, 0x7c]);
-        assert_eq!(read!(band), 1000);
+        let mut tape = Cursor::new(vec![0xfa, 0x7c]);
+        assert_eq!(read!(tape), 1000);
 
-        let mut band = Cursor::new(vec![0xfe, 0x7c]);
-        assert_eq!(read!(band), -1000);
+        let mut tape = Cursor::new(vec![0xfe, 0x7c]);
+        assert_eq!(read!(tape), -1000);
 
-        let mut band = Cursor::new(vec![0x1c, 0x27, 0x10]);
-        assert_eq!(read!(band), 10000);
+        let mut tape = Cursor::new(vec![0x1c, 0x27, 0x10]);
+        assert_eq!(read!(tape), 10000);
 
-        let mut band = Cursor::new(vec![0x1c, 0xd8, 0xf0]);
-        assert_eq!(read!(band), -10000);
+        let mut tape = Cursor::new(vec![0x1c, 0xd8, 0xf0]);
+        assert_eq!(read!(tape), -10000);
 
-        let mut band = Cursor::new(vec![0x1d, 0x00, 0x01, 0x86, 0xa0]);
-        assert_eq!(read!(band), 100000);
+        let mut tape = Cursor::new(vec![0x1d, 0x00, 0x01, 0x86, 0xa0]);
+        assert_eq!(read!(tape), 100000);
 
-        let mut band = Cursor::new(vec![0x1d, 0xff, 0xfe, 0x79, 0x60]);
-        assert_eq!(read!(band), -100000);
+        let mut tape = Cursor::new(vec![0x1d, 0xff, 0xfe, 0x79, 0x60]);
+        assert_eq!(read!(tape), -100000);
     }
 
     #[test]
     fn real() {
-        macro_rules! read(($band:expr) => (Number::read(&mut $band).unwrap().as_f32()));
+        macro_rules! read(($tape:expr) => (Number::read(&mut $tape).unwrap().as_f32()));
 
-        let mut band = Cursor::new(vec![0x1e, 0xe2, 0xa2, 0x5f, 0x0f]);
-        assert_eq!(read!(band), -2.25);
+        let mut tape = Cursor::new(vec![0x1e, 0xe2, 0xa2, 0x5f, 0x0f]);
+        assert_eq!(read!(tape), -2.25);
 
-        let mut band = Cursor::new(vec![0x1e, 0x0a, 0x14, 0x05, 0x41, 0xc3, 0xff, 0x0f]);
-        assert!((read!(band) - 0.140541e-3).abs() < 1e-14);
+        let mut tape = Cursor::new(vec![0x1e, 0x0a, 0x14, 0x05, 0x41, 0xc3, 0xff, 0x0f]);
+        assert!((read!(tape) - 0.140541e-3).abs() < 1e-14);
     }
 }

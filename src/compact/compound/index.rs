@@ -1,9 +1,9 @@
 use std::io::Cursor;
 
 use Result;
-use band::{Band, Value, ValueExt};
 use compact::compound::Operations;
 use compact::primitive::{Offset, OffsetSize, StringID};
+use tape::{Tape, Value, ValueExt};
 
 table_define! {
     #[doc = "An index."]
@@ -16,15 +16,15 @@ table_define! {
 }
 
 impl Value for Index {
-    fn read<T: Band>(band: &mut T) -> Result<Self> {
-        let count = try!(band.take::<u16>());
+    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+        let count = try!(tape.take::<u16>());
         if count == 0 {
             return Ok(Index::default());
         }
-        let offset_size = try!(band.take::<OffsetSize>());
+        let offset_size = try!(tape.take::<OffsetSize>());
         let mut offsets = Vec::with_capacity(count as usize + 1);
         for i in 0..(count as usize + 1) {
-            let offset = try!(Offset::read(band, offset_size));
+            let offset = try!(Offset::read(tape, offset_size));
             if i == 0 && offset != Offset(1) || i > 0 && offset <= offsets[i - 1] {
                 raise!("found a malformed index");
             }
@@ -33,7 +33,7 @@ impl Value for Index {
         let mut data = Vec::with_capacity(count as usize);
         for i in 0..(count as usize) {
             let size = (offsets[i + 1].as_u32() - offsets[i].as_u32()) as usize;
-            data.push(try!(ValueExt::read(band, size)));
+            data.push(try!(ValueExt::read(tape, size)));
         }
         Ok(Index { count: count, offset_size: offset_size, offsets: offsets, data: data })
     }
@@ -62,10 +62,10 @@ macro_rules! index_define {
 
 macro_rules! index_implement {
     ($structure:ident) => (
-        impl ::band::Value for $structure {
+        impl ::tape::Value for $structure {
             #[inline]
-            fn read<T: ::band::Band>(band: &mut T) -> ::Result<Self> {
-                Ok($structure { index: try!(::band::Value::read(band)) })
+            fn read<T: ::tape::Tape>(tape: &mut T) -> ::Result<Self> {
+                Ok($structure { index: try!(::tape::Value::read(tape)) })
             }
         }
     );
@@ -97,9 +97,9 @@ index! {
 }
 
 impl ValueExt<i32> for Charstrings {
-    fn read<T: Band>(band: &mut T, format: i32) -> Result<Self> {
+    fn read<T: Tape>(tape: &mut T, format: i32) -> Result<Self> {
         Ok(match format {
-            2 => Charstrings { index: try!(Value::read(band)) },
+            2 => Charstrings { index: try!(Value::read(tape)) },
             _ => raise!("found an unknown charstring format"),
         })
     }

@@ -1,7 +1,7 @@
 use std::ops::Not;
 
 use Result;
-use band::{Band, Value};
+use tape::{Tape, Value};
 
 number!(Number);
 
@@ -57,9 +57,9 @@ impl Not for Number {
 }
 
 impl Value for Number {
-    fn read<T: Band>(band: &mut T) -> Result<Self> {
+    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
         const FIXED_SCALING: f32 = 1f32 / (1 << 16) as f32;
-        macro_rules! read(($kind:ident) => (try!(band.take::<$kind>())));
+        macro_rules! read(($kind:ident) => (try!(tape.take::<$kind>())));
         let first = read!(u8);
         Ok(match first {
             0x20...0xf6 => Integer(first as i32 - 139),
@@ -93,15 +93,15 @@ impl From<bool> for Number {
 
 #[cfg(test)]
 mod tests {
-    use band::Value;
     use std::io::Cursor;
+    use tape::Value;
     use type2::primitive::Number;
 
     #[test]
     fn real() {
-        macro_rules! read(($band:expr) => (Number::read(&mut $band).unwrap().as_f32()));
+        macro_rules! read(($tape:expr) => (Number::read(&mut $tape).unwrap().as_f32()));
 
-        let mut band = Cursor::new(vec![0xff, 0x00, 0x01, 0x04, 0x5a]);
-        assert_eq!(format!("{:.3}", read!(band)), "1.017");
+        let mut tape = Cursor::new(vec![0xff, 0x00, 0x01, 0x04, 0x5a]);
+        assert_eq!(format!("{:.3}", read!(tape)), "1.017");
     }
 }
