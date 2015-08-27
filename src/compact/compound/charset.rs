@@ -11,7 +11,7 @@ pub enum Charset {
     Format1(Charset1),
 }
 
-/// A charset of Format 1.
+/// A charset of format 1.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Charset1 {
     pub format: u8,
@@ -19,7 +19,7 @@ pub struct Charset1 {
 }
 
 table! {
-    #[doc = "An range of a charset of Format 1."]
+    #[doc = "An range of a charset of format 1."]
     pub CharsetRange1 {
         first (StringID),
         left  (u8      ),
