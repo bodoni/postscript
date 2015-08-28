@@ -99,7 +99,7 @@ mod tests {
 
     #[test]
     fn real() {
-        macro_rules! read(($tape:expr) => (Number::read(&mut $tape).unwrap().as_f32()));
+        macro_rules! read(($tape:expr) => (f32::from(Number::read(&mut $tape).unwrap())));
 
         let mut tape = Cursor::new(vec![0xff, 0x00, 0x01, 0x04, 0x5a]);
         assert_eq!(format!("{:.3}", read!(tape)), "1.017");

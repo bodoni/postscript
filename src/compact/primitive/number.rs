@@ -58,7 +58,7 @@ mod tests {
 
     #[test]
     fn integer() {
-        macro_rules! read(($tape:expr) => (Number::read(&mut $tape).unwrap().as_i32()));
+        macro_rules! read(($tape:expr) => (i32::from(Number::read(&mut $tape).unwrap())));
 
         let mut tape = Cursor::new(vec![0x8b]);
         assert_eq!(read!(tape), 0);
@@ -90,7 +90,7 @@ mod tests {
 
     #[test]
     fn real() {
-        macro_rules! read(($tape:expr) => (Number::read(&mut $tape).unwrap().as_f32()));
+        macro_rules! read(($tape:expr) => (f32::from(Number::read(&mut $tape).unwrap())));
 
         let mut tape = Cursor::new(vec![0x1e, 0xe2, 0xa2, 0x5f, 0x0f]);
         assert_eq!(read!(tape), -2.25);

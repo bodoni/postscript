@@ -56,24 +56,24 @@ macro_rules! number {
             Real(f32),
         }
 
-        impl $name {
-            /// Return the inner value, converting to `i32` if needed.
+        impl From<$name> for i32 {
             #[inline]
-            pub fn as_i32(&self) -> i32 {
+            fn from(number: $name) -> i32 {
                 use self::$name::*;
-                match self {
-                    &Integer(value) => value,
-                    &Real(value) => value as i32,
+                match number {
+                    Integer(value) => value,
+                    Real(value) => value as i32,
                 }
             }
+        }
 
-            /// Return the inner value, converting to `f32` if needed.
+        impl From<$name> for f32 {
             #[inline]
-            pub fn as_f32(&self) -> f32 {
+            fn from(number: $name) -> f32 {
                 use self::$name::*;
-                match self {
-                    &Integer(value) => value as f32,
-                    &Real(value) => value,
+                match number {
+                    Integer(value) => value as f32,
+                    Real(value) => value,
                 }
             }
         }
