@@ -19,7 +19,7 @@ pub struct Charset1 {
 }
 
 table! {
-    #[doc = "An range of a charset of format 1."]
+    #[doc = "A range of a charset of format 1."]
     pub CharsetRange1 {
         first (StringID),
         left  (u8      ),
