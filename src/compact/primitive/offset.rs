@@ -18,11 +18,10 @@ macro_rules! assemble(
     ($hi:expr, $me:expr, $lo:expr) => ([$lo, $me, $hi, 0]);
 );
 
-impl Offset {
-    /// Return the inner value.
+impl From<Offset> for u32 {
     #[inline(always)]
-    pub fn as_u32(&self) -> u32 {
-        self.0
+    fn from(offset: Offset) -> u32 {
+        offset.0
     }
 }
 
@@ -51,9 +50,9 @@ mod tests {
     fn read() {
         let mut tape = Cursor::new(vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
-        assert_eq!(Offset::read(&mut tape, 1).unwrap().as_u32(), 0x01);
-        assert_eq!(Offset::read(&mut tape, 2).unwrap().as_u32(), 0x0203);
-        assert_eq!(Offset::read(&mut tape, 3).unwrap().as_u32(), 0x040506);
-        assert_eq!(Offset::read(&mut tape, 4).unwrap().as_u32(), 0x0708090a);
+        assert_eq!(u32::from(Offset::read(&mut tape, 1).unwrap()), 0x01);
+        assert_eq!(u32::from(Offset::read(&mut tape, 2).unwrap()), 0x0203);
+        assert_eq!(u32::from(Offset::read(&mut tape, 3).unwrap()), 0x040506);
+        assert_eq!(u32::from(Offset::read(&mut tape, 4).unwrap()), 0x0708090a);
     }
 }

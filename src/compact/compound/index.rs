@@ -32,7 +32,7 @@ impl Value for Index {
         }
         let mut data = Vec::with_capacity(count as usize);
         for i in 0..(count as usize) {
-            let size = (offsets[i + 1].as_u32() - offsets[i].as_u32()) as usize;
+            let size = (u32::from(offsets[i + 1]) - u32::from(offsets[i])) as usize;
             data.push(try!(ValueExt::read(tape, size)));
         }
         Ok(Index { count: count, offset_size: offset_size, offsets: offsets, data: data })
