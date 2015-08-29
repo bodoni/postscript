@@ -27,48 +27,6 @@ impl FontSet {
     }
 }
 
-impl Value for FontSet {
-    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
-        let header = try!(Header::read(tape));
-        try!(tape.jump(header.header_size as u64));
-        let names = try!(try!(Names::read(tape)).into_vec());
-        let top_dictionaries = try!(try!(TopDictionaries::read(tape)).into_vec());
-        let strings = try!(Strings::read(tape));
-        let global_subroutines = try!(Subroutines::read(tape));
-
-        let mut encodings = vec![];
-        let mut charsets = vec![];
-        let mut charstrings = vec![];
-        let mut private_dictionaries = vec![];
-        let mut local_subroutines = vec![];
-        for (i, top) in top_dictionaries.iter().enumerate() {
-            encodings.push(try!(read_encoding(tape, top)));
-            charstrings.push(try!(read_charstrings(tape, top)));
-
-            let glyphs = charstrings[i].len();
-            charsets.push(try!(read_charset(tape, top, glyphs)));
-
-            private_dictionaries.push(try!(read_private_dictionary(tape, top)));
-
-            let private = &private_dictionaries[i];
-            local_subroutines.push(try!(read_local_subroutines(tape, top, private)));
-        }
-
-        Ok(FontSet {
-            header: header,
-            names: names,
-            top_dictionaries: top_dictionaries,
-            strings: strings,
-            global_subroutines: global_subroutines,
-            encodings: encodings,
-            charsets: charsets,
-            charstrings: charstrings,
-            private_dictionaries: private_dictionaries,
-            local_subroutines: local_subroutines,
-        })
-    }
-}
-
 macro_rules! get_single(
     ($operations:expr, $operator:ident) => ({
         match $operations.get_single(Operator::$operator) {
@@ -87,45 +45,72 @@ macro_rules! get_double(
     );
 );
 
-fn read_encoding<T: Tape>(_: &mut T, top: &Operations) -> Result<Encoding> {
-    Ok(match get_single!(top, Encoding) {
-        0 => Encoding::Standard,
-        1 => Encoding::Expert,
-        _ => unimplemented!(),
-    })
-}
+impl Value for FontSet {
+    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+        let start = try!(tape.position());
 
-fn read_charset<T: Tape>(tape: &mut T, top: &Operations, glyphs: usize) -> Result<Charset> {
-    match get_single!(top, Charset) {
-        0 => Ok(Charset::ISOAdobe),
-        1 => Ok(Charset::Expert),
-        2 => Ok(Charset::ExpertSubset),
-        offset => {
-            try!(tape.jump(offset as u64));
-            ValueExt::read(tape, glyphs)
-        },
+        let header = try!(Header::read(tape));
+        try!(tape.jump(start + header.header_size as u64));
+        let names = try!(try!(Names::read(tape)).into_vec());
+        let top_dictionaries = try!(try!(TopDictionaries::read(tape)).into_vec());
+        let strings = try!(Strings::read(tape));
+        let global_subroutines = try!(Subroutines::read(tape));
+
+        let mut encodings = vec![];
+        let mut charsets = vec![];
+        let mut charstrings = vec![];
+        let mut private_dictionaries = vec![];
+        let mut local_subroutines = vec![];
+        for (i, top) in top_dictionaries.iter().enumerate() {
+            encodings.push(match get_single!(top, Encoding) {
+                0 => Encoding::Standard,
+                1 => Encoding::Expert,
+                _ => unimplemented!(),
+            });
+
+            charstrings.push({
+                try!(tape.jump(start + get_single!(top, Charstrings) as u64));
+                try!(Charstrings::read(tape, get_single!(top, CharstringType)))
+            });
+
+            charsets.push(match get_single!(top, Charset) {
+                0 => Charset::ISOAdobe,
+                1 => Charset::Expert,
+                2 => Charset::ExpertSubset,
+                offset => {
+                    try!(tape.jump(start + offset as u64));
+                    try!(Charset::read(tape, charstrings[i].len()))
+                },
+            });
+
+            private_dictionaries.push({
+                let (size, offset) = get_double!(top, Private);
+                try!(tape.jump(start + offset as u64));
+                let chunk: Vec<u8> = try!(ValueExt::read(tape, size as usize));
+                try!(Operations::read(&mut Cursor::new(chunk)))
+            });
+
+            local_subroutines.push({
+                let (_, mut offset) = get_double!(top, Private);
+                offset += get_single!(&private_dictionaries[i], Subrs);
+                try!(tape.jump(start + offset as u64));
+                try!(Subroutines::read(tape))
+            });
+        }
+
+        Ok(FontSet {
+            header: header,
+            names: names,
+            top_dictionaries: top_dictionaries,
+            strings: strings,
+            global_subroutines: global_subroutines,
+            encodings: encodings,
+            charsets: charsets,
+            charstrings: charstrings,
+            private_dictionaries: private_dictionaries,
+            local_subroutines: local_subroutines,
+        })
     }
-}
-
-fn read_charstrings<T: Tape>(tape: &mut T, top: &Operations) -> Result<Charstrings> {
-    try!(tape.jump(get_single!(top, Charstrings) as u64));
-    ValueExt::read(tape, get_single!(top, CharstringType))
-}
-
-fn read_private_dictionary<T: Tape>(tape: &mut T, top: &Operations) -> Result<Operations> {
-    let (size, offset) = get_double!(top, Private);
-    try!(tape.jump(offset as u64));
-    let chunk: Vec<u8> = try!(ValueExt::read(tape, size as usize));
-    Value::read(&mut Cursor::new(chunk))
-}
-
-fn read_local_subroutines<T: Tape>(tape: &mut T, top: &Operations, private: &Operations)
-                                   -> Result<Subroutines> {
-
-    let (_, mut offset) = get_double!(top, Private);
-    offset += get_single!(private, Subrs);
-    try!(tape.jump(offset as u64));
-    Value::read(tape)
 }
 
 pub mod compound;
