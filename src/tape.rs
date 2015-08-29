@@ -46,7 +46,7 @@ pub trait Value: Sized {
 }
 
 /// A type that can be read provided a parameter.
-pub trait ValueExt<P>: Sized {
+pub trait ValueX<P>: Sized {
     /// Read a value.
     fn read<T: Tape>(&mut T, P) -> Result<Self>;
 }

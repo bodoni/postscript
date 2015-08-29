@@ -170,4 +170,4 @@ mod tape;
 pub mod compact;
 pub mod type2;
 
-pub use tape::{Tape, Value, ValueExt};
+pub use tape::{Tape, Value, ValueX};

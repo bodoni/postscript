@@ -1,7 +1,7 @@
 use std::mem;
 
 use Result;
-use tape::{Tape, ValueExt};
+use tape::{Tape, ValueX};
 use compact::primitive::OffsetSize;
 
 /// An offset.
@@ -25,7 +25,7 @@ impl From<Offset> for u32 {
     }
 }
 
-impl ValueExt<OffsetSize> for Offset {
+impl ValueX<OffsetSize> for Offset {
     fn read<T: Tape>(tape: &mut T, size: OffsetSize) -> Result<Self> {
         Ok(Offset(match size {
             1 => try!(tape.take::<u8>()) as u32,
@@ -42,7 +42,7 @@ impl ValueExt<OffsetSize> for Offset {
 
 #[cfg(test)]
 mod tests {
-    use tape::ValueExt;
+    use tape::ValueX;
     use compact::primitive::Offset;
     use std::io::Cursor;
 
