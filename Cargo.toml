@@ -9,7 +9,7 @@ documentation = "https://bodoni.github.io/postscript"
 description = "The package provides a parser for PostScript fonts."
 
 [dev-dependencies]
-random = "*"
+random = "0.9"
 
 [[bench]]
 name = "postscript"
