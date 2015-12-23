@@ -10,7 +10,7 @@ The package provides a parser for PostScript fonts.
 2. Implement your idea.
 3. Open a pull request.
 
-[version-img]: https://bodoni.github.io/images/crates.svg
+[version-img]: https://img.shields.io/crates/v/postscript.svg
 [version-url]: https://crates.io/crates/postscript
 [status-img]: https://travis-ci.org/bodoni/postscript.svg?branch=master
 [status-url]: https://travis-ci.org/bodoni/postscript
