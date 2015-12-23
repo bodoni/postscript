@@ -2,7 +2,7 @@ use std::io::Cursor;
 use std::mem;
 
 use Result;
-use tape::{Tape, ValueX};
+use tape::{Tape, Walue};
 use type2::compound::{Operation, Operator};
 use type2::primitive::Number;
 
@@ -104,7 +104,7 @@ impl<'l> Program<'l> {
             },
             HintMask | CntrMask => {
                 self.stems += self.stack.len() >> 1;
-                let _: Vec<u8> = try!(ValueX::read(&mut *self.routine, (self.stems + 7) >> 3));
+                let _: Vec<u8> = try!(Walue::read(&mut *self.routine, (self.stems + 7) >> 3));
                 return Ok(Some((operator, flush!())));
             },
 

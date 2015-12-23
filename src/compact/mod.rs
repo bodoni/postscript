@@ -3,7 +3,7 @@
 use std::io::{Cursor, Read, Seek};
 
 use Result;
-use tape::{Tape, Value, ValueX};
+use tape::{Tape, Value, Walue};
 
 /// A font set.
 pub struct FontSet {
@@ -86,7 +86,7 @@ impl Value for FontSet {
             private_dictionaries.push({
                 let (size, offset) = get_double!(top, Private);
                 try!(tape.jump(start + offset as u64));
-                let chunk: Vec<u8> = try!(ValueX::read(tape, size as usize));
+                let chunk: Vec<u8> = try!(Walue::read(tape, size as usize));
                 try!(Operations::read(&mut Cursor::new(chunk)))
             });
 

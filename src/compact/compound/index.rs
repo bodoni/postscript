@@ -3,7 +3,7 @@ use std::io::Cursor;
 use Result;
 use compact::compound::Operations;
 use compact::primitive::{Offset, OffsetSize, StringID};
-use tape::{Tape, Value, ValueX};
+use tape::{Tape, Value, Walue};
 
 table_define! {
     #[doc = "An index."]
@@ -33,7 +33,7 @@ impl Value for Index {
         let mut data = Vec::with_capacity(count as usize);
         for i in 0..(count as usize) {
             let size = (u32::from(offsets[i + 1]) - u32::from(offsets[i])) as usize;
-            data.push(try!(ValueX::read(tape, size)));
+            data.push(try!(Walue::read(tape, size)));
         }
         Ok(Index { count: count, offset_size: offset_size, offsets: offsets, data: data })
     }
@@ -96,7 +96,7 @@ index! {
     pub Subroutines
 }
 
-impl ValueX<i32> for Charstrings {
+impl Walue<i32> for Charstrings {
     fn read<T: Tape>(tape: &mut T, format: i32) -> Result<Self> {
         Ok(match format {
             2 => Charstrings { index: try!(Value::read(tape)) },

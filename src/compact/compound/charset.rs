@@ -1,6 +1,6 @@
 use Result;
 use compact::primitive::{GlyphID, StringID};
-use tape::{Tape, Value, ValueX};
+use tape::{Tape, Value, Walue};
 
 /// A charset.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -39,7 +39,7 @@ impl Charset {
     }
 }
 
-impl ValueX<usize> for Charset {
+impl Walue<usize> for Charset {
     fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
         Ok(match try!(tape.peek::<u8>()) {
             0 => unimplemented!(),

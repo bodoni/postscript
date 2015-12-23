@@ -3,7 +3,7 @@
 use std::mem;
 
 use Result;
-use tape::{Tape, Value, ValueX};
+use tape::{Tape, Value, Walue};
 
 /// A glyph identifier.
 pub type GlyphID = u16;
@@ -47,7 +47,7 @@ implement!(u8, 1);
 implement!(u16, 2);
 implement!(u32, 4);
 
-impl ValueX<usize> for Vec<u8> {
+impl Walue<usize> for Vec<u8> {
     fn read<T: Tape>(tape: &mut T, count: usize) -> Result<Self> {
         let mut values = Vec::with_capacity(count);
         unsafe { values.set_len(count) };
