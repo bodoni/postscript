@@ -1,8 +1,9 @@
 //! The Type 2 charstring format.
 
-pub mod compound;
-pub mod primitive;
-
+mod compound;
+mod primitive;
 mod program;
 
-pub use self::program::Program;
+pub use self::compound::*;
+pub use self::primitive::*;
+pub use self::program::*;

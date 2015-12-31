@@ -1,4 +1,4 @@
-use postscript::compact::compound::Operator;
+use postscript::compact::Operator;
 use random::{self, Source};
 use test::{Bencher, black_box};
 
@@ -6,7 +6,7 @@ const SAMPLES: usize = 1000;
 
 #[bench]
 fn encoding_get(bencher: &mut Bencher) {
-    use postscript::compact::compound::Encoding;
+    use postscript::compact::Encoding;
 
     let mut source = random::default().seed([42, 69]);
     let codes = source.iter::<u64>().take(SAMPLES).map(|number| (number as u16) % 256)
@@ -43,8 +43,7 @@ fn operator_get(bencher: &mut Bencher) {
 
 #[bench]
 fn string_index_get(bencher: &mut Bencher) {
-    use postscript::compact::compound::Strings;
-    use postscript::compact::primitive::StringID;
+    use postscript::compact::{StringID, Strings};
 
     let mut source = random::default().seed([69, 42]);
     let sids = source.iter::<u64>().take(SAMPLES).map(|number| (number as StringID) % 391)

@@ -2,8 +2,7 @@ use setup;
 
 macro_rules! operations(
     ($($operator:ident => [$($number:expr),*],)*) => ({
-        use postscript::compact::compound::Operator;
-        use postscript::compact::primitive::Number;
+        use postscript::compact::{Number, Operator};
         use std::collections::HashMap;
         let mut operations = HashMap::new();
         $(operations.insert(Operator::$operator, vec![$(Number::Integer($number)),*]);)*
@@ -71,7 +70,7 @@ fn global_subroutines() {
 
 #[test]
 fn encodings() {
-    use postscript::compact::compound::Encoding;
+    use postscript::compact::Encoding;
 
     let set = setup();
     let vector = &set.encodings;
@@ -88,7 +87,7 @@ fn encodings() {
 
 #[test]
 fn charsets() {
-    use postscript::compact::compound::Charset;
+    use postscript::compact::Charset;
 
     let set = setup();
     let vector = &set.charsets;
@@ -111,8 +110,7 @@ fn charstrings() {
 
 #[test]
 fn private_dictionaries() {
-    use postscript::compact::compound::Operator;
-    use postscript::compact::primitive::Number;
+    use postscript::compact::{Number, Operator};
 
     let set = setup();
     let vector = &set.private_dictionaries;

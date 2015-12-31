@@ -113,10 +113,8 @@ impl Value for FontSet {
     }
 }
 
-pub mod compound;
-pub mod primitive;
+mod compound;
+mod primitive;
 
-use self::compound::{Charset, Encoding, Header};
-use self::compound::{Charstrings, Names, Strings, Subroutines, TopDictionaries};
-use self::compound::{Operator, Operations};
-use self::primitive::Number;
+pub use self::compound::*;
+pub use self::primitive::*;
