@@ -79,14 +79,14 @@ impl<'l> Program<'l> {
             try!(Operator::from(try!(self.routine.take::<u8>()) as u16))
         };
         match operator {
-            /// Path-construction operators
+            // Path-construction operators
             RMoveTo | HMoveTo | VMoveTo | RLineTo | HLineTo | VLineTo |
             RRCurveTo | HHCurveTo | HVCurveTo | VHCurveTo | VVCurveTo |
             RCurveLine | RLineCurve | Flex | Flex1 | HFlex | HFlex1 => {
                 return Ok(Some((operator, flush!())));
             },
 
-            /// Terminal operator
+            // Terminal operator
             EndChar => {
                 while let Some(caller) = self.routine.caller.take() {
                     if !try!(self.routine.done()) {
@@ -97,7 +97,7 @@ impl<'l> Program<'l> {
                 return Ok(None);
             },
 
-            /// Hint operators
+            // Hint operators
             HStem | VStem | HStemHM | VStemHM => {
                 self.stems += self.stack.len() >> 1;
                 return Ok(Some((operator, flush!())));
@@ -108,7 +108,7 @@ impl<'l> Program<'l> {
                 return Ok(Some((operator, flush!())));
             },
 
-            /// Arithmetic operators
+            // Arithmetic operators
             Abs => push!(pop!().abs()),
             Add => push!(pop!() + pop!()),
             Sub => {
@@ -162,7 +162,7 @@ impl<'l> Program<'l> {
             Put => unimplemented!(),
             Get => unimplemented!(),
 
-            /// Conditional operators
+            // Conditional operators
             And => push!(pop!().and(pop!())),
             Or => push!(pop!().or(pop!())),
             Not => push!(!pop!()),
@@ -172,7 +172,7 @@ impl<'l> Program<'l> {
                 push!(if left <= right { yes } else { no });
             },
 
-            /// Subroutine operators
+            // Subroutine operators
             CallSubr | CallGSubr => {
                 let address = pop!(Integer);
                 let mut routine = {
