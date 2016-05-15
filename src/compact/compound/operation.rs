@@ -140,7 +140,7 @@ operator! {
         // 0x0c => Escape,
         0x0d => UniqueID [],
         0x0e => XUID [],
-        0x0f => Charset [Integer(0)],
+        0x0f => CharSet [Integer(0)],
         0x10 => Encoding [Integer(0)],
         0x11 => CharStrings [],
         0x12 => Private [],

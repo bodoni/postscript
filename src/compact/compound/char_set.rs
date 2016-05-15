@@ -2,69 +2,69 @@ use Result;
 use compact::primitive::{GlyphID, StringID};
 use tape::{Tape, Value, Walue};
 
-/// A charset.
+/// A char set.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum Charset {
+pub enum CharSet {
     ISOAdobe,
     Expert,
     ExpertSubset,
-    Format1(Charset1),
+    Format1(CharSet1),
 }
 
-/// A charset of format 1.
+/// A char set of format 1.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Charset1 {
+pub struct CharSet1 {
     pub format: u8,
-    pub ranges: Vec<CharsetRange1>,
+    pub ranges: Vec<CharSetRange1>,
 }
 
 table! {
-    #[doc = "A range of a charset of format 1."]
-    pub CharsetRange1 {
+    #[doc = "A range of a char set of format 1."]
+    pub CharSetRange1 {
         first (StringID),
         left  (u8      ),
     }
 }
 
-impl Charset {
+impl CharSet {
     /// Return the name of a glyph.
     #[inline]
     pub fn get(&self, gid: GlyphID) -> Option<&'static str> {
         match self {
-            &Charset::ISOAdobe => get_iso_adobe(gid),
-            &Charset::Expert => get_expert(gid),
-            &Charset::ExpertSubset => get_expert_subset(gid),
+            &CharSet::ISOAdobe => get_iso_adobe(gid),
+            &CharSet::Expert => get_expert(gid),
+            &CharSet::ExpertSubset => get_expert_subset(gid),
             _ => unimplemented!(),
         }
     }
 }
 
-impl Walue<usize> for Charset {
+impl Walue<usize> for CharSet {
     fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
         Ok(match try!(tape.peek::<u8>()) {
             0 => unimplemented!(),
-            1 => Charset::Format1(try!(Charset1::read(tape, glyphs))),
+            1 => CharSet::Format1(try!(CharSet1::read(tape, glyphs))),
             2 => unimplemented!(),
             _ => raise!("found a char set with an unknown format"),
         })
     }
 }
 
-impl Charset1 {
+impl CharSet1 {
     fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
         let format = try!(tape.take::<u8>());
         debug_assert_eq!(format, 1);
         let mut ranges = vec![];
         let mut found = 0 + 1;
         while found < glyphs {
-            let range = try!(CharsetRange1::read(tape));
+            let range = try!(CharSetRange1::read(tape));
             found += 1 + range.left as usize;
             ranges.push(range);
         }
         if found != glyphs {
             raise!("found a malformed char set");
         }
-        Ok(Charset1 { format: format, ranges: ranges })
+        Ok(CharSet1 { format: format, ranges: ranges })
     }
 }
 

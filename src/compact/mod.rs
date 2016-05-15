@@ -17,7 +17,7 @@ pub struct FontSet {
     pub names: Vec<String>,
     pub strings: Strings,
     pub encodings: Vec<Encoding>,
-    pub charsets: Vec<Charset>,
+    pub char_sets: Vec<CharSet>,
     pub char_strings: Vec<CharStrings>,
     pub top_dictionaries: Vec<Operations>,
     pub private_dictionaries: Vec<Operations>,
@@ -63,7 +63,7 @@ impl Value for FontSet {
         let global_subroutines = try!(Subroutines::read(tape));
 
         let mut encodings = vec![];
-        let mut charsets = vec![];
+        let mut char_sets = vec![];
         let mut char_strings = vec![];
         let mut private_dictionaries = vec![];
         let mut local_subroutines = vec![];
@@ -79,13 +79,13 @@ impl Value for FontSet {
                 try!(CharStrings::read(tape, get_single!(top, CharStringType)))
             });
 
-            charsets.push(match get_single!(top, Charset) {
-                0 => Charset::ISOAdobe,
-                1 => Charset::Expert,
-                2 => Charset::ExpertSubset,
+            char_sets.push(match get_single!(top, CharSet) {
+                0 => CharSet::ISOAdobe,
+                1 => CharSet::Expert,
+                2 => CharSet::ExpertSubset,
                 offset => {
                     try!(tape.jump(start + offset as u64));
-                    try!(Charset::read(tape, char_strings[i].len()))
+                    try!(CharSet::read(tape, char_strings[i].len()))
                 },
             });
 
@@ -109,7 +109,7 @@ impl Value for FontSet {
             names: names,
             strings: strings,
             encodings: encodings,
-            charsets: charsets,
+            char_sets: char_sets,
             char_strings: char_strings,
             top_dictionaries: top_dictionaries,
             private_dictionaries: private_dictionaries,

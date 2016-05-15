@@ -11,15 +11,15 @@ macro_rules! operations(
 );
 
 #[test]
-fn charsets() {
-    use postscript::compact::Charset;
+fn char_sets() {
+    use postscript::compact::CharSet;
 
     let set = setup();
-    let vector = &set.charsets;
+    let vector = &set.char_sets;
 
     assert_eq!(vector.len(), 1);
     match &vector[0] {
-        &Charset::Format1(..) => {},
+        &CharSet::Format1(..) => {},
         _ => unreachable!(),
     }
 }
@@ -123,7 +123,7 @@ fn top_dictionaries() {
         FamilyName => [712],
         Weight => [388],
         FontBBox => [-178, -335, 1138, 918],
-        Charset => [8340],
+        CharSet => [8340],
         CharStrings => [8917],
         Private => [65, 33671],
     ));
