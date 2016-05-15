@@ -72,8 +72,8 @@ macro_rules! index_implement {
 }
 
 index_define! {
-    #[doc = "A charstrings index."]
-    pub Charstrings
+    #[doc = "A char-strings index."]
+    pub CharStrings
 }
 
 index! {
@@ -96,11 +96,11 @@ index! {
     pub Subroutines
 }
 
-impl Walue<i32> for Charstrings {
+impl Walue<i32> for CharStrings {
     fn read<T: Tape>(tape: &mut T, format: i32) -> Result<Self> {
         Ok(match format {
-            2 => Charstrings { index: try!(Value::read(tape)) },
-            _ => raise!("found an unknown charstring format"),
+            2 => CharStrings { index: try!(Value::read(tape)) },
+            _ => raise!("found an unknown char-string format"),
         })
     }
 }

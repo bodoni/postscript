@@ -25,9 +25,9 @@ fn charsets() {
 }
 
 #[test]
-fn charstrings() {
+fn char_strings() {
     let set = setup();
-    let vector = &set.charstrings;
+    let vector = &set.char_strings;
 
     assert_eq!(vector.len(), 1);
     assert_eq!(vector[0].len(), 547);
@@ -124,7 +124,7 @@ fn top_dictionaries() {
         Weight => [388],
         FontBBox => [-178, -335, 1138, 918],
         Charset => [8340],
-        Charstrings => [8917],
+        CharStrings => [8917],
         Private => [65, 33671],
     ));
 }

@@ -1,4 +1,4 @@
-//! The Type 2 charstring format.
+//! The Type 2 char-string format.
 
 mod compound;
 mod primitive;

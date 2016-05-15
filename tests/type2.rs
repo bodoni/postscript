@@ -17,7 +17,7 @@ fn program_all() {
     let global = &set.global_subroutines;
     let local = &set.local_subroutines[0];
 
-    for code in set.charstrings[0].iter() {
+    for code in set.char_strings[0].iter() {
         let mut program = Program::new(code, global, local);
         while let Some(..) = program.next().unwrap() {
         }
@@ -28,7 +28,7 @@ fn program_all() {
 fn program_one() {
     let set = setup();
 
-    let code = &set.charstrings[0][134];
+    let code = &set.char_strings[0][134];
     let global = &set.global_subroutines;
     let local = &set.local_subroutines[0];
 

@@ -5,6 +5,12 @@ use std::io::{Cursor, Read, Seek};
 use Result;
 use tape::{Tape, Value, Walue};
 
+mod compound;
+mod primitive;
+
+pub use self::compound::*;
+pub use self::primitive::*;
+
 /// A font set.
 pub struct FontSet {
     pub header: Header,
@@ -12,7 +18,7 @@ pub struct FontSet {
     pub strings: Strings,
     pub encodings: Vec<Encoding>,
     pub charsets: Vec<Charset>,
-    pub charstrings: Vec<Charstrings>,
+    pub char_strings: Vec<CharStrings>,
     pub top_dictionaries: Vec<Operations>,
     pub private_dictionaries: Vec<Operations>,
     pub global_subroutines: Subroutines,
@@ -58,7 +64,7 @@ impl Value for FontSet {
 
         let mut encodings = vec![];
         let mut charsets = vec![];
-        let mut charstrings = vec![];
+        let mut char_strings = vec![];
         let mut private_dictionaries = vec![];
         let mut local_subroutines = vec![];
         for (i, top) in top_dictionaries.iter().enumerate() {
@@ -68,9 +74,9 @@ impl Value for FontSet {
                 _ => unimplemented!(),
             });
 
-            charstrings.push({
-                try!(tape.jump(start + get_single!(top, Charstrings) as u64));
-                try!(Charstrings::read(tape, get_single!(top, CharstringType)))
+            char_strings.push({
+                try!(tape.jump(start + get_single!(top, CharStrings) as u64));
+                try!(CharStrings::read(tape, get_single!(top, CharStringType)))
             });
 
             charsets.push(match get_single!(top, Charset) {
@@ -79,7 +85,7 @@ impl Value for FontSet {
                 2 => Charset::ExpertSubset,
                 offset => {
                     try!(tape.jump(start + offset as u64));
-                    try!(Charset::read(tape, charstrings[i].len()))
+                    try!(Charset::read(tape, char_strings[i].len()))
                 },
             });
 
@@ -104,7 +110,7 @@ impl Value for FontSet {
             strings: strings,
             encodings: encodings,
             charsets: charsets,
-            charstrings: charstrings,
+            char_strings: char_strings,
             top_dictionaries: top_dictionaries,
             private_dictionaries: private_dictionaries,
             global_subroutines: global_subroutines,
@@ -112,9 +118,3 @@ impl Value for FontSet {
         })
     }
 }
-
-mod compound;
-mod primitive;
-
-pub use self::compound::*;
-pub use self::primitive::*;
