@@ -9,13 +9,13 @@ use tape::{Tape, Value, Walue};
 pub struct FontSet {
     pub header: Header,
     pub names: Vec<String>,
-    pub top_dictionaries: Vec<Operations>,
     pub strings: Strings,
-    pub global_subroutines: Subroutines,
     pub encodings: Vec<Encoding>,
     pub charsets: Vec<Charset>,
     pub charstrings: Vec<Charstrings>,
+    pub top_dictionaries: Vec<Operations>,
     pub private_dictionaries: Vec<Operations>,
+    pub global_subroutines: Subroutines,
     pub local_subroutines: Vec<Subroutines>,
 }
 
@@ -101,13 +101,13 @@ impl Value for FontSet {
         Ok(FontSet {
             header: header,
             names: names,
-            top_dictionaries: top_dictionaries,
             strings: strings,
-            global_subroutines: global_subroutines,
             encodings: encodings,
             charsets: charsets,
             charstrings: charstrings,
+            top_dictionaries: top_dictionaries,
             private_dictionaries: private_dictionaries,
+            global_subroutines: global_subroutines,
             local_subroutines: local_subroutines,
         })
     }
