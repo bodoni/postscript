@@ -10,7 +10,7 @@ fn program(bencher: &mut Bencher) {
     let local = &set.local_subroutines[0];
 
     bencher.iter(|| {
-        for code in set.charstrings[0].iter() {
+        for code in set.char_strings[0].iter() {
             let mut program = Program::new(code, global, local);
             while let Some(..) = program.next().unwrap() {
             }
