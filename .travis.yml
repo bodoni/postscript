@@ -1,5 +1,6 @@
 language: rust
 sudo: false
+
 rust:
   - stable
   - beta
@@ -8,14 +9,13 @@ rust:
 script:
   - cargo build --verbose
   - cargo test --verbose
-  - if [ "$TRAVIS_RUST_VERSION" = "nightly" ]; then cargo bench --verbose; fi
+  - if [ "${TRAVIS_RUST_VERSION}" == "nightly" ]; then cargo bench --verbose; fi
 
 after_success:
-  - curl https://bodoni.github.io/travis/after_success.sh | bash
+  - curl https://bodoni.github.io/travis/documentation.sh | bash
 
 env:
   global:
-    - RUSTDOC_VERSION=nightly
     - secure: tLCdv61oAIIsIjUmHJvhNsfZXSq/QiiUn7K7ZOkWRRsPpzJrarF0VuoOZl37igPLvNDjZV0kiDKye7i7KST76a7DXRjDZgIuBwYHIF8moz/vRzNb8PYr/ZgXzT4+xfvk85cLg+SSJ5+GoYz/C4a53fQ+T+2cmxxER9XpkoIv4IhtFCOPsXKziOCS/w6pmVquFNai/Ih7j6lMCCCBmadnuEp1KGgfXmAZ32KF7/o7rhK3A+YComY+131L10SV1B0XnNa2It7afhdTgLmC09pxvtyfHKMai/QSzpBAoXdmFYUh37V3x4jgW+dcPBQBp0uu1kQJiB6xZlb4OQ2IBS+MzkPAdAZtMU6IlGbqn4XvOfPPkbYtVzXgC7dafvC2Tt8MsisWP8hv8r5KurvtL+SYEc+lW0AGrdl4sOR7PBk9D+281N+DJu5kNjMkinDpdD9Bj2YANFK66DAWKKrTZHQKL7/3ZAT4Yr36zNaM21FwbHIluBDL7DZ/n3Ndj9rrLvxmdRahAJZpzxGhoWzPbr3eZerI+5d4ZLaWF1WMx2QlmChonNA9kibcGk7OqGRxjsaHb23zhvJEPZ/YpepCfdAO/xyLlYlqbEvFLqGc4CJB7oB4ixSnyP+djZQ++RV9NgiJaaEYEMc2WBEhhlPSiHr84bE+Kx7F2yYy6fr89o3/E8M=
 
 notifications:
