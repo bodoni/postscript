@@ -1,6 +1,6 @@
 [package]
 name = "postscript"
-version = "0.5.0"
+version = "0.5.1"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
 description = "The package provides a parser for PostScript fonts."
@@ -9,7 +9,7 @@ homepage = "https://github.com/bodoni/postscript"
 repository = "https://github.com/bodoni/postscript"
 
 [dev-dependencies]
-random = "0.10"
+random = "0.11"
 
 [[bench]]
 name = "postscript"
