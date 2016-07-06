@@ -2,11 +2,13 @@ use std::mem;
 
 use Result;
 use tape::{Tape, Walue};
-use compact::primitive::OffsetSize;
 
 /// An offset.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Offset(pub u32);
+
+/// An offset size.
+pub type OffsetSize = u8;
 
 #[cfg(target_endian = "big")]
 macro_rules! assemble(

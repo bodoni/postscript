@@ -1,34 +1,22 @@
 //! Primitive data types.
 
-use std::mem;
-
 use Result;
 use tape::{Tape, Value, Walue};
+
+#[macro_use]
+mod macros;
+
+mod number;
+mod offset;
+
+pub use self::number::Number;
+pub use self::offset::{Offset, OffsetSize};
 
 /// A glyph identifier.
 pub type GlyphID = u16;
 
-/// An offset size.
-pub type OffsetSize = u8;
-
 /// A string identifier.
 pub type StringID = u16;
-
-macro_rules! fill(
-    ($tape:ident, $count:expr, $buffer:ident) => (
-        if try!(::std::io::Read::read($tape, &mut $buffer)) != $count {
-            return raise!("failed to read as much as needed");
-        }
-    );
-);
-
-macro_rules! read(
-    ($tape:ident, $size:expr) => (unsafe {
-        let mut buffer: [u8; $size] = mem::uninitialized();
-        fill!($tape, $size, buffer);
-        mem::transmute(buffer)
-    });
-);
 
 macro_rules! implement {
     ($name:ident, 1) => (impl Value for $name {
@@ -55,9 +43,3 @@ impl Walue<usize> for Vec<u8> {
         Ok(values)
     }
 }
-
-mod number;
-mod offset;
-
-pub use self::number::Number;
-pub use self::offset::Offset;
