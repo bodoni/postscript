@@ -1,4 +1,4 @@
-use compact::primitive::{GlyphID, StringID};
+use compact::{GlyphID, StringID};
 
 /// An encoding.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

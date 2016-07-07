@@ -1,9 +1,9 @@
 //! The Type 2 char-string format.
 
-mod compound;
-mod primitive;
+mod number;
+mod operation;
 mod program;
 
-pub use self::compound::*;
-pub use self::primitive::*;
-pub use self::program::*;
+pub use self::number::Number;
+pub use self::operation::{Operation, Operations, Operator};
+pub use self::program::Program;

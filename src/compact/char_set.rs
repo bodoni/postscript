@@ -1,156 +1,75 @@
-use std::io::Cursor;
-
 use Result;
-use compact::compound::Operations;
-use compact::primitive::{Offset, OffsetSize, StringID};
+use compact::{GlyphID, StringID};
 use tape::{Tape, Value, Walue};
 
-table_define! {
-    #[doc = "An index."]
-    pub Index {
-        count       (u16         ),
-        offset_size (OffsetSize  ),
-        offsets     (Vec<Offset> ),
-        data        (Vec<Vec<u8>>),
+/// A char set.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum CharSet {
+    ISOAdobe,
+    Expert,
+    ExpertSubset,
+    Format1(CharSet1),
+}
+
+/// A char set of format 1.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct CharSet1 {
+    pub format: u8,
+    pub ranges: Vec<CharSetRange1>,
+}
+
+table! {
+    #[doc = "A range of a char set of format 1."]
+    pub CharSetRange1 {
+        first (StringID),
+        left  (u8      ),
     }
 }
 
-impl Value for Index {
-    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
-        let count = try!(tape.take::<u16>());
-        if count == 0 {
-            return Ok(Index::default());
+impl CharSet {
+    /// Return the name of a glyph.
+    #[inline]
+    pub fn get(&self, gid: GlyphID) -> Option<&'static str> {
+        match self {
+            &CharSet::ISOAdobe => get_iso_adobe(gid),
+            &CharSet::Expert => get_expert(gid),
+            &CharSet::ExpertSubset => get_expert_subset(gid),
+            _ => unimplemented!(),
         }
-        let offset_size = try!(tape.take::<OffsetSize>());
-        let mut offsets = Vec::with_capacity(count as usize + 1);
-        for i in 0..(count as usize + 1) {
-            let offset = try!(Offset::read(tape, offset_size));
-            if i == 0 && offset != Offset(1) || i > 0 && offset <= offsets[i - 1] {
-                raise!("found a malformed index");
-            }
-            offsets.push(offset);
-        }
-        let mut data = Vec::with_capacity(count as usize);
-        for i in 0..(count as usize) {
-            let size = (u32::from(offsets[i + 1]) - u32::from(offsets[i])) as usize;
-            data.push(try!(Walue::read(tape, size)));
-        }
-        Ok(Index { count: count, offset_size: offset_size, offsets: offsets, data: data })
     }
 }
 
-deref! { Index::data => [Vec<u8>] }
-
-macro_rules! index {
-    ($(#[$attribute:meta])* pub $structure:ident) => (
-        index_define! { $(#[$attribute])* pub $structure }
-        index_implement! { $structure }
-    );
-}
-
-macro_rules! index_define {
-    ($(#[$attribute:meta])* pub $structure:ident) => (
-        $(#[$attribute])*
-        #[derive(Clone, Debug, Default, Eq, PartialEq)]
-        pub struct $structure {
-            index: ::compact::compound::Index,
-        }
-
-        deref! { $structure::index => ::compact::compound::Index }
-    );
-}
-
-macro_rules! index_implement {
-    ($structure:ident) => (
-        impl ::tape::Value for $structure {
-            #[inline]
-            fn read<T: ::tape::Tape>(tape: &mut T) -> ::Result<Self> {
-                Ok($structure { index: try!(::tape::Value::read(tape)) })
-            }
-        }
-    );
-}
-
-index_define! {
-    #[doc = "A char-strings index."]
-    pub CharStrings
-}
-
-index! {
-    #[doc = "A top-dictionaries index."]
-    pub TopDictionaries
-}
-
-index! {
-    #[doc = "A names index."]
-    pub Names
-}
-
-index! {
-    #[doc = "A strings index."]
-    pub Strings
-}
-
-index! {
-    #[doc = "A subroutines index."]
-    pub Subroutines
-}
-
-impl Walue<i32> for CharStrings {
-    fn read<T: Tape>(tape: &mut T, format: i32) -> Result<Self> {
-        Ok(match format {
-            2 => CharStrings { index: try!(Value::read(tape)) },
-            _ => raise!("found an unknown char-string format"),
+impl Walue<usize> for CharSet {
+    fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
+        Ok(match try!(tape.peek::<u8>()) {
+            0 => unimplemented!(),
+            1 => CharSet::Format1(try!(CharSet1::read(tape, glyphs))),
+            2 => unimplemented!(),
+            _ => raise!("found a char set with an unknown format"),
         })
     }
 }
 
-impl TopDictionaries {
-    #[doc(hidden)]
-    pub fn into_vec(self) -> Result<Vec<Operations>> {
-        let TopDictionaries { index: Index { data, .. } } = self;
-        let mut vector = Vec::with_capacity(data.len());
-        for chunk in data {
-            vector.push(try!(Value::read(&mut Cursor::new(chunk))));
+impl CharSet1 {
+    fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
+        let format = try!(tape.take::<u8>());
+        debug_assert_eq!(format, 1);
+        let mut ranges = vec![];
+        let mut found = 0 + 1;
+        while found < glyphs {
+            let range = try!(CharSetRange1::read(tape));
+            found += 1 + range.left as usize;
+            ranges.push(range);
         }
-        Ok(vector)
+        if found != glyphs {
+            raise!("found a malformed char set");
+        }
+        Ok(CharSet1 { format: format, ranges: ranges })
     }
 }
 
-impl Names {
-    #[doc(hidden)]
-    pub fn into_vec(self) -> Result<Vec<String>> {
-        let Names { index: Index { data, .. } } = self;
-        let mut vector = Vec::with_capacity(data.len());
-        for chunk in data {
-            vector.push(match String::from_utf8(chunk) {
-                Ok(string) => string,
-                Err(chunk) => String::from_utf8_lossy(&chunk.into_bytes()).into_owned(),
-            });
-        }
-        Ok(vector)
-    }
-}
-
-impl Strings {
-    /// Return the string corresponding to a string identifier.
-    pub fn get(&self, sid: StringID) -> Option<String> {
-        match sid as usize {
-            i if i < NUMBER_OF_STANDARD_STRINGS => {
-                get_standard_string(sid).map(|string| string.to_string())
-            },
-            i => self.index.get(i - NUMBER_OF_STANDARD_STRINGS).map(|chunk| {
-                String::from_utf8_lossy(chunk).into_owned()
-            }),
-        }
-    }
-}
-
-const NUMBER_OF_STANDARD_STRINGS: usize = 391;
-
-fn get_standard_string(sid: StringID) -> Option<&'static str> {
-    Some(match sid {
-        0 => ".notdef",
+fn get_iso_adobe(gid: GlyphID) -> Option<&'static str> {
+    Some(match gid {
         1 => "space",
         2 => "exclam",
         3 => "quotedbl",
@@ -379,6 +298,13 @@ fn get_standard_string(sid: StringID) -> Option<&'static str> {
         226 => "yacute",
         227 => "ydieresis",
         228 => "zcaron",
+        _ => return None,
+    })
+}
+
+fn get_expert(gid: GlyphID) -> Option<&'static str> {
+    Some(match gid {
+        1 => "space",
         229 => "exclamsmall",
         230 => "Hungarumlautsmall",
         231 => "dollaroldstyle",
@@ -389,6 +315,10 @@ fn get_standard_string(sid: StringID) -> Option<&'static str> {
         236 => "parenrightsuperior",
         237 => "twodotenleader",
         238 => "onedotenleader",
+        13 => "comma",
+        14 => "hyphen",
+        15 => "period",
+        99 => "fraction",
         239 => "zerooldstyle",
         240 => "oneoldstyle",
         241 => "twooldstyle",
@@ -399,6 +329,8 @@ fn get_standard_string(sid: StringID) -> Option<&'static str> {
         246 => "sevenoldstyle",
         247 => "eightoldstyle",
         248 => "nineoldstyle",
+        27 => "colon",
+        28 => "semicolon",
         249 => "commasuperior",
         250 => "threequartersemdash",
         251 => "periodsuperior",
@@ -417,6 +349,8 @@ fn get_standard_string(sid: StringID) -> Option<&'static str> {
         264 => "ssuperior",
         265 => "tsuperior",
         266 => "ff",
+        109 => "fi",
+        110 => "fl",
         267 => "ffi",
         268 => "ffl",
         269 => "parenleftinferior",
@@ -469,6 +403,9 @@ fn get_standard_string(sid: StringID) -> Option<&'static str> {
         316 => "Ogoneksmall",
         317 => "Ringsmall",
         318 => "Cedillasmall",
+        158 => "onequarter",
+        155 => "onehalf",
+        163 => "threequarters",
         319 => "questiondownsmall",
         320 => "oneeighth",
         321 => "threeeighths",
@@ -477,6 +414,9 @@ fn get_standard_string(sid: StringID) -> Option<&'static str> {
         324 => "onethird",
         325 => "twothirds",
         326 => "zerosuperior",
+        150 => "onesuperior",
+        164 => "twosuperior",
+        169 => "threesuperior",
         327 => "foursuperior",
         328 => "fivesuperior",
         329 => "sixsuperior",
@@ -529,31 +469,98 @@ fn get_standard_string(sid: StringID) -> Option<&'static str> {
         376 => "Yacutesmall",
         377 => "Thornsmall",
         378 => "Ydieresissmall",
-        379 => "001.000",
-        380 => "001.001",
-        381 => "001.002",
-        382 => "001.003",
-        383 => "Black",
-        384 => "Bold",
-        385 => "Book",
-        386 => "Light",
-        387 => "Medium",
-        388 => "Regular",
-        389 => "Roman",
-        390 => "Semibold",
         _ => return None,
     })
 }
 
-#[cfg(test)]
-mod tests {
-    use compact::primitive::StringID;
-    use super::NUMBER_OF_STANDARD_STRINGS;
-    use super::get_standard_string;
-
-    #[test]
-    fn number_of_standard_strings() {
-        assert!(get_standard_string(NUMBER_OF_STANDARD_STRINGS as StringID - 1).is_some());
-        assert!(get_standard_string(NUMBER_OF_STANDARD_STRINGS as StringID).is_none());
-    }
+fn get_expert_subset(gid: GlyphID) -> Option<&'static str> {
+    Some(match gid {
+        1 => "space",
+        231 => "dollaroldstyle",
+        232 => "dollarsuperior",
+        235 => "parenleftsuperior",
+        236 => "parenrightsuperior",
+        237 => "twodotenleader",
+        238 => "onedotenleader",
+        13 => "comma",
+        14 => "hyphen",
+        15 => "period",
+        99 => "fraction",
+        239 => "zerooldstyle",
+        240 => "oneoldstyle",
+        241 => "twooldstyle",
+        242 => "threeoldstyle",
+        243 => "fouroldstyle",
+        244 => "fiveoldstyle",
+        245 => "sixoldstyle",
+        246 => "sevenoldstyle",
+        247 => "eightoldstyle",
+        248 => "nineoldstyle",
+        27 => "colon",
+        28 => "semicolon",
+        249 => "commasuperior",
+        250 => "threequartersemdash",
+        251 => "periodsuperior",
+        253 => "asuperior",
+        254 => "bsuperior",
+        255 => "centsuperior",
+        256 => "dsuperior",
+        257 => "esuperior",
+        258 => "isuperior",
+        259 => "lsuperior",
+        260 => "msuperior",
+        261 => "nsuperior",
+        262 => "osuperior",
+        263 => "rsuperior",
+        264 => "ssuperior",
+        265 => "tsuperior",
+        266 => "ff",
+        109 => "fi",
+        110 => "fl",
+        267 => "ffi",
+        268 => "ffl",
+        269 => "parenleftinferior",
+        270 => "parenrightinferior",
+        272 => "hyphensuperior",
+        300 => "colonmonetary",
+        301 => "onefitted",
+        302 => "rupiah",
+        305 => "centoldstyle",
+        314 => "figuredash",
+        315 => "hypheninferior",
+        158 => "onequarter",
+        155 => "onehalf",
+        163 => "threequarters",
+        320 => "oneeighth",
+        321 => "threeeighths",
+        322 => "fiveeighths",
+        323 => "seveneighths",
+        324 => "onethird",
+        325 => "twothirds",
+        326 => "zerosuperior",
+        150 => "onesuperior",
+        164 => "twosuperior",
+        169 => "threesuperior",
+        327 => "foursuperior",
+        328 => "fivesuperior",
+        329 => "sixsuperior",
+        330 => "sevensuperior",
+        331 => "eightsuperior",
+        332 => "ninesuperior",
+        333 => "zeroinferior",
+        334 => "oneinferior",
+        335 => "twoinferior",
+        336 => "threeinferior",
+        337 => "fourinferior",
+        338 => "fiveinferior",
+        339 => "sixinferior",
+        340 => "seveninferior",
+        341 => "eightinferior",
+        342 => "nineinferior",
+        343 => "centinferior",
+        344 => "dollarinferior",
+        345 => "periodinferior",
+        346 => "commainferior",
+        _ => return None,
+    })
 }

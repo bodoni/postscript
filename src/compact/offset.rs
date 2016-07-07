@@ -45,7 +45,7 @@ impl Walue<OffsetSize> for Offset {
 #[cfg(test)]
 mod tests {
     use tape::Walue;
-    use compact::primitive::Offset;
+    use compact::Offset;
     use std::io::Cursor;
 
     #[test]

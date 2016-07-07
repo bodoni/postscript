@@ -1,19 +1,19 @@
 use std::io::{Cursor, Read, Seek};
 
 use Result;
-use compact::compound::{
+use compact::{
     CharSet,
     CharStrings,
     Encoding,
     Header,
     Names,
+    Number,
     Operations,
     Operator,
     Strings,
     Subroutines,
     TopDictionaries,
 };
-use compact::primitive::Number;
 use tape::{Tape, Value, Walue};
 
 /// A font set.

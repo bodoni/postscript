@@ -3,8 +3,7 @@ use std::mem;
 
 use Result;
 use tape::{Tape, Walue};
-use type2::compound::{Operation, Operator};
-use type2::primitive::Number;
+use type2::{Number, Operation, Operator};
 
 /// A program.
 pub struct Program<'l> {
@@ -36,7 +35,7 @@ impl<'l> Program<'l> {
 
     /// Return the next operation.
     pub fn next(&mut self) -> Result<Option<Operation>> {
-        use type2::compound::Operator::*;
+        use type2::Operator::*;
 
         if try!(self.routine.done()) {
             return Ok(None);

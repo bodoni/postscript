@@ -95,7 +95,7 @@ impl From<bool> for Number {
 mod tests {
     use std::io::Cursor;
     use tape::Value;
-    use type2::primitive::Number;
+    use type2::Number;
 
     #[test]
     fn real() {

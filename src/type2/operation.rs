@@ -1,5 +1,5 @@
 use Result;
-use type2::primitive::Number;
+use type2::Number;
 
 /// An operation.
 pub type Operation = (Operator, Vec<Number>);

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use Result;
 use tape::{Tape, Value};
-use compact::primitive::Number;
+use compact::Number;
 
 /// An operation.
 pub type Operation = (Operator, Vec<Number>);
