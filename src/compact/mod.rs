@@ -6,6 +6,25 @@ use tape::{Tape, Value, Walue};
 #[macro_use]
 mod macros;
 
+mod char_set;
+mod encoding;
+mod font_set;
+mod header;
+mod index;
+mod number;
+mod offset;
+mod operation;
+
+pub use self::char_set::{CharSet, CharSet1, CharSetRange1};
+pub use self::encoding::Encoding;
+pub use self::font_set::FontSet;
+pub use self::header::Header;
+pub use self::index::{CharStrings, Index, Names};
+pub use self::index::{Strings, Subroutines, TopDictionaries};
+pub use self::number::Number;
+pub use self::offset::{Offset, OffsetSize};
+pub use self::operation::{Operation, Operations, Operator};
+
 /// A glyph identifier.
 pub type GlyphID = u16;
 
@@ -37,22 +56,3 @@ impl Walue<usize> for Vec<u8> {
         Ok(values)
     }
 }
-
-mod char_set;
-mod encoding;
-mod font_set;
-mod header;
-mod index;
-mod number;
-mod offset;
-mod operation;
-
-pub use self::char_set::{CharSet, CharSet1, CharSetRange1};
-pub use self::encoding::Encoding;
-pub use self::font_set::FontSet;
-pub use self::header::Header;
-pub use self::index::{CharStrings, Index, Names};
-pub use self::index::{Strings, Subroutines, TopDictionaries};
-pub use self::number::Number;
-pub use self::offset::{Offset, OffsetSize};
-pub use self::operation::{Operation, Operations, Operator};
