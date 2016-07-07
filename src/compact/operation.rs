@@ -79,23 +79,25 @@ impl Value for Operations {
 
 deref! { Operations::0 => HashMap<Operator, Vec<Number>> }
 
+macro_rules! default(
+    ([$($argument:ident($number:expr)),+]) => ({
+        const ARGUMENTS: &'static [Number] = &[$(Number::$argument($number)),+];
+        Some(ARGUMENTS)
+    });
+    ([]) => (None);
+);
+
 macro_rules! operator {
     (pub $name:ident { $($code:pat => $variant:ident $default:tt,)+ }) => (
-        operator_define! { pub $name { $($variant,)+ } }
-        operator_implement! { pub $name { $($code => $variant $default,)+ } }
+        operator! { @define pub $name { $($variant,)+ } }
+        operator! { @implement pub $name { $($code => $variant $default,)+ } }
     );
-}
-
-macro_rules! operator_define {
-    (pub $name:ident { $($variant:ident,)* }) => (
+    (@define pub $name:ident { $($variant:ident,)* }) => (
         /// An operator.
         #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
         pub enum $name { $($variant,)* }
     );
-}
-
-macro_rules! operator_implement {
-    (pub $name:ident { $($code:pat => $variant:ident $default:tt,)* }) => (impl $name {
+    (@implement pub $name:ident { $($code:pat => $variant:ident $default:tt,)* }) => (impl $name {
         #[doc(hidden)]
         pub fn from(code: u16) -> Result<Self> {
             use self::$name::*;
@@ -109,19 +111,11 @@ macro_rules! operator_implement {
         pub fn default(&self) -> Option<&'static [Number]> {
             use self::$name::*;
             match *self {
-                $($variant => operator_default!($default),)+
+                $($variant => default!($default),)+
             }
         }
     });
 }
-
-macro_rules! operator_default(
-    ([$($argument:ident($number:expr)),+]) => ({
-        const ARGUMENTS: &'static [Number] = &[$(Number::$argument($number)),+];
-        Some(ARGUMENTS)
-    });
-    ([]) => (None);
-);
 
 operator! {
     pub Operator {

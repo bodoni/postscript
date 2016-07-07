@@ -15,22 +15,22 @@ macro_rules! read(
 );
 
 macro_rules! table {
-    ($(#[$attribute:meta])* pub $structure:ident { $($field:ident ($kind:ty),)+ }) => (
-        table_define! { $(#[$attribute])* pub $structure { $($field ($kind),)+ } }
-        table_read! { pub $structure { $($field,)+ } }
+    ($(#[$attribute:meta])* pub $structure:ident {
+        $($field:ident ($kind:ty),)+
+    }) => (
+        table! { @define $(#[$attribute])* pub $structure { $($field ($kind),)+ } }
+        table! { @implement pub $structure { $($field,)+ } }
     );
-}
-
-macro_rules! table_define {
-    ($(#[$attribute:meta])* pub $structure:ident { $($field:ident ($kind:ty),)+ }) => (itemize! {
+    (@define $(#[$attribute:meta])* pub $structure:ident {
+        $($field:ident ($kind:ty),)+
+    }) => (itemize! {
         $(#[$attribute])*
         #[derive(Clone, Debug, Default, Eq, PartialEq)]
         pub struct $structure { $(pub $field: $kind,)+ }
     });
-}
-
-macro_rules! table_read {
-    (pub $structure:ident { $($field:ident,)+ }) => (
+    (@implement pub $structure:ident {
+        $($field:ident,)+
+    }) => (
         impl ::tape::Value for $structure {
             fn read<T: ::tape::Tape>(tape: &mut T) -> ::Result<Self> {
                 let mut table = $structure::default();

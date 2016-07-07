@@ -4,7 +4,8 @@ use Result;
 use compact::{Offset, OffsetSize, Operations, StringID};
 use tape::{Tape, Value, Walue};
 
-table_define! {
+table! {
+    @define
     #[doc = "An index."]
     pub Index {
         count       (u16         ),
@@ -42,25 +43,18 @@ deref! { Index::data => [Vec<u8>] }
 
 macro_rules! index {
     ($(#[$attribute:meta])* pub $structure:ident) => (
-        index_define! { $(#[$attribute])* pub $structure }
-        index_implement! { $structure }
+        index! { @define $(#[$attribute])* pub $structure }
+        index! { @implement $structure }
     );
-}
-
-macro_rules! index_define {
-    ($(#[$attribute:meta])* pub $structure:ident) => (
+    (@define $(#[$attribute:meta])* pub $structure:ident) => (
         $(#[$attribute])*
         #[derive(Clone, Debug, Default, Eq, PartialEq)]
         pub struct $structure {
             index: ::compact::Index,
         }
-
         deref! { $structure::index => ::compact::Index }
     );
-}
-
-macro_rules! index_implement {
-    ($structure:ident) => (
+    (@implement $structure:ident) => (
         impl ::tape::Value for $structure {
             #[inline]
             fn read<T: ::tape::Tape>(tape: &mut T) -> ::Result<Self> {
@@ -70,7 +64,8 @@ macro_rules! index_implement {
     );
 }
 
-index_define! {
+index! {
+    @define
     #[doc = "A char-strings index."]
     pub CharStrings
 }

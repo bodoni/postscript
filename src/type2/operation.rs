@@ -9,21 +9,15 @@ pub type Operations = Vec<Operation>;
 
 macro_rules! operator {
     (pub $name:ident { $($code:pat => $variant:ident,)+ }) => (
-        operator_define! { pub $name { $($variant,)+ } }
-        operator_implement! { pub $name { $($code => $variant,)+ } }
+        operator! { @define pub $name { $($variant,)+ } }
+        operator! { @implement pub $name { $($code => $variant,)+ } }
     );
-}
-
-macro_rules! operator_define {
-    (pub $name:ident { $($variant:ident,)* }) => (
+    (@define pub $name:ident { $($variant:ident,)* }) => (
         /// An operator.
         #[derive(Clone, Copy, Debug, Eq, PartialEq)]
         pub enum $name { $($variant,)* }
     );
-}
-
-macro_rules! operator_implement {
-    (pub $name:ident { $($code:pat => $variant:ident,)* }) => (impl $name {
+    (@implement pub $name:ident { $($code:pat => $variant:ident,)* }) => (impl $name {
         #[doc(hidden)]
         pub fn from(code: u16) -> Result<Self> {
             use self::$name::*;
