@@ -65,27 +65,27 @@ macro_rules! index {
 
 index! {
     @define
-    #[doc = "A char-strings index."]
+    #[doc = "A char-string index."]
     pub CharStrings
 }
 
 index! {
-    #[doc = "A top-dictionaries index."]
-    pub TopDictionaries
+    #[doc = "A top-dictionary index."]
+    pub Dictionaries
 }
 
 index! {
-    #[doc = "A names index."]
+    #[doc = "A name index."]
     pub Names
 }
 
 index! {
-    #[doc = "A strings index."]
+    #[doc = "A string index."]
     pub Strings
 }
 
 index! {
-    #[doc = "A subroutines index."]
+    #[doc = "A subroutine index."]
     pub Subroutines
 }
 
@@ -98,10 +98,10 @@ impl Walue<i32> for CharStrings {
     }
 }
 
-impl TopDictionaries {
+impl Dictionaries {
     #[doc(hidden)]
     pub fn into_vec(self) -> Result<Vec<Operations>> {
-        let TopDictionaries { index: Index { data, .. } } = self;
+        let Dictionaries { index: Index { data, .. } } = self;
         let mut vector = Vec::with_capacity(data.len());
         for chunk in data {
             vector.push(try!(Value::read(&mut Cursor::new(chunk))));

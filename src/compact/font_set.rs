@@ -4,6 +4,7 @@ use {Result, Tape, Value, Walue};
 use compact::{
     CharSet,
     CharStrings,
+    Dictionaries,
     Encoding,
     Header,
     Names,
@@ -12,7 +13,6 @@ use compact::{
     Operator,
     Strings,
     Subroutines,
-    TopDictionaries,
 };
 
 /// A font set.
@@ -63,7 +63,7 @@ impl Value for FontSet {
         let header = try!(Header::read(tape));
         try!(tape.jump(start + header.header_size as u64));
         let names = try!(try!(Names::read(tape)).into_vec());
-        let top_dictionaries = try!(try!(TopDictionaries::read(tape)).into_vec());
+        let top_dictionaries = try!(try!(Dictionaries::read(tape)).into_vec());
         let strings = try!(Strings::read(tape));
         let global_subroutines = try!(Subroutines::read(tape));
 
