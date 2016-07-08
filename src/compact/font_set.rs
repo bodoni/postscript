@@ -16,6 +16,7 @@ use compact::{
 };
 
 /// A font set.
+#[derive(Clone, Debug)]
 pub struct FontSet {
     pub header: Header,
     pub names: Vec<String>,

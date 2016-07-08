@@ -19,6 +19,7 @@ pub struct CharSet1 {
 
 table! {
     #[doc = "A range of a char set of format 1."]
+    #[derive(Copy)]
     pub CharSetRange1 {
         first (StringID),
         left  (u8      ),
