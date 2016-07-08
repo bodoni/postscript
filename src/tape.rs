@@ -51,5 +51,30 @@ pub trait Walue<P>: Sized {
     fn read<T: Tape>(&mut T, P) -> Result<Self>;
 }
 
-impl<T: Read + Seek> Tape for T {
+impl<T: Read + Seek> Tape for T {}
+
+macro_rules! value {
+    ($name:ident, 1) => (impl Value for $name {
+        fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+            Ok(read!(tape, 1))
+        }
+    });
+    ($name:ident, $size:expr) => (impl Value for $name {
+        fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+            Ok($name::from_be(read!(tape, $size)))
+        }
+    });
+}
+
+value!(u8, 1);
+value!(u16, 2);
+value!(u32, 4);
+
+impl Walue<usize> for Vec<u8> {
+    fn read<T: Tape>(tape: &mut T, count: usize) -> Result<Self> {
+        let mut values = Vec::with_capacity(count);
+        unsafe { values.set_len(count) };
+        read!(tape, count, values);
+        Ok(values)
+    }
 }

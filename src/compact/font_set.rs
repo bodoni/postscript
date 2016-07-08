@@ -1,6 +1,6 @@
 use std::io::{Cursor, Read, Seek};
 
-use Result;
+use {Result, Tape, Value, Walue};
 use compact::{
     CharSet,
     CharStrings,
@@ -14,7 +14,6 @@ use compact::{
     Subroutines,
     TopDictionaries,
 };
-use tape::{Tape, Value, Walue};
 
 /// A font set.
 pub struct FontSet {

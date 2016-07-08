@@ -1,8 +1,7 @@
 use std::io::Cursor;
 use std::mem;
 
-use Result;
-use tape::{Tape, Walue};
+use {Result, Tape, Walue};
 use type2::{Number, Operation, Operator};
 
 /// A program.

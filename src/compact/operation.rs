@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
-use Result;
+use {Result, Tape, Value};
 use compact::Number;
-use tape::{Tape, Value};
 
 /// An operation.
 pub type Operation = (Operator, Vec<Number>);

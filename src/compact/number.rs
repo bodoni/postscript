@@ -1,5 +1,4 @@
-use Result;
-use tape::{Tape, Value};
+use {Result, Tape, Value};
 
 number!(Number);
 use self::Number::*;
