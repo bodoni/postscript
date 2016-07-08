@@ -2,7 +2,6 @@ use Result;
 use tape::{Tape, Value};
 
 number!(Number);
-
 use self::Number::*;
 
 impl Value for Number {
