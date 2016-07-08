@@ -43,9 +43,10 @@ impl Walue<OffsetSize> for Offset {
 
 #[cfg(test)]
 mod tests {
-    use tape::Walue;
-    use compact::Offset;
     use std::io::Cursor;
+
+    use Walue;
+    use compact::Offset;
 
     #[test]
     fn read() {

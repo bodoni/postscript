@@ -50,9 +50,10 @@ fn read_real<T: Tape>(tape: &mut T) -> Result<f32> {
 
 #[cfg(test)]
 mod tests {
-    use tape::Value;
-    use compact::Number;
     use std::io::Cursor;
+
+    use Value;
+    use compact::Number;
 
     #[test]
     fn integer() {

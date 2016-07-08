@@ -92,7 +92,8 @@ impl From<bool> for Number {
 #[cfg(test)]
 mod tests {
     use std::io::Cursor;
-    use tape::Value;
+
+    use Value;
     use type2::Number;
 
     #[test]

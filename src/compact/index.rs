@@ -1,8 +1,7 @@
 use std::io::Cursor;
 
-use Result;
+use {Result, Tape, Value, Walue};
 use compact::{Offset, OffsetSize, Operations, StringID};
-use tape::{Tape, Value, Walue};
 
 table! {
     @define

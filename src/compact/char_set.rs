@@ -1,6 +1,5 @@
-use Result;
+use {Result, Tape, Value, Walue};
 use compact::{GlyphID, StringID};
-use tape::{Tape, Value, Walue};
 
 /// A char set.
 #[derive(Clone, Debug, Eq, PartialEq)]
