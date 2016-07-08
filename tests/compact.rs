@@ -51,6 +51,26 @@ fn encodings() {
 }
 
 #[test]
+fn global_dictionaries() {
+    let set = setup();
+    let vector = &set.global_dictionaries;
+
+    assert_eq!(vector.len(), 1);
+    assert_eq!(&*vector[0], &operations!(
+        Version => [709],
+        Notice => [710],
+        Copyright => [711],
+        FullName => [712],
+        FamilyName => [712],
+        Weight => [388],
+        FontBBox => [-178, -335, 1138, 918],
+        CharSet => [8340],
+        CharStrings => [8917],
+        Private => [65, 33671],
+    ));
+}
+
+#[test]
 fn global_subroutines() {
     let set = setup();
     let index = &set.global_subroutines;
@@ -67,6 +87,18 @@ fn header() {
     assert_eq!(table.minor, 0);
     assert_eq!(table.header_size, 4);
     assert_eq!(table.offset_size, 2);
+}
+
+#[test]
+fn local_dictionaries() {
+    use postscript::compact::{Number, Operator};
+
+    let set = setup();
+    let vector = &set.local_dictionaries;
+
+    assert_eq!(vector.len(), 1);
+    assert_eq!(vector[0].len(), 13);
+    assert_eq!(vector[0].get(Operator::BlueScale).unwrap(), &[Number::Real(0.0375)]);
 }
 
 #[test]
@@ -88,18 +120,6 @@ fn names() {
 }
 
 #[test]
-fn private_dictionaries() {
-    use postscript::compact::{Number, Operator};
-
-    let set = setup();
-    let vector = &set.private_dictionaries;
-
-    assert_eq!(vector.len(), 1);
-    assert_eq!(vector[0].len(), 13);
-    assert_eq!(vector[0].get(Operator::BlueScale).unwrap(), &[Number::Real(0.0375)]);
-}
-
-#[test]
 fn strings() {
     let set = setup();
     let index = &set.strings;
@@ -107,24 +127,4 @@ fn strings() {
     assert_eq!(index.len(), 322);
     assert_eq!(index.get(175).unwrap(), "Aring");
     assert_eq!(index.get(500).unwrap(), "nine.tosf");
-}
-
-#[test]
-fn top_dictionaries() {
-    let set = setup();
-    let vector = &set.top_dictionaries;
-
-    assert_eq!(vector.len(), 1);
-    assert_eq!(&*vector[0], &operations!(
-        Version => [709],
-        Notice => [710],
-        Copyright => [711],
-        FullName => [712],
-        FamilyName => [712],
-        Weight => [388],
-        FontBBox => [-178, -335, 1138, 918],
-        CharSet => [8340],
-        CharStrings => [8917],
-        Private => [65, 33671],
-    ));
 }

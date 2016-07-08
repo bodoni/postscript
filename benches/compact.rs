@@ -42,7 +42,7 @@ fn operator_get(bencher: &mut Bencher) {
 }
 
 #[bench]
-fn string_index_get(bencher: &mut Bencher) {
+fn strings_get(bencher: &mut Bencher) {
     use postscript::compact::{StringID, Strings};
 
     let mut source = random::default().seed([69, 42]);
