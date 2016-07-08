@@ -13,16 +13,16 @@ pub enum CharSet {
 /// A char set of format 1.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CharSet1 {
-    pub format: u8,
-    pub ranges: Vec<CharSetRange1>,
+    pub format: u8,          // format
+    pub ranges: Vec<Range1>, // Range1
 }
 
 table! {
     #[doc = "A range of a char set of format 1."]
     #[derive(Copy)]
-    pub CharSetRange1 {
-        first (StringID),
-        left  (u8      ),
+    pub Range1 {
+        first (StringID), // first
+        left  (u8      ), // nLeft
     }
 }
 
@@ -50,14 +50,14 @@ impl Walue<usize> for CharSet {
     }
 }
 
-impl CharSet1 {
+impl Walue<usize> for CharSet1 {
     fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
         let format = try!(tape.take::<u8>());
         debug_assert_eq!(format, 1);
         let mut ranges = vec![];
         let mut found = 0 + 1;
         while found < glyphs {
-            let range = try!(CharSetRange1::read(tape));
+            let range = try!(Range1::read(tape));
             found += 1 + range.left as usize;
             ranges.push(range);
         }

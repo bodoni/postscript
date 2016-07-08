@@ -9,7 +9,7 @@ mod number;
 mod offset;
 mod operation;
 
-pub use self::char_set::{CharSet, CharSet1, CharSetRange1};
+pub use self::char_set::{CharSet, CharSet1, Range1};
 pub use self::encoding::Encoding;
 pub use self::font_set::FontSet;
 pub use self::header::Header;
