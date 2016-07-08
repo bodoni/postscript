@@ -99,7 +99,7 @@ impl Walue<i32> for CharStrings {
 
 impl Dictionaries {
     #[doc(hidden)]
-    pub fn into_vec(self) -> Result<Vec<Operations>> {
+    pub fn into(self) -> Result<Vec<Operations>> {
         let Dictionaries { index: Index { data, .. } } = self;
         let mut vector = Vec::with_capacity(data.len());
         for chunk in data {
@@ -111,7 +111,7 @@ impl Dictionaries {
 
 impl Names {
     #[doc(hidden)]
-    pub fn into_vec(self) -> Result<Vec<String>> {
+    pub fn into(self) -> Result<Vec<String>> {
         let Names { index: Index { data, .. } } = self;
         let mut vector = Vec::with_capacity(data.len());
         for chunk in data {

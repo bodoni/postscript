@@ -62,8 +62,8 @@ impl Value for FontSet {
 
         let header = try!(Header::read(tape));
         try!(tape.jump(start + header.header_size as u64));
-        let names = try!(try!(Names::read(tape)).into_vec());
-        let global_dictionaries = try!(try!(Dictionaries::read(tape)).into_vec());
+        let names = try!(try!(Names::read(tape)).into());
+        let global_dictionaries = try!(try!(Dictionaries::read(tape)).into());
         let strings = try!(Strings::read(tape));
         let global_subroutines = try!(Subroutines::read(tape));
 
