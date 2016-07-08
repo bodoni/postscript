@@ -13,7 +13,7 @@ pub use self::char_set::{CharSet, CharSet1, Range1};
 pub use self::encoding::Encoding;
 pub use self::font_set::FontSet;
 pub use self::header::Header;
-pub use self::index::{CharStrings, Dictionaries, Index, Names, Strings, Subroutines};
+pub use self::index::{CharStrings, Dictionaries, Names, Strings, Subroutines};
 pub use self::number::Number;
 pub use self::offset::{Offset, OffsetSize};
 pub use self::operation::{Operation, Operations, Operator};
