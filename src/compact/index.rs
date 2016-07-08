@@ -7,10 +7,10 @@ table! {
     @define
     #[doc = "An index."]
     pub Index {
-        count       (u16         ),
-        offset_size (OffsetSize  ),
-        offsets     (Vec<Offset> ),
-        data        (Vec<Vec<u8>>),
+        count       (u16         ), // count
+        offset_size (OffsetSize  ), // offSize
+        offsets     (Vec<Offset> ), // offset
+        data        (Vec<Vec<u8>>), // data
     }
 }
 
@@ -70,7 +70,7 @@ index! {
 }
 
 index! {
-    #[doc = "A top-dictionary index."]
+    #[doc = "A dictionary index."]
     pub Dictionaries
 }
 
