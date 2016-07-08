@@ -1,4 +1,4 @@
-use std::io::{Cursor, Read, Seek};
+use std::io::Cursor;
 
 use {Result, Tape, Value, Walue};
 use compact::{
@@ -28,14 +28,6 @@ pub struct FontSet {
     pub global_subroutines: Subroutines,
     pub local_dictionaries: Vec<Operations>,
     pub local_subroutines: Vec<Subroutines>,
-}
-
-impl FontSet {
-    /// Parse a font set.
-    #[inline]
-    pub fn read<T: Read + Seek>(reader: &mut T) -> Result<Self> {
-        Value::read(reader)
-    }
 }
 
 macro_rules! get_single(

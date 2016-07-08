@@ -1,5 +1,6 @@
 extern crate postscript;
 
+use postscript::Value;
 use postscript::compact::FontSet;
 
 mod compact;

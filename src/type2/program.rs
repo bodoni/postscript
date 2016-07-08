@@ -22,7 +22,7 @@ struct Routine<'l> {
 impl<'l> Program<'l> {
     /// Create a program.
     #[inline]
-    pub fn new(code: &'l [u8], global: &'l [Vec<u8>], local: &'l [Vec<u8>]) -> Program<'l> {
+    pub fn new(code: &'l [u8], global: &'l [Vec<u8>], local: &'l [Vec<u8>]) -> Self {
         Program {
             routine: Routine::new(code),
             global: global,

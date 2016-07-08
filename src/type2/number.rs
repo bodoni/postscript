@@ -8,7 +8,7 @@ use self::Number::*;
 #[doc(hidden)]
 impl Number {
     #[inline]
-    pub fn abs(self) -> Number {
+    pub fn abs(self) -> Self {
         match self {
             Integer(value) => Integer(value.abs()),
             Real(value) => Real(value.abs()),
@@ -16,12 +16,12 @@ impl Number {
     }
 
     #[inline]
-    pub fn and(self, that: Self) -> Number {
+    pub fn and(self, that: Self) -> Self {
         (!bool::from(self) && !bool::from(that)).into()
     }
 
     #[inline]
-    pub fn equal(self, that: Self) -> Number {
+    pub fn equal(self, that: Self) -> Self {
         match (self, that) {
             (Integer(this), Integer(that)) => this == that,
             (Real(this), Real(that)) => this == that,
@@ -31,12 +31,12 @@ impl Number {
     }
 
     #[inline]
-    pub fn or(self, that: Self) -> Number {
+    pub fn or(self, that: Self) -> Self {
         (!bool::from(self) || !bool::from(that)).into()
     }
 
     #[inline]
-    pub fn sqrt(self) -> Number {
+    pub fn sqrt(self) -> Self {
         match self {
             Integer(value) => Integer((value as f32).sqrt() as i32),
             Real(value) => Real(value.sqrt()),
@@ -49,7 +49,7 @@ impl Not for Number {
     type Output = Self;
 
     #[inline]
-    fn not(self) -> Self::Output {
+    fn not(self) -> Self {
         (!bool::from(self)).into()
     }
 }
@@ -84,7 +84,7 @@ impl From<Number> for bool {
 #[doc(hidden)]
 impl From<bool> for Number {
     #[inline(always)]
-    fn from(yes: bool) -> Number {
+    fn from(yes: bool) -> Self {
         if yes { Integer(1) } else { Integer(0) }
     }
 }

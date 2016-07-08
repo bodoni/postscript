@@ -18,7 +18,7 @@ impl Encoding {
     }
 }
 
-macro_rules! lookup(
+macro_rules! get(
     ($one:ident { $($gid:pat => $sid:expr => $name:expr,)+ }) => (
         Some(match $one {
             $($gid => $sid,)+
@@ -28,7 +28,7 @@ macro_rules! lookup(
 );
 
 fn get_standard(gid: GlyphID) -> Option<StringID> {
-    lookup!(gid {
+    get!(gid {
         0 => 0 => ".notdef",
         1 => 0 => ".notdef",
         2 => 0 => ".notdef",
@@ -289,7 +289,7 @@ fn get_standard(gid: GlyphID) -> Option<StringID> {
 }
 
 fn get_expert(gid: GlyphID) -> Option<StringID> {
-    lookup!(gid {
+    get!(gid {
         0 => 0 => ".notdef",
         1 => 0 => ".notdef",
         2 => 0 => ".notdef",
