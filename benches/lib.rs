@@ -4,6 +4,7 @@ extern crate postscript;
 extern crate random;
 extern crate test;
 
+use postscript::Value;
 use postscript::compact::FontSet;
 
 mod compact;
