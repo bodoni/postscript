@@ -1,127 +1,10 @@
-use std::io::Cursor;
+use compact::StringID;
 
-use {Result, Tape, Value, Walue};
-use compact::{Offset, OffsetSize, Operations, StringID};
-
-table! {
-    @define
-    pub Index {
-        count       (u16         ), // count
-        offset_size (OffsetSize  ), // offSize
-        offsets     (Vec<Offset> ), // offset
-        data        (Vec<Vec<u8>>), // data
-    }
-}
-
-impl Value for Index {
-    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
-        let count = try!(tape.take::<u16>());
-        if count == 0 {
-            return Ok(Index::default());
-        }
-        let offset_size = try!(tape.take::<OffsetSize>());
-        let mut offsets = Vec::with_capacity(count as usize + 1);
-        for i in 0..(count as usize + 1) {
-            let offset = try!(Offset::read(tape, offset_size));
-            if i == 0 && offset != Offset(1) || i > 0 && offset <= offsets[i - 1] {
-                raise!("found a malformed index");
-            }
-            offsets.push(offset);
-        }
-        let mut data = Vec::with_capacity(count as usize);
-        for i in 0..(count as usize) {
-            let size = (u32::from(offsets[i + 1]) - u32::from(offsets[i])) as usize;
-            data.push(try!(Walue::read(tape, size)));
-        }
-        Ok(Index { count: count, offset_size: offset_size, offsets: offsets, data: data })
-    }
-}
-
-deref! { Index::data => [Vec<u8>] }
-
-macro_rules! index {
-    ($(#[$attribute:meta])* pub $structure:ident) => (
-        index! { @define $(#[$attribute])* pub $structure }
-        index! { @implement $structure }
-    );
-    (@define $(#[$attribute:meta])* pub $structure:ident) => (
-        $(#[$attribute])*
-        #[derive(Clone, Debug, Default, Eq, PartialEq)]
-        pub struct $structure {
-            index: Index,
-        }
-        deref! { $structure::index => Index }
-    );
-    (@implement $structure:ident) => (
-        impl ::tape::Value for $structure {
-            #[inline]
-            fn read<T: ::tape::Tape>(tape: &mut T) -> ::Result<Self> {
-                Ok($structure { index: try!(::tape::Value::read(tape)) })
-            }
-        }
-    );
-}
-
-index! {
-    @define
-    #[doc = "A char-string index."]
-    pub CharStrings
-}
-
-index! {
-    #[doc = "A dictionary index."]
-    pub Dictionaries
-}
-
-index! {
-    #[doc = "A name index."]
-    pub Names
-}
+const NUMBER_OF_STANDARD_STRINGS: usize = 391;
 
 index! {
     #[doc = "A string index."]
     pub Strings
-}
-
-index! {
-    #[doc = "A subroutine index."]
-    pub Subroutines
-}
-
-impl Walue<i32> for CharStrings {
-    fn read<T: Tape>(tape: &mut T, format: i32) -> Result<Self> {
-        Ok(match format {
-            2 => CharStrings { index: try!(Value::read(tape)) },
-            _ => raise!("found an unknown char-string format"),
-        })
-    }
-}
-
-impl Dictionaries {
-    #[doc(hidden)]
-    pub fn into(self) -> Result<Vec<Operations>> {
-        let Dictionaries { index: Index { data, .. } } = self;
-        let mut vector = Vec::with_capacity(data.len());
-        for chunk in data {
-            vector.push(try!(Value::read(&mut Cursor::new(chunk))));
-        }
-        Ok(vector)
-    }
-}
-
-impl Names {
-    #[doc(hidden)]
-    pub fn into(self) -> Result<Vec<String>> {
-        let Names { index: Index { data, .. } } = self;
-        let mut vector = Vec::with_capacity(data.len());
-        for chunk in data {
-            vector.push(match String::from_utf8(chunk) {
-                Ok(string) => string,
-                Err(chunk) => String::from_utf8_lossy(&chunk.into_bytes()).into_owned(),
-            });
-        }
-        Ok(vector)
-    }
 }
 
 impl Strings {
@@ -137,8 +20,6 @@ impl Strings {
         }
     }
 }
-
-const NUMBER_OF_STANDARD_STRINGS: usize = 391;
 
 fn get_standard_string(sid: StringID) -> Option<&'static str> {
     Some(match sid {
