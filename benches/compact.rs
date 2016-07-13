@@ -1,4 +1,4 @@
-use postscript::compact::Operator;
+use postscript::compact::operation::Operator;
 use random::{self, Source};
 use test::{Bencher, black_box};
 
@@ -43,7 +43,8 @@ fn operator_get(bencher: &mut Bencher) {
 
 #[bench]
 fn strings_get(bencher: &mut Bencher) {
-    use postscript::compact::{StringID, Strings};
+    use postscript::compact::StringID;
+    use postscript::compact::index::Strings;
 
     let mut source = random::default().seed([69, 42]);
     let sids = source.iter::<u64>().take(SAMPLES).map(|number| (number as StringID) % 391)
