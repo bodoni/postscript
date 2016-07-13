@@ -1,3 +1,5 @@
+//! The char set.
+
 use {Result, Tape, Value, Walue};
 use compact::{GlyphID, StringID};
 
@@ -7,12 +9,12 @@ pub enum CharSet {
     ISOAdobe,
     Expert,
     ExpertSubset,
-    Format1(CharSet1),
+    Format1(Format1),
 }
 
 /// A char set of format 1.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct CharSet1 {
+pub struct Format1 {
     pub format: u8,          // format
     pub ranges: Vec<Range1>, // Range1
 }
@@ -43,14 +45,14 @@ impl Walue<usize> for CharSet {
     fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
         Ok(match try!(tape.peek::<u8>()) {
             0 => unimplemented!(),
-            1 => CharSet::Format1(try!(CharSet1::read(tape, glyphs))),
+            1 => CharSet::Format1(try!(Format1::read(tape, glyphs))),
             2 => unimplemented!(),
             _ => raise!("found a char set with an unknown format"),
         })
     }
 }
 
-impl Walue<usize> for CharSet1 {
+impl Walue<usize> for Format1 {
     fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
         let format = try!(tape.take::<u8>());
         debug_assert_eq!(format, 1);
@@ -64,7 +66,7 @@ impl Walue<usize> for CharSet1 {
         if found != glyphs {
             raise!("found a malformed char set");
         }
-        Ok(CharSet1 { format: format, ranges: ranges })
+        Ok(Format1 { format: format, ranges: ranges })
     }
 }
 

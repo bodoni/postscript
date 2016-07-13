@@ -3,14 +3,16 @@ use std::io::Cursor;
 use {Result, Tape, Value, Walue};
 use compact::{
     CharSet,
-    CharStrings,
-    Dictionaries,
     Encoding,
     Header,
-    Names,
     Number,
     Operations,
     Operator,
+};
+use compact::index::{
+    CharStrings,
+    Dictionaries,
+    Names,
     Strings,
     Subroutines,
 };

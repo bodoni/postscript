@@ -1,8 +1,11 @@
+//! The indices.
+
 use {Result, Tape, Value, Walue};
 use compact::{Offset, OffsetSize};
 
 table! {
     @define
+    #[doc(hidden)]
     pub Index {
         count       (u16         ), // count
         offset_size (OffsetSize  ), // offSize
