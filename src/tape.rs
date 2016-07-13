@@ -53,15 +53,6 @@ pub trait Walue<P>: Sized {
 
 impl<T: Read + Seek> Tape for T {}
 
-macro_rules! array {
-    ($kind:ident, 1, $count:expr) => (impl Value for [$kind; $count] {
-        #[inline]
-        fn read<T: Tape>(tape: &mut T) -> Result<Self> {
-            Ok(read!(tape, $count))
-        }
-    });
-}
-
 macro_rules! read(
     ($tape:ident, $count:expr, $buffer:expr) => (
         if try!(::std::io::Read::read($tape, $buffer)) != $count {
@@ -75,7 +66,13 @@ macro_rules! read(
     });
 );
 
-macro_rules! scalar {
+macro_rules! value {
+    ([$kind:ident; $count:expr], 1) => (impl Value for [$kind; $count] {
+        #[inline]
+        fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+            Ok(read!(tape, $count))
+        }
+    });
     ($kind:ident, 1) => (impl Value for $kind {
         #[inline]
         fn read<T: Tape>(tape: &mut T) -> Result<Self> {
@@ -90,8 +87,8 @@ macro_rules! scalar {
     });
 }
 
-macro_rules! vector {
-    ($kind:ident, 1) => (impl Walue<usize> for Vec<$kind> {
+macro_rules! walue {
+    ($kind:ty, 1) => (impl Walue<usize> for $kind {
         fn read<T: Tape>(tape: &mut T, count: usize) -> Result<Self> {
             let mut values = Vec::with_capacity(count);
             unsafe { values.set_len(count) };
@@ -101,10 +98,9 @@ macro_rules! vector {
     });
 }
 
-array!(u8, 1, 3);
+value!(u8, 1);
+value!(u16, 2);
+value!(u32, 4);
+value!([u8; 3], 1);
 
-scalar!(u8, 1);
-scalar!(u16, 2);
-scalar!(u32, 4);
-
-vector!(u8, 1);
+walue!(Vec<u8>, 1);
