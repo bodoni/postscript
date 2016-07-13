@@ -53,28 +53,58 @@ pub trait Walue<P>: Sized {
 
 impl<T: Read + Seek> Tape for T {}
 
-macro_rules! value {
-    ($name:ident, 1) => (impl Value for $name {
+macro_rules! array {
+    ($kind:ident, 1, $count:expr) => (impl Value for [$kind; $count] {
+        #[inline]
+        fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+            Ok(read!(tape, $count))
+        }
+    });
+}
+
+macro_rules! read(
+    ($tape:ident, $count:expr, $buffer:expr) => (
+        if try!(::std::io::Read::read($tape, $buffer)) != $count {
+            return raise!("failed to read as much as needed");
+        }
+    );
+    ($tape:ident, $size:expr) => (unsafe {
+        let mut buffer: [u8; $size] = ::std::mem::uninitialized();
+        read!($tape, $size, &mut buffer);
+        ::std::mem::transmute(buffer)
+    });
+);
+
+macro_rules! scalar {
+    ($kind:ident, 1) => (impl Value for $kind {
+        #[inline]
         fn read<T: Tape>(tape: &mut T) -> Result<Self> {
             Ok(read!(tape, 1))
         }
     });
-    ($name:ident, $size:expr) => (impl Value for $name {
+    ($kind:ident, $size:expr) => (impl Value for $kind {
+        #[inline]
         fn read<T: Tape>(tape: &mut T) -> Result<Self> {
-            Ok($name::from_be(read!(tape, $size)))
+            Ok($kind::from_be(read!(tape, $size)))
         }
     });
 }
 
-value!(u8, 1);
-value!(u16, 2);
-value!(u32, 4);
-
-impl Walue<usize> for Vec<u8> {
-    fn read<T: Tape>(tape: &mut T, count: usize) -> Result<Self> {
-        let mut values = Vec::with_capacity(count);
-        unsafe { values.set_len(count) };
-        read!(tape, count, values);
-        Ok(values)
-    }
+macro_rules! vector {
+    ($kind:ident, 1) => (impl Walue<usize> for Vec<$kind> {
+        fn read<T: Tape>(tape: &mut T, count: usize) -> Result<Self> {
+            let mut values = Vec::with_capacity(count);
+            unsafe { values.set_len(count) };
+            read!(tape, count, &mut values);
+            Ok(values)
+        }
+    });
 }
+
+array!(u8, 1, 3);
+
+scalar!(u8, 1);
+scalar!(u16, 2);
+scalar!(u32, 4);
+
+vector!(u8, 1);

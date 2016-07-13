@@ -157,19 +157,6 @@ macro_rules! raise(
     ($($argument:tt)+) => (raise!(format!($($argument)+)));
 );
 
-macro_rules! read(
-    ($tape:ident, $count:expr, $buffer:ident) => (
-        if try!(::std::io::Read::read($tape, &mut $buffer)) != $count {
-            return raise!("failed to read as much as needed");
-        }
-    );
-    ($tape:ident, $size:expr) => (unsafe {
-        let mut buffer: [u8; $size] = ::std::mem::uninitialized();
-        read!($tape, $size, buffer);
-        ::std::mem::transmute(buffer)
-    });
-);
-
 macro_rules! table {
     ($(#[$attribute:meta])* pub $structure:ident {
         $($field:ident ($kind:ty),)+
