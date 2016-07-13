@@ -1,3 +1,5 @@
+//! The operations.
+
 use Result;
 use type2::Number;
 

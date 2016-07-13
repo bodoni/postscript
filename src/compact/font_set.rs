@@ -6,8 +6,6 @@ use compact::{
     Encoding,
     Header,
     Number,
-    Operations,
-    Operator,
 };
 use compact::index::{
     CharStrings,
@@ -15,6 +13,10 @@ use compact::index::{
     Names,
     Strings,
     Subroutines,
+};
+use compact::operation::{
+    Operations,
+    Operator,
 };
 
 /// A font set.

@@ -2,7 +2,8 @@ use setup;
 
 macro_rules! operations(
     ($($operator:ident => [$($number:expr),*],)*) => ({
-        use postscript::compact::{Number, Operator};
+        use postscript::compact::Number;
+        use postscript::compact::operation::Operator;
         use std::collections::HashMap;
         let mut operations = HashMap::new();
         $(operations.insert(Operator::$operator, vec![$(Number::Integer($number)),*]);)*
@@ -91,7 +92,8 @@ fn header() {
 
 #[test]
 fn local_dictionaries() {
-    use postscript::compact::{Number, Operator};
+    use postscript::compact::Number;
+    use postscript::compact::operation::Operator;
 
     let set = setup();
     let vector = &set.local_dictionaries;

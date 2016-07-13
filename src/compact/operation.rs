@@ -1,3 +1,5 @@
+//! The operations.
+
 use std::collections::HashMap;
 
 use {Result, Tape, Value};
