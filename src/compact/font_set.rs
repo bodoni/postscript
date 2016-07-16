@@ -1,6 +1,6 @@
 use std::io::Cursor;
 
-use {Result, Tape, Value, Walue};
+use {Result, Tape, Value};
 use compact::{
     CharSet,
     Encoding,
@@ -56,12 +56,12 @@ impl Value for FontSet {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
         let start = try!(tape.position());
 
-        let header = try!(Header::read(tape));
+        let header = read_value!(tape, Header);
         try!(tape.jump(start + header.header_size as u64));
-        let names = try!(try!(Names::read(tape)).into());
-        let global_dictionaries = try!(try!(Dictionaries::read(tape)).into());
-        let strings = try!(Strings::read(tape));
-        let global_subroutines = try!(Subroutines::read(tape));
+        let names = try!(read_value!(tape, Names).into());
+        let global_dictionaries = try!(read_value!(tape, Dictionaries).into());
+        let strings = read_value!(tape, Strings);
+        let global_subroutines = read_value!(tape, Subroutines);
 
         let mut encodings = vec![];
         let mut char_sets = vec![];
@@ -77,7 +77,7 @@ impl Value for FontSet {
 
             char_strings.push({
                 try!(tape.jump(start + get_single!(dictionary, CharStrings) as u64));
-                try!(CharStrings::read(tape, get_single!(dictionary, CharStringType)))
+                read_walue!(tape, get_single!(dictionary, CharStringType), CharStrings)
             });
 
             char_sets.push(match get_single!(dictionary, CharSet) {
@@ -86,22 +86,22 @@ impl Value for FontSet {
                 2 => CharSet::ExpertSubset,
                 offset => {
                     try!(tape.jump(start + offset as u64));
-                    try!(CharSet::read(tape, char_strings[i].len()))
+                    read_walue!(tape, char_strings[i].len())
                 },
             });
 
             local_dictionaries.push({
                 let (size, offset) = get_double!(dictionary, Private);
                 try!(tape.jump(start + offset as u64));
-                let chunk: Vec<u8> = try!(Walue::read(tape, size as usize));
-                try!(Operations::read(&mut Cursor::new(chunk)))
+                let chunk: Vec<u8> = read_walue!(tape, size as usize);
+                read_value!(&mut Cursor::new(chunk), Operations)
             });
 
             local_subroutines.push({
                 let (_, mut offset) = get_double!(dictionary, Private);
                 offset += get_single!(&local_dictionaries[i], Subrs);
                 try!(tape.jump(start + offset as u64));
-                try!(Subroutines::read(tape))
+                read_value!(tape)
             });
         }
 

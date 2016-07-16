@@ -1,6 +1,6 @@
 use std::io::Cursor;
 
-use {Result, Value};
+use Result;
 use compact::index::Index;
 use compact::operation::Operations;
 
@@ -15,7 +15,7 @@ impl Dictionaries {
         let Dictionaries { index: Index { data, .. } } = self;
         let mut vector = Vec::with_capacity(data.len());
         for chunk in data {
-            vector.push(try!(Value::read(&mut Cursor::new(chunk))));
+            vector.push(read_value!(&mut Cursor::new(chunk)));
         }
         Ok(vector)
     }

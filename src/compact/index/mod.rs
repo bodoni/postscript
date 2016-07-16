@@ -1,6 +1,6 @@
 //! The indices.
 
-use {Result, Tape, Value, Walue};
+use {Result, Tape, Value};
 use compact::{Offset, OffsetSize};
 
 table! {
@@ -23,7 +23,7 @@ impl Value for Index {
         let offset_size = try!(tape.take::<OffsetSize>());
         let mut offsets = Vec::with_capacity(count as usize + 1);
         for i in 0..(count as usize + 1) {
-            let offset = try!(Offset::read(tape, offset_size));
+            let offset = read_walue!(tape, offset_size, Offset);
             if i == 0 && offset != Offset(1) || i > 0 && offset <= offsets[i - 1] {
                 raise!("found a malformed index");
             }
@@ -32,7 +32,7 @@ impl Value for Index {
         let mut data = Vec::with_capacity(count as usize);
         for i in 0..(count as usize) {
             let size = (u32::from(offsets[i + 1]) - u32::from(offsets[i])) as usize;
-            data.push(try!(Walue::read(tape, size)));
+            data.push(read_walue!(tape, size));
         }
         Ok(Index { count: count, offset_size: offset_size, offsets: offsets, data: data })
     }
@@ -57,7 +57,7 @@ macro_rules! index {
         impl ::tape::Value for $structure {
             #[inline]
             fn read<T: ::tape::Tape>(tape: &mut T) -> ::Result<Self> {
-                Ok($structure { index: try!(::tape::Value::read(tape)) })
+                Ok($structure { index: read_value!(tape) })
             }
         }
     );

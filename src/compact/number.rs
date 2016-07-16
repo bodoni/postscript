@@ -5,7 +5,7 @@ use self::Number::*;
 
 impl Value for Number {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
-        macro_rules! read(($kind:ident) => (try!(tape.take::<$kind>())));
+        macro_rules! read(($kind:ident) => (read_value!(tape, $kind)));
         let first = read!(u8);
         Ok(match first {
             0x20...0xf6 => Integer(first as i32 - 139),

@@ -1,4 +1,4 @@
-use {Result, Tape, Value, Walue};
+use {Result, Tape, Walue};
 
 index! {
     @define
@@ -9,7 +9,7 @@ index! {
 impl Walue<i32> for CharStrings {
     fn read<T: Tape>(tape: &mut T, format: i32) -> Result<Self> {
         Ok(match format {
-            2 => CharStrings { index: try!(Value::read(tape)) },
+            2 => CharStrings { index: read_value!(tape) },
             _ => raise!("found an unknown char-string format"),
         })
     }

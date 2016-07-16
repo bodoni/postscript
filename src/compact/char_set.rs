@@ -1,6 +1,6 @@
 //! The char set.
 
-use {Result, Tape, Value, Walue};
+use {Result, Tape, Walue};
 use compact::{GlyphID, StringID};
 
 /// A char set.
@@ -45,7 +45,7 @@ impl Walue<usize> for CharSet {
     fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
         Ok(match try!(tape.peek::<u8>()) {
             0 => unimplemented!(),
-            1 => CharSet::Format1(try!(Format1::read(tape, glyphs))),
+            1 => CharSet::Format1(read_walue!(tape, glyphs)),
             2 => unimplemented!(),
             _ => raise!("found a char set with an unknown format"),
         })
@@ -59,7 +59,7 @@ impl Walue<usize> for Format1 {
         let mut ranges = vec![];
         let mut found = 0 + 1;
         while found < glyphs {
-            let range = try!(Range1::read(tape));
+            let range = read_value!(tape, Range1);
             found += 1 + range.left as usize;
             ranges.push(range);
         }

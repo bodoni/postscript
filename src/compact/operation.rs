@@ -17,7 +17,7 @@ impl Value for Operation {
         let mut arguments = vec![];
         loop {
             match try!(tape.peek::<u8>()) {
-                0x1c | 0x1d | 0x1e | 0x20...0xfe => arguments.push(try!(Value::read(tape))),
+                0x1c | 0x1d | 0x1e | 0x20...0xfe => arguments.push(read_value!(tape)),
                 code => {
                     let code = if code == 0x0c {
                         try!(tape.take::<u16>())
@@ -71,7 +71,7 @@ impl Value for Operations {
         let size = try!(tape.count());
         let mut map = HashMap::new();
         while try!(tape.position()) < size {
-            let (operator, arguments) = try!(Value::read(tape));
+            let (operator, arguments) = read_value!(tape);
             map.insert(operator, arguments);
         }
         Ok(Operations(map))

@@ -1,7 +1,7 @@
 use std::io::Cursor;
 use std::mem;
 
-use {Result, Tape, Walue};
+use {Result, Tape};
 use type2::Number;
 use type2::operation::{Operation, Operator};
 
@@ -103,7 +103,7 @@ impl<'l> Program<'l> {
             },
             HintMask | CntrMask => {
                 self.stems += self.stack.len() >> 1;
-                let _: Vec<u8> = try!(Walue::read(&mut *self.routine, (self.stems + 7) >> 3));
+                let _: Vec<u8> = read_walue!(&mut *self.routine, (self.stems + 7) >> 3);
                 return Ok(Some((operator, flush!())));
             },
 
