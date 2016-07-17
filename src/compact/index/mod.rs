@@ -20,7 +20,7 @@ impl Value for Index {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
         let count = try!(tape.take::<u16>());
         if count == 0 {
-            return Ok(Index::default());
+            return Ok(Index { count: 0, offset_size: 0, offsets: vec![], data: vec![] });
         }
         let offset_size = try!(tape.take::<OffsetSize>());
         let mut offsets = Vec::with_capacity(count as usize + 1);
@@ -47,7 +47,7 @@ macro_rules! index {
     );
     (@define $(#[$attribute:meta])* pub $structure:ident) => (
         $(#[$attribute])*
-        #[derive(Clone, Debug, Default, Eq, PartialEq)]
+        #[derive(Clone, Debug, Eq, PartialEq)]
         pub struct $structure {
             index: ::compact::index::Index,
         }

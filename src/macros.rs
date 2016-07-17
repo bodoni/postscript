@@ -180,7 +180,7 @@ macro_rules! table {
         $($field:ident ($kind:ty),)+
     }) => (itemize! {
         $(#[$attribute])*
-        #[derive(Clone, Debug, Default, Eq, PartialEq)]
+        #[derive(Clone, Debug, Eq, PartialEq)]
         pub struct $structure { $(pub $field: $kind,)+ }
     });
     (@implement pub $structure:ident {
@@ -188,8 +188,8 @@ macro_rules! table {
     }) => (
         impl ::Value for $structure {
             fn read<T: ::Tape>(tape: &mut T) -> ::Result<Self> {
-                let mut table = $structure::default();
-                $(table.$field = read_value!(tape);)+
+                let mut table: $structure = unsafe { ::std::mem::uninitialized() };
+                $(::std::mem::forget(::std::mem::replace(&mut table.$field, read_value!(tape)));)+
                 Ok(table)
             }
         }
