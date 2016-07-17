@@ -9,7 +9,7 @@ homepage = "https://github.com/bodoni/postscript"
 repository = "https://github.com/bodoni/postscript"
 
 [dev-dependencies]
-random = "0.11"
+random = "0.12"
 
 [[bench]]
 name = "postscript"
