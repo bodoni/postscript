@@ -41,22 +41,6 @@ fn operator_get(bencher: &mut Bencher) {
     });
 }
 
-#[bench]
-fn strings_get(bencher: &mut Bencher) {
-    use postscript::compact::StringID;
-    use postscript::compact::index::Strings;
-
-    let mut source = random::default().seed([69, 42]);
-    let sids = source.iter::<u64>().take(SAMPLES).map(|number| (number as StringID) % 391)
-                                                 .collect::<Vec<_>>();
-    let index = Strings::default();
-    bencher.iter(|| {
-        for &sid in &sids {
-            black_box(index.get(sid));
-        }
-    });
-}
-
 fn generate_codes<T: Source>(source: &mut T, count: usize) -> Vec<u16> {
     let mut codes = vec![];
     while codes.len() != count {
