@@ -2,11 +2,10 @@ use setup;
 
 macro_rules! operations(
     ($($operator:ident => [$($number:expr),*],)*) => ({
-        use postscript::compact::Number;
         use postscript::compact::operation::Operator;
         use std::collections::HashMap;
         let mut operations = HashMap::new();
-        $(operations.insert(Operator::$operator, vec![$(Number::Integer($number)),*]);)*
+        $(operations.insert(Operator::$operator, vec![$($number as f32),*]);)*
         operations
     });
 );
@@ -92,7 +91,6 @@ fn header() {
 
 #[test]
 fn local_dictionaries() {
-    use postscript::compact::Number;
     use postscript::compact::operation::Operator;
 
     let set = setup();
@@ -100,7 +98,7 @@ fn local_dictionaries() {
 
     assert_eq!(vector.len(), 1);
     assert_eq!(vector[0].len(), 13);
-    assert_eq!(ok!(vector[0].get(Operator::BlueScale)), &[Number::Real(0.0375)]);
+    assert_eq!(ok!(vector[0].get(Operator::BlueScale)), &[0.0375]);
 }
 
 #[test]

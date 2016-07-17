@@ -5,7 +5,6 @@ use compact::{
     CharSet,
     Encoding,
     Header,
-    Number,
 };
 use compact::index::{
     CharStrings,
@@ -37,7 +36,7 @@ pub struct FontSet {
 macro_rules! get_single(
     ($operations:expr, $operator:ident) => ({
         match $operations.get_single(Operator::$operator) {
-            Some(Number::Integer(value)) => value,
+            Some(value) if is_i32!(value) => value as i32,
             _ => raise!("failed to process an operation ({})", stringify!($operator)),
         }
     });
@@ -46,10 +45,16 @@ macro_rules! get_single(
 macro_rules! get_double(
     ($operations:expr, $operator:ident) => (
         match $operations.get_double(Operator::$operator) {
-            Some((Number::Integer(value0), Number::Integer(value1))) => (value0, value1),
+            Some((value0, value1)) if is_i32!(value0) && is_i32!(value1) => {
+                (value0 as i32, value1 as i32)
+            },
             _ => raise!("failed to process an operation ({})", stringify!($operator)),
         }
     );
+);
+
+macro_rules! is_i32(
+    ($value:ident) => ($value as i32 as f32 == $value);
 );
 
 impl Value for FontSet {

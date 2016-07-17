@@ -1,25 +1,20 @@
-use {Result, Tape, Value};
+use {Result, Tape};
 
-number!(Number);
-use self::Number::*;
-
-impl Value for Number {
-    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
-        macro_rules! read(($kind:ident) => (read_value!(tape, $kind)));
-        let first = read!(u8);
-        Ok(match first {
-            0x20...0xf6 => Integer(first as i32 - 139),
-            0xf7...0xfa => Integer((first as i32 - 247) * 256 + read!(u8) as i32 + 108),
-            0xfb...0xfe => Integer(-(first as i32 - 251) * 256 - read!(u8) as i32 - 108),
-            0x1c => Integer(read!(u16) as i16 as i32),
-            0x1d => Integer(read!(u32) as i32),
-            0x1e => Real(try!(read_real(tape))),
-            _ => raise!("found a malformed number"),
-        })
-    }
+pub fn read<T: Tape>(tape: &mut T) -> Result<f32> {
+    macro_rules! read(($kind:ident) => (read_value!(tape, $kind)));
+    let first = read!(u8);
+    Ok(match first {
+        0x20...0xf6 => (first as i32 - 139) as f32,
+        0xf7...0xfa => ((first as i32 - 247) * 256 + read!(u8) as i32 + 108) as f32,
+        0xfb...0xfe => (-(first as i32 - 251) * 256 - read!(u8) as i32 - 108) as f32,
+        0x1c => read!(u16) as i16 as i32 as f32,
+        0x1d => read!(u32) as i32 as f32,
+        0x1e => try!(parse_real(tape)),
+        _ => raise!("found a malformed number"),
+    })
 }
 
-fn read_real<T: Tape>(tape: &mut T) -> Result<f32> {
+fn parse_real<T: Tape>(tape: &mut T) -> Result<f32> {
     let mut buffer = String::new();
     let mut byte = 0;
     let mut high = true;
@@ -52,12 +47,9 @@ fn read_real<T: Tape>(tape: &mut T) -> Result<f32> {
 mod tests {
     use std::io::Cursor;
 
-    use Value;
-    use compact::Number;
-
     #[test]
     fn integer() {
-        macro_rules! read(($tape:expr) => (i32::from(Number::read(&mut $tape).unwrap())));
+        macro_rules! read(($tape:expr) => (super::read(&mut $tape).unwrap() as i32));
 
         let mut tape = Cursor::new(vec![0x8b]);
         assert_eq!(read!(tape), 0);
@@ -89,7 +81,7 @@ mod tests {
 
     #[test]
     fn real() {
-        macro_rules! read(($tape:expr) => (f32::from(Number::read(&mut $tape).unwrap())));
+        macro_rules! read(($tape:expr) => (super::read(&mut $tape).unwrap()));
 
         let mut tape = Cursor::new(vec![0x1e, 0xe2, 0xa2, 0x5f, 0x0f]);
         assert_eq!(read!(tape), -2.25);

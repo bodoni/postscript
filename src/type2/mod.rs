@@ -1,5 +1,6 @@
 //! The Type 2 char-string format.
 
+mod number;
 mod program;
 
 pub mod operation;

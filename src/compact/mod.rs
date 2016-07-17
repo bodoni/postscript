@@ -14,7 +14,6 @@ pub use self::char_set::CharSet;
 pub use self::encoding::Encoding;
 pub use self::font_set::FontSet;
 pub use self::header::Header;
-pub use self::number::Number;
 pub use self::offset::{Offset, OffsetSize};
 pub use self::operation::Operations;
 

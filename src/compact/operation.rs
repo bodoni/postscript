@@ -3,21 +3,21 @@
 use std::collections::HashMap;
 
 use {Result, Tape, Value};
-use compact::Number;
+use compact::number;
 
 /// An operation.
-pub type Operation = (Operator, Vec<Number>);
+pub type Operation = (Operator, Vec<f32>);
 
 /// A collection of operations.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Operations(pub HashMap<Operator, Vec<Number>>);
+pub struct Operations(pub HashMap<Operator, Vec<f32>>);
 
 impl Value for Operation {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
         let mut arguments = vec![];
         loop {
             match try!(tape.peek::<u8>()) {
-                0x1c | 0x1d | 0x1e | 0x20...0xfe => arguments.push(read_value!(tape)),
+                0x1c | 0x1d | 0x1e | 0x20...0xfe => arguments.push(try!(number::read(tape))),
                 code => {
                     let code = if code == 0x0c {
                         try!(tape.take::<u16>())
@@ -34,7 +34,7 @@ impl Value for Operation {
 impl Operations {
     /// Return the arguments of an operation.
     #[inline]
-    pub fn get(&self, operator: Operator) -> Option<&[Number]> {
+    pub fn get(&self, operator: Operator) -> Option<&[f32]> {
         match self.0.get(&operator) {
             Some(arguments) => Some(&*arguments),
             _ => operator.default(),
@@ -43,7 +43,7 @@ impl Operations {
 
     #[doc(hidden)]
     #[inline]
-    pub fn get_single(&self, operator: Operator) -> Option<Number> {
+    pub fn get_single(&self, operator: Operator) -> Option<f32> {
         self.get(operator).and_then(|arguments| {
             if arguments.len() > 0 {
                 Some(arguments[0])
@@ -55,7 +55,7 @@ impl Operations {
 
     #[doc(hidden)]
     #[inline]
-    pub fn get_double(&self, operator: Operator) -> Option<(Number, Number)> {
+    pub fn get_double(&self, operator: Operator) -> Option<(f32, f32)> {
         self.get(operator).and_then(|arguments| {
             if arguments.len() > 1 {
                 Some((arguments[0], arguments[1]))
@@ -66,7 +66,7 @@ impl Operations {
     }
 }
 
-deref! { Operations::0 => HashMap<Operator, Vec<Number>> }
+deref! { Operations::0 => HashMap<Operator, Vec<f32>> }
 
 impl Value for Operations {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
@@ -81,8 +81,8 @@ impl Value for Operations {
 }
 
 macro_rules! default(
-    ([$($argument:ident($number:expr)),+]) => ({
-        const ARGUMENTS: &'static [Number] = &[$(Number::$argument($number)),+];
+    ([$($number:expr),+]) => ({
+        const ARGUMENTS: &'static [f32] = &[$($number as f32),+];
         Some(ARGUMENTS)
     });
     ([]) => (None);
@@ -109,7 +109,7 @@ macro_rules! operator {
         }
 
         /// Return the default arguments.
-        pub fn default(&self) -> Option<&'static [Number]> {
+        pub fn default(&self) -> Option<&'static [f32]> {
             use self::$name::*;
             match *self {
                 $($variant => default!($default),)+
@@ -125,7 +125,7 @@ operator! {
         0x02 => FullName [],
         0x03 => FamilyName [],
         0x04 => Weight [],
-        0x05 => FontBBox [Integer(0), Integer(0), Integer(0), Integer(0)],
+        0x05 => FontBBox [0, 0, 0, 0],
         0x06 => BlueValues [],
         0x07 => OtherBlues [],
         0x08 => FamilyBlues [],
@@ -135,13 +135,13 @@ operator! {
         // 0x0c => Escape,
         0x0d => UniqueID [],
         0x0e => XUID [],
-        0x0f => CharSet [Integer(0)],
-        0x10 => Encoding [Integer(0)],
+        0x0f => CharSet [0],
+        0x10 => Encoding [0],
         0x11 => CharStrings [],
         0x12 => Private [],
         0x13 => Subrs [],
-        0x14 => DefaultWidthX [Integer(0)],
-        0x15 => NominalWidthX [Integer(0)],
+        0x14 => DefaultWidthX [0],
+        0x15 => NominalWidthX [0],
         // 0x16...0x1b => Reserved,
         // 0x1c => ShortInt,
         // 0x1d => LongInt,
@@ -151,34 +151,34 @@ operator! {
         // 0xf7...0xfe => <numbers>,
         // 0xff => Reserved,
         0x0c00 => Copyright [],
-        0x0c01 => IsFixedPitch [Integer(false as i32)],
-        0x0c02 => ItalicAngle [Integer(0)],
-        0x0c03 => UnderlinePosition [Integer(-100)],
-        0x0c04 => UnderlineThickness [Integer(50)],
-        0x0c05 => PaintType [Integer(0)],
-        0x0c06 => CharStringType [Integer(2)],
-        0x0c07 => FontMatrix [Real(0.001), Real(0.), Real(0.), Real(0.001), Real(0.), Real(0.)],
-        0x0c08 => StrokeWidth [Integer(0)],
-        0x0c09 => BlueScale [Real(0.039625)],
-        0x0c0a => BlueShift [Integer(7)],
-        0x0c0b => BlueFuzz [Integer(1)],
+        0x0c01 => IsFixedPitch [false as i32],
+        0x0c02 => ItalicAngle [0],
+        0x0c03 => UnderlinePosition [-100],
+        0x0c04 => UnderlineThickness [50],
+        0x0c05 => PaintType [0],
+        0x0c06 => CharStringType [2],
+        0x0c07 => FontMatrix [0.001, 0.0, 0.0, 0.001, 0.0, 0.0],
+        0x0c08 => StrokeWidth [0],
+        0x0c09 => BlueScale [0.039625],
+        0x0c0a => BlueShift [7],
+        0x0c0b => BlueFuzz [1],
         0x0c0c => StemSnapH [],
         0x0c0d => StemSnapV [],
-        0x0c0e => ForceBold [Integer(false as i32)],
+        0x0c0e => ForceBold [false as i32],
         // 0x0c0f...0x0c10 => Reserved,
-        0x0c11 => LanguageGroup [Integer(0)],
-        0x0c12 => ExpansionFactor [Real(0.06)],
-        0x0c13 => InitialRandomSeed [Integer(0)],
+        0x0c11 => LanguageGroup [0],
+        0x0c12 => ExpansionFactor [0.06],
+        0x0c13 => InitialRandomSeed [0],
         0x0c14 => SyntheticBase [],
         0x0c15 => PostScript [],
         0x0c16 => BaseFontName [],
         0x0c17 => BaseFontBlend [],
         // 0x0c18...0x0c1d => Reserved,
         0x0c1e => ROS [],
-        0x0c1f => CIDFontVersion [Integer(0)],
-        0x0c20 => CIDFontRevision [Integer(0)],
-        0x0c21 => CIDFontType [Integer(0)],
-        0x0c22 => CIDCount [Integer(8720)],
+        0x0c1f => CIDFontVersion [0],
+        0x0c20 => CIDFontRevision [0],
+        0x0c21 => CIDFontType [0],
+        0x0c22 => CIDCount [8720],
         0x0c23 => UIDBase [],
         0x0c24 => FDArray [],
         0x0c25 => FDSelect [],

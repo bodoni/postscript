@@ -2,6 +2,7 @@ use std::io::Cursor;
 use std::mem;
 
 use {Result, Tape};
+use type2::number;
 use type2::operation::{Operation, Operator};
 
 /// A program.
@@ -229,18 +230,9 @@ impl<'l> Routine<'l> {
         Ok(try!(Tape::position(&mut self.tape)) == self.size as u64)
     }
 
+    #[inline(always)]
     fn take_number(&mut self) -> Result<f32> {
-        const FIXED_SCALING: f32 = 1f32 / (1 << 16) as f32;
-        macro_rules! read(($kind:ident) => (try!(self.tape.take::<$kind>())));
-        let first = read!(u8);
-        Ok(match first {
-            0x20...0xf6 => (first as i32 - 139) as f32,
-            0xf7...0xfa => ((first as i32 - 247) * 256 + read!(u8) as i32 + 108) as f32,
-            0xfb...0xfe => (-(first as i32 - 251) * 256 - read!(u8) as i32 - 108) as f32,
-            0x1c => read!(u16) as i16 as i32 as f32,
-            0xff => FIXED_SCALING * (read!(u32) as f32),
-            _ => raise!("found a malformed number"),
-        })
+        number::read(&mut self.tape)
     }
 }
 
@@ -249,16 +241,4 @@ deref! { Routine<'l>::tape => Cursor<&'l [u8]> }
 #[inline]
 fn bias(count: usize) -> i32 {
     if count < 1240 { 107 } else if count < 33900 { 1131 } else { 32768 }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::Routine;
-
-    #[test]
-    fn routine_take_number() {
-        let code = vec![0xff, 0x00, 0x01, 0x04, 0x5a];
-        let mut routine = Routine::new(&code);
-        assert_eq!(format!("{:.3}", routine.take_number().unwrap()), "1.017");
-    }
 }
