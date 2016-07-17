@@ -20,7 +20,7 @@ fn program_all() {
 
     for code in set.char_strings[0].iter() {
         let mut program = Program::new(code, global, local);
-        while let Some(..) = program.next().unwrap() {
+        while let Some(..) = ok!(program.next()) {
         }
     }
 }
@@ -35,7 +35,7 @@ fn program_one() {
 
     let mut program = Program::new(code, global, local);
     let mut operations = vec![];
-    while let Some(operation) = program.next().unwrap() {
+    while let Some(operation) = ok!(program.next()) {
         operations.push(operation);
     }
 

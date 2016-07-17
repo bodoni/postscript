@@ -45,7 +45,7 @@ fn encodings() {
     assert_eq!(vector.len(), 1);
     match &vector[0] {
         encoding @ &Encoding::Standard => {
-            assert_eq!(strings.get(encoding.get(42).unwrap()).unwrap(), "asterisk");
+            assert_eq!(ok!(strings.get(ok!(encoding.get(42)))), "asterisk");
         },
         _ => unreachable!(),
     }
@@ -100,7 +100,7 @@ fn local_dictionaries() {
 
     assert_eq!(vector.len(), 1);
     assert_eq!(vector[0].len(), 13);
-    assert_eq!(vector[0].get(Operator::BlueScale).unwrap(), &[Number::Real(0.0375)]);
+    assert_eq!(ok!(vector[0].get(Operator::BlueScale)), &[Number::Real(0.0375)]);
 }
 
 #[test]
@@ -127,6 +127,6 @@ fn strings() {
     let index = &set.strings;
 
     assert_eq!(index.len(), 322);
-    assert_eq!(index.get(175).unwrap(), "Aring");
-    assert_eq!(index.get(500).unwrap(), "nine.tosf");
+    assert_eq!(ok!(index.get(175)), "Aring");
+    assert_eq!(ok!(index.get(500)), "nine.tosf");
 }
