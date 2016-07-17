@@ -66,6 +66,8 @@ impl Operations {
     }
 }
 
+deref! { Operations::0 => HashMap<Operator, Vec<Number>> }
+
 impl Value for Operations {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
         let size = try!(tape.count());
@@ -77,8 +79,6 @@ impl Value for Operations {
         Ok(Operations(map))
     }
 }
-
-deref! { Operations::0 => HashMap<Operator, Vec<Number>> }
 
 macro_rules! default(
     ([$($argument:ident($number:expr)),+]) => ({

@@ -14,6 +14,8 @@ table! {
     }
 }
 
+deref! { Index::data => [Vec<u8>] }
+
 impl Value for Index {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
         let count = try!(tape.take::<u16>());
@@ -37,8 +39,6 @@ impl Value for Index {
         Ok(Index { count: count, offset_size: offset_size, offsets: offsets, data: data })
     }
 }
-
-deref! { Index::data => [Vec<u8>] }
 
 macro_rules! index {
     ($(#[$attribute:meta])* pub $structure:ident) => (
