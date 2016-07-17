@@ -3,14 +3,14 @@ use std::mem;
 
 use {Result, Tape};
 use type2::number;
-use type2::operation::{Operation, Operator};
+use type2::operation::{Operand, Operation, Operator};
 
 /// A program.
 pub struct Program<'l> {
     routine: Routine<'l>,
     global: &'l [Vec<u8>],
     local: &'l [Vec<u8>],
-    stack: Vec<f32>,
+    stack: Vec<Operand>,
     stems: usize,
 }
 
@@ -54,7 +54,7 @@ impl<'l> Program<'l> {
                 _ => raise!("expected an argument"),
             });
             (i32) => (match self.stack.pop() {
-                Some(value) if value as i32 as f32 == value => value as i32,
+                Some(value) if value as i32 as Operand == value => value as i32,
                 _ => raise!("expected an argument of a different type"),
             });
         );
@@ -76,7 +76,7 @@ impl<'l> Program<'l> {
         loop {
             code = try!(self.routine.peek::<u8>());
             match code {
-                0x1c | 0x20...0xff => push!(try!(self.routine.take_number())),
+                0x1c | 0x20...0xff => push!(try!(self.routine.take_operand())),
                 _ => break,
             }
         }
@@ -231,7 +231,7 @@ impl<'l> Routine<'l> {
     }
 
     #[inline(always)]
-    fn take_number(&mut self) -> Result<f32> {
+    fn take_operand(&mut self) -> Result<Operand> {
         number::read(&mut self.tape)
     }
 }

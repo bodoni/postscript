@@ -3,10 +3,10 @@ use postscript::type2::Program;
 use setup;
 
 macro_rules! operations(
-    ($(($operator:ident, [$($number:expr),*]),)*) => ({
-        use postscript::type2::operation::Operator;
+    ($(($operator:ident, [$($operand:expr),*]),)*) => ({
+        use postscript::type2::operation::{Operand, Operator};
         let mut operations = vec![];
-        $(operations.push((Operator::$operator, vec![$($number as f32),*]));)*
+        $(operations.push((Operator::$operator, vec![$($operand as Operand),*]));)*
         operations
     });
 );

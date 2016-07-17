@@ -14,6 +14,7 @@ use compact::index::{
     Subroutines,
 };
 use compact::operation::{
+    Operand,
     Operations,
     Operator,
 };
@@ -54,7 +55,7 @@ macro_rules! get_double(
 );
 
 macro_rules! is_i32(
-    ($value:ident) => ($value as i32 as f32 == $value);
+    ($value:ident) => ($value as i32 as Operand == $value);
 );
 
 impl Value for FontSet {

@@ -1,11 +1,11 @@
 use setup;
 
 macro_rules! operations(
-    ($($operator:ident => [$($number:expr),*],)*) => ({
-        use postscript::compact::operation::Operator;
+    ($($operator:ident => [$($operand:expr),*],)*) => ({
+        use postscript::compact::operation::{Operand, Operator};
         use std::collections::HashMap;
         let mut operations = HashMap::new();
-        $(operations.insert(Operator::$operator, vec![$($number as f32),*]);)*
+        $(operations.insert(Operator::$operator, vec![$($operand as Operand),*]);)*
         operations
     });
 );

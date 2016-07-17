@@ -5,12 +5,15 @@ use std::collections::HashMap;
 use {Result, Tape, Value};
 use compact::number;
 
+/// An operand.
+pub type Operand = f32;
+
 /// An operation.
-pub type Operation = (Operator, Vec<f32>);
+pub type Operation = (Operator, Vec<Operand>);
 
 /// A collection of operations.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Operations(pub HashMap<Operator, Vec<f32>>);
+pub struct Operations(pub HashMap<Operator, Vec<Operand>>);
 
 impl Value for Operation {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
@@ -34,7 +37,7 @@ impl Value for Operation {
 impl Operations {
     /// Return the arguments of an operation.
     #[inline]
-    pub fn get(&self, operator: Operator) -> Option<&[f32]> {
+    pub fn get(&self, operator: Operator) -> Option<&[Operand]> {
         match self.0.get(&operator) {
             Some(arguments) => Some(&*arguments),
             _ => operator.default(),
@@ -43,7 +46,7 @@ impl Operations {
 
     #[doc(hidden)]
     #[inline]
-    pub fn get_single(&self, operator: Operator) -> Option<f32> {
+    pub fn get_single(&self, operator: Operator) -> Option<Operand> {
         self.get(operator).and_then(|arguments| {
             if arguments.len() > 0 {
                 Some(arguments[0])
@@ -55,7 +58,7 @@ impl Operations {
 
     #[doc(hidden)]
     #[inline]
-    pub fn get_double(&self, operator: Operator) -> Option<(f32, f32)> {
+    pub fn get_double(&self, operator: Operator) -> Option<(Operand, Operand)> {
         self.get(operator).and_then(|arguments| {
             if arguments.len() > 1 {
                 Some((arguments[0], arguments[1]))
@@ -66,7 +69,7 @@ impl Operations {
     }
 }
 
-deref! { Operations::0 => HashMap<Operator, Vec<f32>> }
+deref! { Operations::0 => HashMap<Operator, Vec<Operand>> }
 
 impl Value for Operations {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
@@ -81,8 +84,8 @@ impl Value for Operations {
 }
 
 macro_rules! default(
-    ([$($number:expr),+]) => ({
-        const ARGUMENTS: &'static [f32] = &[$($number as f32),+];
+    ([$($operand:expr),+]) => ({
+        const ARGUMENTS: &'static [Operand] = &[$($operand as Operand),+];
         Some(ARGUMENTS)
     });
     ([]) => (None);
@@ -109,7 +112,7 @@ macro_rules! operator {
         }
 
         /// Return the default arguments.
-        pub fn default(&self) -> Option<&'static [f32]> {
+        pub fn default(&self) -> Option<&'static [Operand]> {
             use self::$name::*;
             match *self {
                 $($variant => default!($default),)+

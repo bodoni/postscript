@@ -2,8 +2,11 @@
 
 use Result;
 
+/// An operand.
+pub type Operand = f32;
+
 /// An operation.
-pub type Operation = (Operator, Vec<f32>);
+pub type Operation = (Operator, Vec<Operand>);
 
 /// A collection of operations.
 pub type Operations = Vec<Operation>;
