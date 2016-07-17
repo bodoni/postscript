@@ -1,10 +1,9 @@
 //! The operations.
 
 use Result;
-use type2::Number;
 
 /// An operation.
-pub type Operation = (Operator, Vec<Number>);
+pub type Operation = (Operator, Vec<f32>);
 
 /// A collection of operations.
 pub type Operations = Vec<Operation>;
