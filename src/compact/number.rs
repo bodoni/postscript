@@ -1,14 +1,13 @@
 use {Result, Tape};
 
 pub fn read<T: Tape>(tape: &mut T) -> Result<f32> {
-    macro_rules! read(($kind:ident) => (read_value!(tape, $kind)));
-    let first = read!(u8);
+    let first = read_value!(tape, u8);
     Ok(match first {
         0x20...0xf6 => (first as i32 - 139) as f32,
-        0xf7...0xfa => ((first as i32 - 247) * 256 + read!(u8) as i32 + 108) as f32,
-        0xfb...0xfe => (-(first as i32 - 251) * 256 - read!(u8) as i32 - 108) as f32,
-        0x1c => read!(u16) as i16 as i32 as f32,
-        0x1d => read!(u32) as i32 as f32,
+        0xf7...0xfa => ((first as i32 - 247) * 256 + read_value!(tape, u8) as i32 + 108) as f32,
+        0xfb...0xfe => (-(first as i32 - 251) * 256 - read_value!(tape, u8) as i32 - 108) as f32,
+        0x1c => read_value!(tape, u16) as i16 as i32 as f32,
+        0x1d => read_value!(tape, u32) as i32 as f32,
         0x1e => try!(parse_real(tape)),
         _ => raise!("found a malformed number"),
     })
@@ -21,7 +20,7 @@ fn parse_real<T: Tape>(tape: &mut T) -> Result<f32> {
     loop {
         let nibble = match high {
             true => {
-                byte = try!(tape.take::<u8>());
+                byte = read_value!(tape, u8);
                 byte >> 4
             },
             false => byte & 0x0f,
