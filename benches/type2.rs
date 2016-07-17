@@ -12,7 +12,7 @@ fn program(bencher: &mut Bencher) {
     bencher.iter(|| {
         for code in set.char_strings[0].iter() {
             let mut program = Program::new(code, global, local);
-            while let Some(..) = program.next().unwrap() {
+            while let Some(..) = ok!(program.next()) {
             }
         }
     })
