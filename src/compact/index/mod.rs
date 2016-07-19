@@ -48,16 +48,14 @@ macro_rules! index {
     (@define $(#[$attribute:meta])* pub $structure:ident) => (
         $(#[$attribute])*
         #[derive(Clone, Debug, Eq, PartialEq)]
-        pub struct $structure {
-            index: ::compact::index::Index,
-        }
-        deref! { $structure::index => ::compact::index::Index }
+        pub struct $structure(::compact::index::Index);
+        deref! { $structure::0 => ::compact::index::Index }
     );
     (@implement $structure:ident) => (
         impl ::tape::Value for $structure {
             #[inline]
             fn read<T: ::tape::Tape>(tape: &mut T) -> ::Result<Self> {
-                Ok($structure { index: read_value!(tape) })
+                Ok($structure(read_value!(tape)))
             }
         }
     );

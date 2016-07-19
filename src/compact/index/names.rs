@@ -9,7 +9,7 @@ index! {
 impl Names {
     #[doc(hidden)]
     pub fn into(self) -> Result<Vec<String>> {
-        let Names { index: Index { data, .. } } = self;
+        let Names(Index { data, .. }) = self;
         let mut vector = Vec::with_capacity(data.len());
         for chunk in data {
             vector.push(match String::from_utf8(chunk) {
