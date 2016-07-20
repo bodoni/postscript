@@ -12,7 +12,7 @@ pub enum CharSet {
     Format1(Format1),
 }
 
-/// A char set of format 1.
+/// A char set in format 1.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Format1 {
     pub format: u8,          // format
@@ -20,7 +20,7 @@ pub struct Format1 {
 }
 
 table! {
-    #[doc = "A range of a char set of format 1."]
+    #[doc = "A range of a char set in format 1."]
     #[derive(Copy)]
     pub Range1 {
         first (StringID), // first
