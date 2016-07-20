@@ -5,7 +5,7 @@ use compact::{Offset, OffsetSize};
 
 table! {
     @define
-    #[doc(hidden)]
+    #[doc = "An index."]
     pub Index {
         count       (u16         ), // count
         offset_size (OffsetSize  ), // offSize
@@ -48,7 +48,7 @@ macro_rules! index {
     (@define $(#[$attribute:meta])* pub $structure:ident) => (
         $(#[$attribute])*
         #[derive(Clone, Debug, Eq, PartialEq)]
-        pub struct $structure(::compact::index::Index);
+        pub struct $structure(pub ::compact::index::Index);
         deref! { $structure::0 => ::compact::index::Index }
     );
     (@implement $structure:ident) => (
