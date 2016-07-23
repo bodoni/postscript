@@ -92,26 +92,26 @@ impl<'l> Program<'l> {
                     $min = $left;
                 }
             });
-            (@reduce [$min:expr, $left:expr] [exactly($count:expr), $($tail:tt)*]) => ({
+            (@reduce [$min:expr, $left:expr] [equal($count:expr), $($tail:tt)*]) => ({
                 if $left >= $count {
                     let left = $left - $count;
                     clear!(@reduce [$min, left] [$($tail)*]);
                 }
             });
-            (@reduce [$min:expr, $left:expr] [maybe($count:expr), $($tail:tt)*]) => ({
+            (@reduce [$min:expr, $left:expr] [maybe_equal($count:expr), $($tail:tt)*]) => ({
                 clear!(@reduce [$min, $left] [$($tail)*]);
                 if $left >= $count {
                     clear!(@reduce [$min, $left - $count] [$($tail)*]);
                 }
             });
-            (@reduce [$min:expr, $left:expr] [maybe_modulo($count:expr), $($tail:tt)*]) => ({
-                for i in 0..($left / $count + 1) {
+            (@reduce [$min:expr, $left:expr] [modulo($count:expr), $($tail:tt)*]) => ({
+                for i in 1..($left / $count + 1) {
                     let left = $left - i * $count;
                     clear!(@reduce [$min, left] [$($tail)*]);
                 }
             });
-            (@reduce [$min:expr, $left:expr] [modulo($count:expr), $($tail:tt)*]) => ({
-                for i in 1..($left / $count + 1) {
+            (@reduce [$min:expr, $left:expr] [maybe_modulo($count:expr), $($tail:tt)*]) => ({
+                for i in 0..($left / $count + 1) {
                     let left = $left - i * $count;
                     clear!(@reduce [$min, left] [$($tail)*]);
                 }
@@ -134,23 +134,25 @@ impl<'l> Program<'l> {
 
         match operator {
             // Path-construction operators
-            RMoveTo => clear!([exactly(2)]),
-            HMoveTo => clear!([exactly(1)]),
-            VMoveTo => clear!([exactly(1)]),
+            RMoveTo => clear!([equal(2)]),
+            HMoveTo => clear!([equal(1)]),
+            VMoveTo => clear!([equal(1)]),
             RLineTo => clear!([modulo(2)]),
-            HLineTo => clear!([exactly(1), maybe_modulo(2)], [modulo(2)]),
-            VLineTo => clear!([exactly(1), maybe_modulo(2)], [modulo(2)]),
+            HLineTo => clear!([equal(1), maybe_modulo(2)], [modulo(2)]),
+            VLineTo => clear!([equal(1), maybe_modulo(2)], [modulo(2)]),
             RRCurveTo => clear!([modulo(6)]),
-            HHCurveTo => clear!([maybe(1), modulo(4)]),
-            VVCurveTo => clear!([maybe(1), modulo(4)]),
-            HVCurveTo => clear!([exactly(4), maybe_modulo(8), maybe(1)], [modulo(8), maybe(1)]),
-            VHCurveTo => clear!([exactly(4), maybe_modulo(8), maybe(1)], [modulo(8), maybe(1)]),
-            RCurveLine => clear!([modulo(6), exactly(2)]),
-            RLineCurve => clear!([modulo(2), exactly(6)]),
-            Flex => clear!([exactly(13)]),
-            Flex1 => clear!([exactly(11)]),
-            HFlex => clear!([exactly(7)]),
-            HFlex1 => clear!([exactly(9)]),
+            HHCurveTo => clear!([maybe_equal(1), modulo(4)]),
+            VVCurveTo => clear!([maybe_equal(1), modulo(4)]),
+            HVCurveTo => clear!([equal(4), maybe_modulo(8), maybe_equal(1)],
+                                [modulo(8), maybe_equal(1)]),
+            VHCurveTo => clear!([equal(4), maybe_modulo(8), maybe_equal(1)],
+                                [modulo(8), maybe_equal(1)]),
+            RCurveLine => clear!([modulo(6), equal(2)]),
+            RLineCurve => clear!([modulo(2), equal(6)]),
+            Flex => clear!([equal(13)]),
+            Flex1 => clear!([equal(11)]),
+            HFlex => clear!([equal(7)]),
+            HFlex1 => clear!([equal(9)]),
 
             // Terminal operator
             EndChar => {
@@ -170,12 +172,12 @@ impl<'l> Program<'l> {
             // Hint operators
             HStem | VStem | HStemHM | VStemHM => {
                 self.stems += self.stack.len() >> 1;
-                clear!([exactly(2), maybe_modulo(2)]);
+                clear!([equal(2), maybe_modulo(2)]);
             },
             HintMask | CntrMask => {
                 self.stems += self.stack.len() >> 1;
                 let _: Vec<u8> = read_walue!(&mut *self.routine, (self.stems + 7) >> 3);
-                clear!([exactly(0)]);
+                clear!([equal(0)]);
             },
 
             // Arithmetic operators
