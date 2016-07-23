@@ -12,6 +12,7 @@ pub struct Program<'l> {
     local: &'l [Vec<u8>],
     stack: Vec<Operand>,
     stems: usize,
+    width: Option<Operand>,
 }
 
 struct Routine<'l> {
@@ -30,6 +31,7 @@ impl<'l> Program<'l> {
             local: local,
             stack: vec![],
             stems: 0,
+            width: None,
         }
     }
 
@@ -83,6 +85,7 @@ impl<'l> Program<'l> {
         } else {
             try!(Operator::from(try!(self.routine.take::<u8>()) as u16))
         };
+
         macro_rules! clear(
             (@reduce [$min:expr, $left:expr] []) => ({
                 if $min > $left {
@@ -120,10 +123,15 @@ impl<'l> Program<'l> {
                 if min == !0 {
                     raise!("found malformed operands");
                 }
-                let operands = mem::replace(&mut self.stack, vec![]);
+                let mut stack = mem::replace(&mut self.stack, vec![]);
+                let operands = stack.drain(min..).collect();
+                if min > 0 && self.width.is_none() {
+                    self.width = Some(stack[min - 1]);
+                }
                 return Ok(Some((operator, operands)));
             });
         );
+
         match operator {
             // Path-construction operators
             RMoveTo => clear!([exactly(2)]),
@@ -151,6 +159,10 @@ impl<'l> Program<'l> {
                         raise!("found trailing data after the end operator");
                     }
                     mem::replace(&mut self.routine, *caller);
+                }
+                let length = self.stack.len();
+                if length > 0 && self.width.is_none() {
+                    self.width = Some(self.stack[length - 1]);
                 }
                 return Ok(None);
             },
@@ -267,6 +279,12 @@ impl<'l> Program<'l> {
             },
         };
         self.next()
+    }
+
+    /// Return the width difference with respect to the nominal width.
+    #[inline]
+    pub fn width(&self) -> Option<Operand> {
+        self.width
     }
 }
 

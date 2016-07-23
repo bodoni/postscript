@@ -38,9 +38,10 @@ fn program_one() {
         operations.push(operation);
     }
 
+    assert_eq!(program.width(), Some(-95.0));
     assert_eq!(operations, operations![
-        (HStemHM, [-95, -15, 66, -61, 52, 403, 46, 82, 63, 20, 62]),
-        (HintMask, [45, 89, -58, 36, 212, 84, -38, 36]),
+        (HStemHM, [-15, 66, -61, 52, 403, 46, 82, 63, 20, 62]),
+        (HintMask, []),
         (RMoveTo, [112, 585]),
         (VHCurveTo, [50, 20, 21, 28, 21, 16, -13, -26, 27]),
         (HintMask, []),
