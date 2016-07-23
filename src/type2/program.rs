@@ -34,6 +34,7 @@ impl<'l> Program<'l> {
     }
 
     /// Return the next operation.
+    #[allow(unused_comparisons)]
     pub fn next(&mut self) -> Result<Option<Operation>> {
         use type2::operation::Operator::*;
 
@@ -41,33 +42,30 @@ impl<'l> Program<'l> {
             return Ok(None);
         }
 
-        macro_rules! clear(
-            () => (mem::replace(&mut self.stack, vec![]));
-        );
         macro_rules! pop(
             () => (match self.stack.pop() {
                 Some(value) => value,
-                _ => raise!("expected an argument"),
+                _ => raise!("expected an operand"),
             });
             (bool) => (match self.stack.pop() {
                 Some(value) => value != 0.0,
-                _ => raise!("expected an argument"),
+                _ => raise!("expected an operand"),
             });
             (i32) => (match self.stack.pop() {
                 Some(value) if value as i32 as Operand == value => value as i32,
-                _ => raise!("expected an argument of a different type"),
+                _ => raise!("expected an operand of a different type"),
             });
         );
         macro_rules! push(
-            ($argument:expr) => ({
-                let argument = $argument;
-                self.stack.push(argument);
+            ($operand:expr) => ({
+                let operand = $operand;
+                self.stack.push(operand);
             });
         );
         macro_rules! read(($index:expr) => ({
             let length = self.stack.len();
             if $index >= length {
-                raise!("expected more arguments");
+                raise!("expected more operands");
             }
             self.stack[length - 1 - $index]
         }));
@@ -85,13 +83,66 @@ impl<'l> Program<'l> {
         } else {
             try!(Operator::from(try!(self.routine.take::<u8>()) as u16))
         };
+        macro_rules! clear(
+            (@reduce [$min:expr, $left:expr] []) => ({
+                if $min > $left {
+                    $min = $left;
+                }
+            });
+            (@reduce [$min:expr, $left:expr] [exactly($count:expr), $($tail:tt)*]) => ({
+                if $left >= $count {
+                    let left = $left - $count;
+                    clear!(@reduce [$min, left] [$($tail)*]);
+                }
+            });
+            (@reduce [$min:expr, $left:expr] [maybe($count:expr), $($tail:tt)*]) => ({
+                clear!(@reduce [$min, $left] [$($tail)*]);
+                if $left >= $count {
+                    clear!(@reduce [$min, $left - $count] [$($tail)*]);
+                }
+            });
+            (@reduce [$min:expr, $left:expr] [maybe_modulo($count:expr), $($tail:tt)*]) => ({
+                for i in 0..($left / $count + 1) {
+                    let left = $left - i * $count;
+                    clear!(@reduce [$min, left] [$($tail)*]);
+                }
+            });
+            (@reduce [$min:expr, $left:expr] [modulo($count:expr), $($tail:tt)*]) => ({
+                for i in 1..($left / $count + 1) {
+                    let left = $left - i * $count;
+                    clear!(@reduce [$min, left] [$($tail)*]);
+                }
+            });
+            ($([$($predicate:ident($count:expr)),*]),+) => ({
+                let length = self.stack.len();
+                let mut min = !0;
+                $(clear!(@reduce [min, length] [$($predicate($count),)*]);)+
+                if min == !0 {
+                    raise!("found malformed operands");
+                }
+                let operands = mem::replace(&mut self.stack, vec![]);
+                return Ok(Some((operator, operands)));
+            });
+        );
         match operator {
             // Path-construction operators
-            RMoveTo | HMoveTo | VMoveTo | RLineTo | HLineTo | VLineTo |
-            RRCurveTo | HHCurveTo | HVCurveTo | VHCurveTo | VVCurveTo |
-            RCurveLine | RLineCurve | Flex | Flex1 | HFlex | HFlex1 => {
-                return Ok(Some((operator, clear!())));
-            },
+            RMoveTo => clear!([exactly(2)]),
+            HMoveTo => clear!([exactly(1)]),
+            VMoveTo => clear!([exactly(1)]),
+            RLineTo => clear!([modulo(2)]),
+            HLineTo => clear!([exactly(1), maybe_modulo(2)], [modulo(2)]),
+            VLineTo => clear!([exactly(1), maybe_modulo(2)], [modulo(2)]),
+            RRCurveTo => clear!([modulo(6)]),
+            HHCurveTo => clear!([maybe(1), modulo(4)]),
+            VVCurveTo => clear!([maybe(1), modulo(4)]),
+            HVCurveTo => clear!([exactly(4), maybe_modulo(8), maybe(1)], [modulo(8), maybe(1)]),
+            VHCurveTo => clear!([exactly(4), maybe_modulo(8), maybe(1)], [modulo(8), maybe(1)]),
+            RCurveLine => clear!([modulo(6), exactly(2)]),
+            RLineCurve => clear!([modulo(2), exactly(6)]),
+            Flex => clear!([exactly(13)]),
+            Flex1 => clear!([exactly(11)]),
+            HFlex => clear!([exactly(7)]),
+            HFlex1 => clear!([exactly(9)]),
 
             // Terminal operator
             EndChar => {
@@ -107,12 +158,12 @@ impl<'l> Program<'l> {
             // Hint operators
             HStem | VStem | HStemHM | VStemHM => {
                 self.stems += self.stack.len() >> 1;
-                return Ok(Some((operator, clear!())));
+                clear!([exactly(2), maybe_modulo(2)]);
             },
             HintMask | CntrMask => {
                 self.stems += self.stack.len() >> 1;
                 let _: Vec<u8> = read_walue!(&mut *self.routine, (self.stems + 7) >> 3);
-                return Ok(Some((operator, clear!())));
+                clear!([exactly(0)]);
             },
 
             // Arithmetic operators
@@ -146,15 +197,15 @@ impl<'l> Program<'l> {
                 let (shift, span) = (pop!(i32), pop!(i32));
                 let length = self.stack.len();
                 if span < 0 {
-                    raise!("found an invalid argument");
+                    raise!("found an invalid operand");
                 } else if span as usize > length {
-                    raise!("expected more arguments");
+                    raise!("expected more operands");
                 } else if span > 0 {
                     let position = length - span as usize;
                     if shift > 0 {
                         for _ in 0..shift {
-                            let argument = pop!();
-                            self.stack.insert(position, argument);
+                            let operand = pop!();
+                            self.stack.insert(position, operand);
                         }
                     } else if shift < 0 {
                         for _ in 0..(-shift) {

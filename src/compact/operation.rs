@@ -17,17 +17,17 @@ pub struct Operations(pub HashMap<Operator, Vec<Operand>>);
 
 impl Value for Operation {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
-        let mut arguments = vec![];
+        let mut operands = vec![];
         loop {
             match try!(tape.peek::<u8>()) {
-                0x1c | 0x1d | 0x1e | 0x20...0xfe => arguments.push(try!(number::read(tape))),
+                0x1c | 0x1d | 0x1e | 0x20...0xfe => operands.push(try!(number::read(tape))),
                 code => {
                     let code = if code == 0x0c {
                         try!(tape.take::<u16>())
                     } else {
                         try!(tape.take::<u8>()) as u16
                     };
-                    return Ok((try!(Operator::from(code)), arguments));
+                    return Ok((try!(Operator::from(code)), operands));
                 },
             }
         }
@@ -35,11 +35,11 @@ impl Value for Operation {
 }
 
 impl Operations {
-    /// Return the arguments of an operation.
+    /// Return the operands of an operation.
     #[inline]
     pub fn get(&self, operator: Operator) -> Option<&[Operand]> {
         match self.0.get(&operator) {
-            Some(arguments) => Some(&*arguments),
+            Some(operands) => Some(&*operands),
             _ => operator.default(),
         }
     }
@@ -47,9 +47,9 @@ impl Operations {
     #[doc(hidden)]
     #[inline]
     pub fn get_single(&self, operator: Operator) -> Option<Operand> {
-        self.get(operator).and_then(|arguments| {
-            if arguments.len() > 0 {
-                Some(arguments[0])
+        self.get(operator).and_then(|operands| {
+            if operands.len() > 0 {
+                Some(operands[0])
             } else {
                 None
             }
@@ -59,9 +59,9 @@ impl Operations {
     #[doc(hidden)]
     #[inline]
     pub fn get_double(&self, operator: Operator) -> Option<(Operand, Operand)> {
-        self.get(operator).and_then(|arguments| {
-            if arguments.len() > 1 {
-                Some((arguments[0], arguments[1]))
+        self.get(operator).and_then(|operands| {
+            if operands.len() > 1 {
+                Some((operands[0], operands[1]))
             } else {
                 None
             }
@@ -76,8 +76,8 @@ impl Value for Operations {
         let size = try!(tape.count());
         let mut map = HashMap::new();
         while try!(tape.position()) < size {
-            let (operator, arguments) = read_value!(tape);
-            map.insert(operator, arguments);
+            let (operator, operands) = read_value!(tape);
+            map.insert(operator, operands);
         }
         Ok(Operations(map))
     }
@@ -85,8 +85,8 @@ impl Value for Operations {
 
 macro_rules! default(
     ([$($operand:expr),+]) => ({
-        const ARGUMENTS: &'static [Operand] = &[$($operand as Operand),+];
-        Some(ARGUMENTS)
+        const OPERANDS: &'static [Operand] = &[$($operand as Operand),+];
+        Some(OPERANDS)
     });
     ([]) => (None);
 );
@@ -111,7 +111,7 @@ macro_rules! operator {
             })
         }
 
-        /// Return the default arguments.
+        /// Return the default operands.
         pub fn default(&self) -> Option<&'static [Operand]> {
             use self::$name::*;
             match *self {
