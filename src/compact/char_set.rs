@@ -54,8 +54,11 @@ impl Walue<usize> for CharSet {
 
 impl Walue<usize> for Format1 {
     fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
+        macro_rules! reject(() => (raise!("found a malformed char set")));
         let format = try!(tape.take::<u8>());
-        debug_assert_eq!(format, 1);
+        if format != 1 {
+            reject!();
+        }
         let mut ranges = vec![];
         let mut found = 0 + 1;
         while found < glyphs {
@@ -64,7 +67,7 @@ impl Walue<usize> for Format1 {
             ranges.push(range);
         }
         if found != glyphs {
-            raise!("found a malformed char set");
+            reject!();
         }
         Ok(Format1 { format: format, ranges: ranges })
     }
