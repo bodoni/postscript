@@ -59,6 +59,10 @@ impl<'l> Program<'l> {
             });
         );
         macro_rules! push(
+            ($operand:expr, bool) => ({
+                let operand = $operand;
+                self.stack.push(if operand { 1.0 } else { 0.0 });
+            });
             ($operand:expr) => ({
                 let operand = $operand;
                 self.stack.push(operand);
@@ -190,9 +194,7 @@ impl<'l> Program<'l> {
             Random => unimplemented!(),
             Mul => push!(pop!() * pop!()),
             Sqrt => push!(pop!().sqrt()),
-            Drop => {
-                pop!();
-            },
+            Drop => mem::drop(pop!()),
             Exch => {
                 let (right, left) = (pop!(), pop!());
                 push!(right);
@@ -232,16 +234,16 @@ impl<'l> Program<'l> {
             // Conditional operators
             And => {
                 let (right, left) = (pop!(bool), pop!(bool));
-                push!(if left && right { 1.0 } else { 0.0 })
+                push!(left && right, bool);
             },
             Or => {
                 let (right, left) = (pop!(bool), pop!(bool));
-                push!(if left || right { 1.0 } else { 0.0 })
+                push!(left || right, bool);
             },
-            Not => push!(if pop!(bool) { 0.0 } else { 1.0 }),
+            Not => push!(!pop!(bool), bool),
             Eq => {
                 let (right, left) = (pop!(), pop!());
-                push!(if left == right { 1.0 } else { 0.0 })
+                push!(left == right, bool);
             },
             IfElse => {
                 let (right, left, no, yes) = (pop!(), pop!(), pop!(), pop!());
