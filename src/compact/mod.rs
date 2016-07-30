@@ -1,4 +1,6 @@
-//! The compact font format.
+//! The [compact font format][1].
+//!
+//! [1]: https://www.adobe.com/content/dam/Adobe/en/devnet/font/pdfs/5176.CFF.pdf
 
 mod encoding;
 mod font_set;
