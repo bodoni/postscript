@@ -4,6 +4,12 @@ use Result;
 
 /// A type that can read.
 pub trait Tape: Read + Seek + Sized {
+    /// Read a value.
+    #[inline(always)]
+    fn take<T: Value>(&mut self) -> Result<T> {
+        Value::read(self)
+    }
+
     #[doc(hidden)]
     fn count(&mut self) -> Result<u64> {
         let current = try!(self.position());
@@ -31,12 +37,6 @@ pub trait Tape: Read + Seek + Sized {
     fn position(&mut self) -> Result<u64> {
         self.seek(SeekFrom::Current(0))
     }
-
-    #[doc(hidden)]
-    #[inline(always)]
-    fn take<T: Value>(&mut self) -> Result<T> {
-        Value::read(self)
-    }
 }
 
 /// A type that can be read.
@@ -45,7 +45,7 @@ pub trait Value: Sized {
     fn read<T: Tape>(&mut T) -> Result<Self>;
 }
 
-/// A type that can be read provided a parameter.
+/// A type that can be read given a parameter.
 pub trait Walue<P>: Sized {
     /// Read a value.
     fn read<T: Tape>(&mut T, P) -> Result<Self>;
