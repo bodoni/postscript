@@ -54,14 +54,9 @@ pub trait Walue<P>: Sized {
 impl<T: Read + Seek> Tape for T {}
 
 macro_rules! read(
-    ($tape:ident, $count:expr, $buffer:expr) => (
-        if try!(::std::io::Read::read($tape, $buffer)) != $count {
-            return raise!("failed to read as much as needed");
-        }
-    );
     ($tape:ident, $size:expr) => (unsafe {
         let mut buffer: [u8; $size] = ::std::mem::uninitialized();
-        read!($tape, $size, &mut buffer);
+        try!(::std::io::Read::read($tape, &mut buffer));
         ::std::mem::transmute(buffer)
     });
 );
@@ -87,20 +82,20 @@ macro_rules! value {
     });
 }
 
-macro_rules! walue {
-    ($kind:ty, 1) => (impl Walue<usize> for $kind {
-        fn read<T: Tape>(tape: &mut T, count: usize) -> Result<Self> {
-            let mut values = Vec::with_capacity(count);
-            unsafe { values.set_len(count) };
-            read!(tape, count, &mut values);
-            Ok(values)
-        }
-    });
-}
-
 value!(u8, 1);
 value!(u16, 2);
 value!(u32, 4);
 value!([u8; 3], 1);
+
+macro_rules! walue {
+    ($kind:ty, 1) => (impl Walue<usize> for $kind {
+        fn read<T: Tape>(tape: &mut T, count: usize) -> Result<Self> {
+            let mut buffer = Vec::with_capacity(count);
+            unsafe { buffer.set_len(count) };
+            try!(::std::io::Read::read_exact(tape, &mut buffer));
+            Ok(buffer)
+        }
+    });
+}
 
 walue!(Vec<u8>, 1);
