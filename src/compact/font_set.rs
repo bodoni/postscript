@@ -62,12 +62,12 @@ impl Value for FontSet {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
         let start = try!(tape.position());
 
-        let header = read_value!(tape, Header);
+        let header = try!(tape.take::<Header>());
         try!(tape.jump(start + header.header_size as u64));
-        let names = try!(read_value!(tape, Names).into());
-        let global_dictionaries = try!(read_value!(tape, Dictionaries).into());
-        let strings = read_value!(tape, Strings);
-        let global_subroutines = read_value!(tape, Subroutines);
+        let names = try!(try!(tape.take::<Names>()).into());
+        let global_dictionaries = try!(try!(tape.take::<Dictionaries>()).into());
+        let strings = try!(tape.take::<Strings>());
+        let global_subroutines = try!(tape.take::<Subroutines>());
 
         let mut encodings = vec![];
         let mut char_sets = vec![];
@@ -100,14 +100,14 @@ impl Value for FontSet {
                 let (size, offset) = get_double!(dictionary, Private);
                 try!(tape.jump(start + offset as u64));
                 let chunk: Vec<u8> = read_walue!(tape, size as usize);
-                read_value!(&mut Cursor::new(chunk), Operations)
+                try!(Cursor::new(chunk).take::<Operations>())
             });
 
             local_subroutines.push({
                 let (_, mut offset) = get_double!(dictionary, Private);
                 offset += get_single!(&local_dictionaries[i], Subrs);
                 try!(tape.jump(start + offset as u64));
-                read_value!(tape)
+                try!(tape.take())
             });
         }
 

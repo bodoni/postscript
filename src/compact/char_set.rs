@@ -62,7 +62,7 @@ impl Walue<usize> for Format1 {
         let mut ranges = vec![];
         let mut found = 0 + 1;
         while found < glyphs {
-            let range = read_value!(tape, Range1);
+            let range = try!(tape.take::<Range1>());
             found += 1 + range.left as usize;
             ranges.push(range);
         }

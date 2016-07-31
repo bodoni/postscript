@@ -9,7 +9,7 @@ index! {
 impl Walue<i32> for CharStrings {
     fn read<T: Tape>(tape: &mut T, format: i32) -> Result<Self> {
         Ok(match format {
-            2 => CharStrings(read_value!(tape)),
+            2 => CharStrings(try!(tape.take())),
             _ => raise!("found an unknown char-string format"),
         })
     }

@@ -55,7 +55,7 @@ macro_rules! index {
         impl ::tape::Value for $structure {
             #[inline]
             fn read<T: ::tape::Tape>(tape: &mut T) -> ::Result<Self> {
-                Ok($structure(read_value!(tape)))
+                Ok($structure(try!(tape.take())))
             }
         }
     );

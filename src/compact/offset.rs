@@ -32,7 +32,7 @@ impl Walue<OffsetSize> for Offset {
             1 => try!(tape.take::<u8>()) as u32,
             2 => try!(tape.take::<u16>()) as u32,
             3 => {
-                let trio: [u8; 3] = read_value!(tape);
+                let trio: [u8; 3] = try!(tape.take());
                 unsafe { mem::transmute::<_, u32>(assemble!(trio[0], trio[1], trio[2])) }
             },
             4 => try!(tape.take::<u32>()),

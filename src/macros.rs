@@ -45,11 +45,6 @@ macro_rules! raise(
     ($($argument:tt)+) => (raise!(format!($($argument)+)));
 );
 
-macro_rules! read_value(
-    ($tape:expr) => (try!(::Value::read($tape)));
-    ($tape:expr, $kind:ty) => (try!(<$kind as $crate::Value>::read($tape)));
-);
-
 macro_rules! read_walue(
     ($tape:expr, $parameter:expr) => (try!(::Walue::read($tape, $parameter)));
     ($tape:expr, $parameter:expr, $kind:ty) => (
@@ -79,7 +74,7 @@ macro_rules! table {
         impl $crate::Value for $structure {
             fn read<T: $crate::Tape>(tape: &mut T) -> $crate::Result<Self> {
                 let mut table: $structure = unsafe { ::std::mem::uninitialized() };
-                $(::std::mem::forget(::std::mem::replace(&mut table.$field, read_value!(tape)));)+
+                $(::std::mem::forget(::std::mem::replace(&mut table.$field, try!(tape.take())));)+
                 Ok(table)
             }
         }

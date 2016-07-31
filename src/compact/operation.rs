@@ -76,7 +76,7 @@ impl Value for Operations {
         let size = try!(tape.count());
         let mut map = HashMap::new();
         while try!(tape.position()) < size {
-            let (operator, operands) = read_value!(tape);
+            let (operator, operands) = try!(tape.take());
             map.insert(operator, operands);
         }
         Ok(Operations(map))
