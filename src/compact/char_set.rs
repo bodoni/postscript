@@ -9,12 +9,12 @@ pub enum CharSet {
     ISOAdobe,
     Expert,
     ExpertSubset,
-    Format1(Format1),
+    Format1(CharSet1),
 }
 
 /// A char set in format 1.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Format1 {
+pub struct CharSet1 {
     pub format: u8,          // format
     pub ranges: Vec<Range1>, // Range1
 }
@@ -52,7 +52,7 @@ impl Walue<usize> for CharSet {
     }
 }
 
-impl Walue<usize> for Format1 {
+impl Walue<usize> for CharSet1 {
     fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
         macro_rules! reject(() => (raise!("found a malformed char set")));
         let format = try!(tape.take::<u8>());
@@ -69,7 +69,7 @@ impl Walue<usize> for Format1 {
         if found != glyphs {
             reject!();
         }
-        Ok(Format1 { format: format, ranges: ranges })
+        Ok(CharSet1 { format: format, ranges: ranges })
     }
 }
 
