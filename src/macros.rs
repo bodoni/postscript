@@ -1,5 +1,8 @@
 macro_rules! deref {
-    ($name:ident::$field:tt => $target:ty) => (itemize! {
+    (@itemize $($one:item)*) => ($($one)*);
+    ($name:ident::$field:tt => $target:ty) => (deref! {
+        @itemize
+
         impl ::std::ops::Deref for $name {
             type Target = $target;
 
@@ -16,7 +19,9 @@ macro_rules! deref {
             }
         }
     });
-    ($name:ident<$life:tt>::$field:tt => $target:ty) => (itemize! {
+    ($name:ident<$life:tt>::$field:tt => $target:ty) => (deref! {
+        @itemize
+
         impl<$life> ::std::ops::Deref for $name<$life> {
             type Target = $target;
 
@@ -35,8 +40,6 @@ macro_rules! deref {
     });
 }
 
-macro_rules! itemize(($($chunk:item)*) => ($($chunk)*));
-
 macro_rules! raise(
     ($message:expr) => (return Err(::Error::new(::std::io::ErrorKind::Other, $message)));
     ($($argument:tt)+) => (raise!(format!($($argument)+)));
@@ -44,16 +47,18 @@ macro_rules! raise(
 
 macro_rules! read_value(
     ($tape:expr) => (try!(::Value::read($tape)));
-    ($tape:expr, $kind:ty) => (try!(<$kind as ::Value>::read($tape)));
+    ($tape:expr, $kind:ty) => (try!(<$kind as $crate::Value>::read($tape)));
 );
 
 macro_rules! read_walue(
     ($tape:expr, $parameter:expr) => (try!(::Walue::read($tape, $parameter)));
     ($tape:expr, $parameter:expr, $kind:ty) => (
-        try!(<$kind as ::Walue<_>>::read($tape, $parameter))
+        try!(<$kind as $crate::Walue<_>>::read($tape, $parameter))
     );
 );
 
+#[doc(hidden)]
+#[macro_export]
 macro_rules! table {
     ($(#[$attribute:meta])* pub $structure:ident {
         $($field:ident ($kind:ty),)*
@@ -63,16 +68,16 @@ macro_rules! table {
     );
     (@define $(#[$attribute:meta])* pub $structure:ident {
         $($field:ident ($kind:ty),)*
-    }) => (itemize! {
+    }) => (
         $(#[$attribute])*
         #[derive(Clone, Debug, Eq, PartialEq)]
         pub struct $structure { $(pub $field: $kind,)* }
-    });
+    );
     (@implement pub $structure:ident {
         $($field:ident,)*
     }) => (
-        impl ::Value for $structure {
-            fn read<T: ::Tape>(tape: &mut T) -> ::Result<Self> {
+        impl $crate::Value for $structure {
+            fn read<T: $crate::Tape>(tape: &mut T) -> $crate::Result<Self> {
                 let mut table: $structure = unsafe { ::std::mem::uninitialized() };
                 $(::std::mem::forget(::std::mem::replace(&mut table.$field, read_value!(tape)));)+
                 Ok(table)
