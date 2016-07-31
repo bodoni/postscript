@@ -62,24 +62,30 @@ macro_rules! read(
 );
 
 macro_rules! value {
-    ([$kind:ident; $count:expr], 1) => (impl Value for [$kind; $count] {
-        #[inline]
-        fn read<T: Tape>(tape: &mut T) -> Result<Self> {
-            Ok(read!(tape, $count))
+    ([$kind:ident; $count:expr], 1) => (
+        impl Value for [$kind; $count] {
+            #[inline]
+            fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+                Ok(read!(tape, $count))
+            }
         }
-    });
-    ($kind:ident, 1) => (impl Value for $kind {
-        #[inline]
-        fn read<T: Tape>(tape: &mut T) -> Result<Self> {
-            Ok(read!(tape, 1))
+    );
+    ($kind:ident, 1) => (
+        impl Value for $kind {
+            #[inline]
+            fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+                Ok(read!(tape, 1))
+            }
         }
-    });
-    ($kind:ident, $size:expr) => (impl Value for $kind {
-        #[inline]
-        fn read<T: Tape>(tape: &mut T) -> Result<Self> {
-            Ok($kind::from_be(read!(tape, $size)))
+    );
+    ($kind:ident, $size:expr) => (
+        impl Value for $kind {
+            #[inline]
+            fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+                Ok($kind::from_be(read!(tape, $size)))
+            }
         }
-    });
+    );
 }
 
 value!(u8, 1);
@@ -88,14 +94,16 @@ value!(u32, 4);
 value!([u8; 3], 1);
 
 macro_rules! walue {
-    ($kind:ty, 1) => (impl Walue<usize> for $kind {
-        fn read<T: Tape>(tape: &mut T, count: usize) -> Result<Self> {
-            let mut buffer = Vec::with_capacity(count);
-            unsafe { buffer.set_len(count) };
-            try!(::std::io::Read::read_exact(tape, &mut buffer));
-            Ok(buffer)
+    ($kind:ty, 1) => (
+        impl Walue<usize> for $kind {
+            fn read<T: Tape>(tape: &mut T, count: usize) -> Result<Self> {
+                let mut buffer = Vec::with_capacity(count);
+                unsafe { buffer.set_len(count) };
+                try!(::std::io::Read::read_exact(tape, &mut buffer));
+                Ok(buffer)
+            }
         }
-    });
+    );
 }
 
 walue!(Vec<u8>, 1);
