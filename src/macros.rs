@@ -45,13 +45,6 @@ macro_rules! raise(
     ($($argument:tt)+) => (raise!(format!($($argument)+)));
 );
 
-macro_rules! read_walue(
-    ($tape:expr, $parameter:expr) => (try!(::Walue::read($tape, $parameter)));
-    ($tape:expr, $parameter:expr, $kind:ty) => (
-        try!(<$kind as $crate::Walue<_>>::read($tape, $parameter))
-    );
-);
-
 #[doc(hidden)]
 #[macro_export]
 macro_rules! table {

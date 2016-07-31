@@ -25,7 +25,7 @@ impl Value for Index {
         let offset_size = try!(tape.take::<OffsetSize>());
         let mut offsets = Vec::with_capacity(count as usize + 1);
         for i in 0..(count as usize + 1) {
-            let offset = read_walue!(tape, offset_size, Offset);
+            let offset = try!(tape.take_given::<Offset, _>(offset_size));
             if i == 0 && offset != Offset(1) || i > 0 && offset <= offsets[i - 1] {
                 raise!("found a malformed index");
             }
@@ -34,7 +34,7 @@ impl Value for Index {
         let mut data = Vec::with_capacity(count as usize);
         for i in 0..(count as usize) {
             let size = (u32::from(offsets[i + 1]) - u32::from(offsets[i])) as usize;
-            data.push(read_walue!(tape, size));
+            data.push(try!(tape.take_given(size)));
         }
         Ok(Index { count: count, offset_size: offset_size, offsets: offsets, data: data })
     }

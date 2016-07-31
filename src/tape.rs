@@ -10,6 +10,12 @@ pub trait Tape: Read + Seek + Sized {
         Value::read(self)
     }
 
+    /// Read a value given a parameter.
+    #[inline(always)]
+    fn take_given<T: Walue<P>, P>(&mut self, parameter: P) -> Result<T> {
+        Walue::read(self, parameter)
+    }
+
     #[doc(hidden)]
     fn count(&mut self) -> Result<u64> {
         let current = try!(self.position());

@@ -175,7 +175,7 @@ impl<'l> Program<'l> {
             },
             HintMask | CntrMask => {
                 self.stems += self.stack.len() >> 1;
-                let _: Vec<u8> = read_walue!(&mut *self.routine, (self.stems + 7) >> 3);
+                let _ = try!(self.routine.take_given::<Vec<u8>, _>((self.stems + 7) >> 3));
                 clear!([equal(0)]);
             },
 
