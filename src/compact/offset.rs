@@ -36,7 +36,7 @@ impl Walue<OffsetSize> for Offset {
                 unsafe { mem::transmute::<_, u32>(assemble!(trio[0], trio[1], trio[2])) }
             },
             4 => try!(tape.take::<u32>()),
-            _ => raise!("found an invalid size"),
+            _ => raise!("found a malformed offset"),
         }))
     }
 }

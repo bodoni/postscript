@@ -1,5 +1,7 @@
 use {Result, Tape};
 
+macro_rules! reject(() => (raise!("found a malformed number")));
+
 pub fn read<T: Tape>(tape: &mut T) -> Result<f32> {
     let first = try!(tape.take::<u8>());
     Ok(match first {
@@ -9,7 +11,7 @@ pub fn read<T: Tape>(tape: &mut T) -> Result<f32> {
         0x1c => try!(tape.take::<u16>()) as i16 as i32 as f32,
         0x1d => try!(tape.take::<u32>()) as i32 as f32,
         0x1e => try!(parse_real(tape)),
-        _ => raise!("found a malformed number"),
+        _ => reject!(),
     })
 }
 
@@ -33,12 +35,12 @@ fn parse_real<T: Tape>(tape: &mut T) -> Result<f32> {
             0x0c => buffer.push_str("e-"),
             0x0e => buffer.push('-'),
             0x0f => break,
-            _ => raise!("found a malformed real number"),
+            _ => reject!(),
         }
     }
     match buffer.parse() {
         Ok(value) => Ok(value),
-        _ => raise!("failed to parse a real number"),
+        _ => reject!(),
     }
 }
 

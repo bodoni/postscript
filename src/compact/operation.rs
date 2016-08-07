@@ -107,7 +107,7 @@ macro_rules! operator {
             use self::$name::*;
             Ok(match code {
                 $($code => $variant,)+
-                _ => raise!("found an unknown operator ({:#x})", code),
+                _ => raise!("found an unknown operator"),
             })
         }
 

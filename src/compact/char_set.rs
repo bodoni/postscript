@@ -47,7 +47,7 @@ impl Walue<usize> for CharSet {
             0 => unimplemented!(),
             1 => CharSet::Format1(try!(tape.take_given(glyphs))),
             2 => unimplemented!(),
-            _ => raise!("found a char set with an unknown format"),
+            _ => raise!("found an unknown char-set format"),
         })
     }
 }
