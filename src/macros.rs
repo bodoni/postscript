@@ -45,25 +45,19 @@ macro_rules! raise(
 );
 
 macro_rules! table {
-    ($(#[$attribute:meta])* pub $structure:ident {
-        $($field:ident ($kind:ty),)*
-    }) => (
-        table! { @define $(#[$attribute])* pub $structure { $($field ($kind),)* } }
-        table! { @implement pub $structure { $($field,)* } }
+    ($(#[$attribute:meta])* pub $name:ident { $($field:ident ($kind:ty),)* }) => (
+        table! { @define $(#[$attribute])* pub $name { $($field ($kind),)* } }
+        table! { @implement pub $name { $($field,)* } }
     );
-    (@define $(#[$attribute:meta])* pub $structure:ident {
-        $($field:ident ($kind:ty),)*
-    }) => (
+    (@define $(#[$attribute:meta])* pub $name:ident { $($field:ident ($kind:ty),)* }) => (
         $(#[$attribute])*
         #[derive(Clone, Debug, Eq, PartialEq)]
-        pub struct $structure { $(pub $field: $kind,)* }
+        pub struct $name { $(pub $field: $kind,)* }
     );
-    (@implement pub $structure:ident {
-        $($field:ident,)*
-    }) => (
-        impl $crate::Value for $structure {
+    (@implement pub $name:ident { $($field:ident,)* }) => (
+        impl $crate::Value for $name {
             fn read<T: $crate::Tape>(tape: &mut T) -> $crate::Result<Self> {
-                let mut table: $structure = unsafe { ::std::mem::uninitialized() };
+                let mut table: $name = unsafe { ::std::mem::uninitialized() };
                 $(::std::mem::forget(::std::mem::replace(&mut table.$field, try!(tape.take())));)+
                 Ok(table)
             }
