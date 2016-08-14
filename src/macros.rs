@@ -51,7 +51,7 @@ macro_rules! table {
     );
     (@define $(#[$attribute:meta])* pub $name:ident { $($field:ident ($kind:ty),)* }) => (
         $(#[$attribute])*
-        #[derive(Clone, Debug, Eq, PartialEq)]
+        #[derive(Clone, Debug)]
         pub struct $name { $(pub $field: $kind,)* }
     );
     (@implement pub $name:ident { $($field:ident,)* }) => (

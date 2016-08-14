@@ -4,7 +4,7 @@ use {Result, Tape, Walue};
 use compact::{GlyphID, StringID};
 
 /// A char set.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug)]
 pub enum CharSet {
     ISOAdobe,
     Expert,
@@ -13,7 +13,7 @@ pub enum CharSet {
 }
 
 /// A char set in format 1.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct CharSet1 {
     pub format: u8,          // format
     pub ranges: Vec<Range1>, // Range1

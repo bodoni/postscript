@@ -47,7 +47,7 @@ macro_rules! index {
     );
     (@define $(#[$attribute:meta])* pub $structure:ident) => (
         $(#[$attribute])*
-        #[derive(Clone, Debug, Eq, PartialEq)]
+        #[derive(Clone, Debug)]
         pub struct $structure(pub ::compact::index::Index);
         deref! { $structure::0 => ::compact::index::Index }
     );
