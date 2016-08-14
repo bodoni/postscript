@@ -298,7 +298,7 @@ impl<'l> Routine<'l> {
         Ok(try!(Tape::position(&mut self.tape)) == self.size as u64)
     }
 
-    #[inline(always)]
+    #[inline]
     fn take_operand(&mut self) -> Result<Operand> {
         number::read(&mut self.tape)
     }

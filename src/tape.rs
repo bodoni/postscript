@@ -5,13 +5,13 @@ use Result;
 /// A type that can read.
 pub trait Tape: Read + Seek + Sized {
     /// Read a value.
-    #[inline(always)]
+    #[inline]
     fn take<T: Value>(&mut self) -> Result<T> {
         Value::read(self)
     }
 
     /// Read a value given a parameter.
-    #[inline(always)]
+    #[inline]
     fn take_given<T: Walue<P>, P>(&mut self, parameter: P) -> Result<T> {
         Walue::read(self, parameter)
     }

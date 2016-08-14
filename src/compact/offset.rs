@@ -20,7 +20,7 @@ macro_rules! assemble(
 );
 
 impl From<Offset> for u32 {
-    #[inline(always)]
+    #[inline]
     fn from(offset: Offset) -> u32 {
         offset.0
     }
