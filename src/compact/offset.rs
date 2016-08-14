@@ -9,16 +9,6 @@ pub struct Offset(pub u32);
 /// An offset size.
 pub type OffsetSize = u8;
 
-#[cfg(target_endian = "big")]
-macro_rules! assemble(
-    ($hi:expr, $me:expr, $lo:expr) => ([0, $hi, $me, $lo]);
-);
-
-#[cfg(target_endian = "little")]
-macro_rules! assemble(
-    ($hi:expr, $me:expr, $lo:expr) => ([$lo, $me, $hi, 0]);
-);
-
 impl From<Offset> for u32 {
     #[inline]
     fn from(offset: Offset) -> u32 {
@@ -28,6 +18,10 @@ impl From<Offset> for u32 {
 
 impl Walue<OffsetSize> for Offset {
     fn read<T: Tape>(tape: &mut T, size: OffsetSize) -> Result<Self> {
+        #[cfg(target_endian = "big")]
+        macro_rules! assemble(($hi:expr, $me:expr, $lo:expr) => ([0, $hi, $me, $lo]));
+        #[cfg(target_endian = "little")]
+        macro_rules! assemble(($hi:expr, $me:expr, $lo:expr) => ([$lo, $me, $hi, 0]));
         Ok(Offset(match size {
             1 => try!(tape.take::<u8>()) as u32,
             2 => try!(tape.take::<u16>()) as u32,
