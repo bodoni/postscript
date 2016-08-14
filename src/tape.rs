@@ -17,14 +17,6 @@ pub trait Tape: Read + Seek + Sized {
     }
 
     #[doc(hidden)]
-    fn count(&mut self) -> Result<u64> {
-        let current = try!(self.position());
-        let end = self.seek(SeekFrom::End(0));
-        try!(self.jump(current));
-        end
-    }
-
-    #[doc(hidden)]
     #[inline]
     fn jump(&mut self, position: u64) -> Result<u64> {
         self.seek(SeekFrom::Start(position))

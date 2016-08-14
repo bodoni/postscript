@@ -73,13 +73,23 @@ deref! { Operations::0 => HashMap<Operator, Vec<Operand>> }
 
 impl Value for Operations {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
-        let size = try!(tape.count());
+        use std::io::ErrorKind;
+
         let mut map = HashMap::new();
-        while try!(tape.position()) < size {
-            let (operator, operands) = try!(tape.take());
-            map.insert(operator, operands);
+        loop {
+            match tape.take() {
+                Ok((operator, operands)) => {
+                    map.insert(operator, operands);
+                },
+                Err(error) => {
+                    if error.kind() == ErrorKind::UnexpectedEof {
+                        return Ok(Operations(map));
+                    } else {
+                        return Err(error);
+                    }
+                },
+            }
         }
-        Ok(Operations(map))
     }
 }
 
