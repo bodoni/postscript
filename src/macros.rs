@@ -57,7 +57,7 @@ macro_rules! table {
     (@implement pub $name:ident { $($field:ident,)* }) => (
         impl $crate::Value for $name {
             fn read<T: $crate::Tape>(tape: &mut T) -> $crate::Result<Self> {
-                let mut table: $name = unsafe { ::std::mem::uninitialized() };
+                let mut table: $name = unsafe { ::std::mem::zeroed() };
                 $(::std::mem::forget(::std::mem::replace(&mut table.$field, try!(tape.take())));)+
                 Ok(table)
             }
