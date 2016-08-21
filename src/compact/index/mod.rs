@@ -25,7 +25,7 @@ impl Value for Index {
         let offset_size = try!(tape.take::<OffsetSize>());
         let mut offsets = Vec::with_capacity(count as usize + 1);
         for i in 0..(count as usize + 1) {
-            let offset = try!(tape.take_given::<Offset, _>(offset_size));
+            let offset = try!(tape.take_given::<Offset>(offset_size));
             if i == 0 && offset != Offset(1) || i > 0 && offset <= offsets[i - 1] {
                 raise!("found a malformed index");
             }

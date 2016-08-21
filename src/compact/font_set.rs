@@ -83,7 +83,7 @@ impl Value for FontSet {
 
             char_strings.push({
                 try!(tape.jump(start + get_single!(dictionary, CharStrings) as u64));
-                try!(tape.take_given::<CharStrings, _>(get_single!(dictionary, CharStringType)))
+                try!(tape.take_given::<CharStrings>(get_single!(dictionary, CharStringType)))
             });
 
             char_sets.push(match get_single!(dictionary, CharSet) {
@@ -99,7 +99,7 @@ impl Value for FontSet {
             local_dictionaries.push({
                 let (size, offset) = get_double!(dictionary, Private);
                 try!(tape.jump(start + offset as u64));
-                let chunk = try!(tape.take_given::<Vec<u8>, _>(size as usize));
+                let chunk = try!(tape.take_given::<Vec<u8>>(size as usize));
                 try!(Cursor::new(chunk).take::<Operations>())
             });
 

@@ -16,7 +16,9 @@ impl From<Offset> for u32 {
     }
 }
 
-impl Walue<OffsetSize> for Offset {
+impl Walue for Offset {
+    type Parameter = OffsetSize;
+
     fn read<T: Tape>(tape: &mut T, size: OffsetSize) -> Result<Self> {
         #[cfg(target_endian = "big")]
         macro_rules! assemble(($hi:expr, $me:expr, $lo:expr) => ([0, $hi, $me, $lo]));

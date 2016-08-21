@@ -6,7 +6,9 @@ index! {
     pub CharStrings
 }
 
-impl Walue<i32> for CharStrings {
+impl Walue for CharStrings {
+    type Parameter = i32;
+
     fn read<T: Tape>(tape: &mut T, format: i32) -> Result<Self> {
         Ok(match format {
             2 => CharStrings(try!(tape.take())),
