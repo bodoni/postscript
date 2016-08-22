@@ -1,12 +1,13 @@
 [package]
 name = "postscript"
-version = "0.10.0"
+version = "0.10.1"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
 description = "The package provides a parser for PostScript fonts."
 documentation = "https://bodoni.github.io/postscript"
 homepage = "https://github.com/bodoni/postscript"
 repository = "https://github.com/bodoni/postscript"
+exclude = ["tests/fixtures/*"]
 
 [dev-dependencies]
 random = "0.12"
