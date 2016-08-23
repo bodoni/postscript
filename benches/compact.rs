@@ -1,4 +1,4 @@
-use postscript::compact::operation::Operator;
+use postscript::compact::Operator;
 use random::{self, Source};
 use test::{Bencher, black_box};
 

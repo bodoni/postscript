@@ -2,7 +2,7 @@ use setup;
 
 macro_rules! operations(
     ($($operator:ident: [$($operand:expr),*],)*) => ({
-        use postscript::compact::operation::{Operand, Operator};
+        use postscript::compact::{Operand, Operator};
         use std::collections::HashMap;
         let mut operations = HashMap::new();
         $(operations.insert(Operator::$operator, vec![$($operand as Operand),*]);)*

@@ -3,9 +3,8 @@
 //! [1]: http://partners.adobe.com/public/developer/en/font/5177.Type2.pdf
 
 mod number;
+mod operation;
 mod program;
 
-pub mod operation;
-
-pub use self::operation::Operations;
+pub use self::operation::{Operand, Operation, Operations, Operator};
 pub use self::program::Program;

@@ -4,7 +4,7 @@ use setup;
 
 macro_rules! operations(
     ($($operator:ident: [$($operand:expr),*],)*) => ({
-        use postscript::type2::operation::{Operand, Operator};
+        use postscript::type2::{Operand, Operator};
         let mut operations = vec![];
         $(operations.push((Operator::$operator, vec![$($operand as Operand),*]));)*
         operations

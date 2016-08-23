@@ -115,6 +115,7 @@ macro_rules! operator {
         #[doc(hidden)]
         pub fn from(code: u16) -> Result<Self> {
             use self::$name::*;
+
             Ok(match code {
                 $($code => $variant,)+
                 _ => raise!("found an unknown operator"),
@@ -124,6 +125,7 @@ macro_rules! operator {
         /// Return the default operands.
         pub fn default(&self) -> Option<&'static [Operand]> {
             use self::$name::*;
+
             match *self {
                 $($variant => default!($default),)+
             }

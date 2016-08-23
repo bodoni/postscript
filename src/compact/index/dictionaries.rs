@@ -2,7 +2,7 @@ use std::io::Cursor;
 
 use {Result, Tape};
 use compact::index::Index;
-use compact::operation::Operations;
+use compact::Operations;
 
 index! {
     #[doc = "A dictionary index."]
@@ -13,10 +13,10 @@ impl Dictionaries {
     #[doc(hidden)]
     pub fn into(self) -> Result<Vec<Operations>> {
         let Dictionaries(Index { data, .. }) = self;
-        let mut vector = Vec::with_capacity(data.len());
+        let mut values = Vec::with_capacity(data.len());
         for chunk in data {
-            vector.push(try!(Cursor::new(chunk).take()));
+            values.push(try!(Cursor::new(chunk).take()));
         }
-        Ok(vector)
+        Ok(values)
     }
 }

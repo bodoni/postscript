@@ -2,8 +2,7 @@ use std::io::Cursor;
 use std::mem;
 
 use {Result, Tape};
-use type2::number;
-use type2::operation::{Operand, Operation, Operator};
+use type2::{Operand, Operation, Operator, number};
 
 /// A program.
 pub struct Program<'l> {
@@ -38,7 +37,7 @@ impl<'l> Program<'l> {
     /// Return the next operation.
     #[allow(unused_comparisons)]
     pub fn next(&mut self) -> Result<Option<Operation>> {
-        use type2::operation::Operator::*;
+        use type2::Operator::*;
 
         if try!(self.routine.done()) {
             return Ok(None);
