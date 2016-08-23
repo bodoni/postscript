@@ -1,3 +1,5 @@
+//! The encodings.
+
 use compact::{GlyphID, StringID};
 
 /// An encoding.

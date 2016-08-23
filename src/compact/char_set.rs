@@ -1,4 +1,4 @@
-//! The char set.
+//! The char sets.
 
 use {Result, Tape, Walue};
 use compact::{GlyphID, StringID};

@@ -32,13 +32,15 @@ pub struct FontSet {
     pub local_subroutines: Vec<Subroutines>,
 }
 
+macro_rules! is_i32(($value:ident) => ($value as i32 as Operand == $value));
+
 macro_rules! get_single(
-    ($operations:expr, $operator:ident) => ({
+    ($operations:expr, $operator:ident) => (
         match $operations.get_single(Operator::$operator) {
             Some(value) if is_i32!(value) => value as i32,
             _ => raise!("found a malformed operation"),
         }
-    });
+    );
 );
 
 macro_rules! get_double(
@@ -50,10 +52,6 @@ macro_rules! get_double(
             _ => raise!("found a malformed operation"),
         }
     );
-);
-
-macro_rules! is_i32(
-    ($value:ident) => ($value as i32 as Operand == $value);
 );
 
 impl Value for FontSet {
