@@ -4,7 +4,7 @@ The package provides a parser for PostScript fonts. It is recommended to use a
 higher-level parser called [`opentype`][opentype], which internally relies on
 this package.
 
-## [Documentation][doc]
+## [Documentation][documentation]
 
 ## Contribution
 
@@ -14,7 +14,7 @@ will be licensed according to the terms given in [LICENSE.md](LICENSE.md).
 
 [opentype]: https://github.com/bodoni/opentype
 
-[doc]: https://bodoni.github.io/postscript
+[documentation]: https://docs.rs/postscript
 [status-img]: https://travis-ci.org/bodoni/postscript.svg?branch=master
 [status-url]: https://travis-ci.org/bodoni/postscript
 [version-img]: https://img.shields.io/crates/v/postscript.svg
