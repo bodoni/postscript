@@ -45,9 +45,9 @@ impl Walue for CharSet {
     type Parameter = usize;
 
     fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
-        Ok(match try!(tape.peek::<u8>()) {
+        Ok(match tape.peek::<u8>()? {
             0 => unimplemented!(),
-            1 => CharSet::Format1(try!(tape.take_given(glyphs))),
+            1 => CharSet::Format1(tape.take_given(glyphs)?),
             2 => unimplemented!(),
             _ => raise!("found an unknown char-set format"),
         })
@@ -59,14 +59,14 @@ impl Walue for CharSet1 {
 
     fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
         macro_rules! reject(() => (raise!("found a malformed char set")));
-        let format = try!(tape.take::<u8>());
+        let format = tape.take::<u8>()?;
         if format != 1 {
             reject!();
         }
         let mut ranges = vec![];
         let mut found = 0 + 1;
         while found < glyphs {
-            let range = try!(tape.take::<Range1>());
+            let range = tape.take::<Range1>()?;
             found += 1 + range.left as usize;
             ranges.push(range);
         }

@@ -15,7 +15,7 @@ impl Dictionaries {
         let Dictionaries(Index { data, .. }) = self;
         let mut values = Vec::with_capacity(data.len());
         for chunk in data {
-            values.push(try!(Cursor::new(chunk).take()));
+            values.push(Cursor::new(chunk).take()?);
         }
         Ok(values)
     }

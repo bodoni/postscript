@@ -19,15 +19,15 @@ impl Value for Operation {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
         let mut operands = vec![];
         loop {
-            match try!(tape.peek::<u8>()) {
-                0x1c | 0x1d | 0x1e | 0x20...0xfe => operands.push(try!(number::read(tape))),
+            match tape.peek::<u8>()? {
+                0x1c | 0x1d | 0x1e | 0x20...0xfe => operands.push(number::read(tape)?),
                 code => {
                     let code = if code == 0x0c {
-                        try!(tape.take::<u16>())
+                        tape.take::<u16>()?
                     } else {
-                        try!(tape.take::<u8>()) as u16
+                        tape.take::<u8>()? as u16
                     };
-                    return Ok((try!(Operator::from(code)), operands));
+                    return Ok((Operator::from(code)?, operands));
                 },
             }
         }

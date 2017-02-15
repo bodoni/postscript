@@ -58,7 +58,7 @@ macro_rules! table {
         impl ::Value for $name {
             fn read<T: ::Tape>(tape: &mut T) -> ::Result<Self> {
                 let mut table: $name = unsafe { ::std::mem::zeroed() };
-                $(::std::mem::forget(::std::mem::replace(&mut table.$field, try!(tape.take())));)+
+                $(::std::mem::forget(::std::mem::replace(&mut table.$field, tape.take()?));)+
                 Ok(table)
             }
         }

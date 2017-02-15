@@ -3,14 +3,14 @@ use {Result, Tape};
 macro_rules! reject(() => (raise!("found a malformed number")));
 
 pub fn read<T: Tape>(tape: &mut T) -> Result<f32> {
-    let first = try!(tape.take::<u8>());
+    let first = tape.take::<u8>()?;
     Ok(match first {
         0x20...0xf6 => (first as i32 - 139) as f32,
-        0xf7...0xfa => ((first as i32 - 247) * 256 + try!(tape.take::<u8>()) as i32 + 108) as f32,
-        0xfb...0xfe => (-(first as i32 - 251) * 256 - try!(tape.take::<u8>()) as i32 - 108) as f32,
-        0x1c => try!(tape.take::<u16>()) as i16 as i32 as f32,
-        0x1d => try!(tape.take::<u32>()) as i32 as f32,
-        0x1e => try!(parse_real(tape)),
+        0xf7...0xfa => ((first as i32 - 247) * 256 + tape.take::<u8>()? as i32 + 108) as f32,
+        0xfb...0xfe => (-(first as i32 - 251) * 256 - tape.take::<u8>()? as i32 - 108) as f32,
+        0x1c => tape.take::<u16>()? as i16 as i32 as f32,
+        0x1d => tape.take::<u32>()? as i32 as f32,
+        0x1e => parse_real(tape)?,
         _ => reject!(),
     })
 }
@@ -22,7 +22,7 @@ fn parse_real<T: Tape>(tape: &mut T) -> Result<f32> {
     loop {
         let nibble = match high {
             true => {
-                byte = try!(tape.take::<u8>());
+                byte = tape.take::<u8>()?;
                 byte >> 4
             },
             false => byte & 0x0f,

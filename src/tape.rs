@@ -24,9 +24,9 @@ pub trait Tape: Read + Seek + Sized {
 
     #[doc(hidden)]
     fn peek<T: Value>(&mut self) -> Result<T> {
-        let current = try!(self.position());
+        let current = self.position()?;
         let result = Value::read(self);
-        try!(self.jump(current));
+        self.jump(current)?;
         result
     }
 
@@ -57,7 +57,7 @@ impl<T: Read + Seek> Tape for T {}
 macro_rules! read(
     ($tape:ident, $size:expr) => (unsafe {
         let mut buffer: [u8; $size] = ::std::mem::uninitialized();
-        try!(::std::io::Read::read_exact($tape, &mut buffer));
+        ::std::io::Read::read_exact($tape, &mut buffer)?;
         ::std::mem::transmute(buffer)
     });
 );
@@ -102,7 +102,7 @@ macro_rules! walue {
             fn read<T: Tape>(tape: &mut T, count: usize) -> Result<Self> {
                 let mut buffer = Vec::with_capacity(count);
                 unsafe { buffer.set_len(count) };
-                try!(::std::io::Read::read_exact(tape, &mut buffer));
+                ::std::io::Read::read_exact(tape, &mut buffer)?;
                 Ok(buffer)
             }
         }

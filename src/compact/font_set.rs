@@ -56,13 +56,13 @@ macro_rules! get_double(
 
 impl Value for FontSet {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
-        let position = try!(tape.position());
-        let header = try!(tape.take::<Header>());
-        try!(tape.jump(position + header.header_size as u64));
-        let names = try!(try!(tape.take::<Names>()).into());
-        let global_dictionaries = try!(try!(tape.take::<Dictionaries>()).into());
-        let strings = try!(tape.take::<Strings>());
-        let global_subroutines = try!(tape.take::<Subroutines>());
+        let position = tape.position()?;
+        let header = tape.take::<Header>()?;
+        tape.jump(position + header.header_size as u64)?;
+        let names = tape.take::<Names>()?.into()?;
+        let global_dictionaries = tape.take::<Dictionaries>()?.into()?;
+        let strings = tape.take::<Strings>()?;
+        let global_subroutines = tape.take::<Subroutines>()?;
         let mut encodings = vec![];
         let mut char_sets = vec![];
         let mut char_strings = vec![];
@@ -75,29 +75,29 @@ impl Value for FontSet {
                 _ => unimplemented!(),
             });
             char_strings.push({
-                try!(tape.jump(position + get_single!(dictionary, CharStrings) as u64));
-                try!(tape.take_given::<CharStrings>(get_single!(dictionary, CharStringType)))
+                tape.jump(position + get_single!(dictionary, CharStrings) as u64)?;
+                tape.take_given::<CharStrings>(get_single!(dictionary, CharStringType))?
             });
             char_sets.push(match get_single!(dictionary, CharSet) {
                 0 => CharSet::ISOAdobe,
                 1 => CharSet::Expert,
                 2 => CharSet::ExpertSubset,
                 offset => {
-                    try!(tape.jump(position + offset as u64));
-                    try!(tape.take_given(char_strings[i].len()))
+                    tape.jump(position + offset as u64)?;
+                    tape.take_given(char_strings[i].len())?
                 },
             });
             local_dictionaries.push({
                 let (size, offset) = get_double!(dictionary, Private);
-                try!(tape.jump(position + offset as u64));
-                let chunk = try!(tape.take_given::<Vec<u8>>(size as usize));
-                try!(Cursor::new(chunk).take::<Operations>())
+                tape.jump(position + offset as u64)?;
+                let chunk = tape.take_given::<Vec<u8>>(size as usize)?;
+                Cursor::new(chunk).take::<Operations>()?
             });
             local_subroutines.push({
                 let (_, mut offset) = get_double!(dictionary, Private);
                 offset += get_single!(&local_dictionaries[i], Subrs);
-                try!(tape.jump(position + offset as u64));
-                try!(tape.take())
+                tape.jump(position + offset as u64)?;
+                tape.take()?
             });
         }
         Ok(FontSet {

@@ -25,13 +25,13 @@ impl Walue for Offset {
         #[cfg(target_endian = "little")]
         macro_rules! assemble(($hi:expr, $me:expr, $lo:expr) => ([$lo, $me, $hi, 0]));
         Ok(Offset(match size {
-            1 => try!(tape.take::<u8>()) as u32,
-            2 => try!(tape.take::<u16>()) as u32,
+            1 => tape.take::<u8>()? as u32,
+            2 => tape.take::<u16>()? as u32,
             3 => {
-                let trio: [u8; 3] = try!(tape.take());
+                let trio: [u8; 3] = tape.take()?;
                 unsafe { mem::transmute::<_, u32>(assemble!(trio[0], trio[1], trio[2])) }
             },
-            4 => try!(tape.take::<u32>()),
+            4 => tape.take::<u32>()?,
             _ => raise!("found a malformed offset"),
         }))
     }

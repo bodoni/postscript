@@ -39,7 +39,7 @@ impl<'l> Program<'l> {
     pub fn next(&mut self) -> Result<Option<Operation>> {
         use type2::Operator::*;
 
-        if try!(self.routine.done()) {
+        if self.routine.done()? {
             return Ok(None);
         }
 
@@ -77,16 +77,16 @@ impl<'l> Program<'l> {
 
         let mut code;
         loop {
-            code = try!(self.routine.peek::<u8>());
+            code = self.routine.peek::<u8>()?;
             match code {
-                0x1c | 0x20...0xff => push!(try!(self.routine.take_operand())),
+                0x1c | 0x20...0xff => push!(self.routine.take_operand()?),
                 _ => break,
             }
         }
         let operator = if code == 0x0c {
-            try!(Operator::from(try!(self.routine.take::<u16>())))
+            Operator::from(self.routine.take::<u16>()?)?
         } else {
-            try!(Operator::from(try!(self.routine.take::<u8>()) as u16))
+            Operator::from(self.routine.take::<u8>()? as u16)?
         };
 
         macro_rules! clear(
@@ -155,7 +155,7 @@ impl<'l> Program<'l> {
             // Terminal operator
             EndChar => {
                 while let Some(caller) = self.routine.caller.take() {
-                    if !try!(self.routine.done()) {
+                    if !self.routine.done()? {
                         raise!("found trailing data after the end operator");
                     }
                     mem::replace(&mut self.routine, *caller);
@@ -174,7 +174,7 @@ impl<'l> Program<'l> {
             },
             HintMask | CntrMask => {
                 self.stems += self.stack.len() >> 1;
-                let _ = try!(self.routine.take_given::<Vec<u8>>((self.stems + 7) >> 3));
+                let _ = self.routine.take_given::<Vec<u8>>((self.stems + 7) >> 3)?;
                 clear!([equal(0)]);
             },
 
@@ -294,7 +294,7 @@ impl<'l> Routine<'l> {
 
     #[inline]
     fn done(&mut self) -> Result<bool> {
-        Ok(try!(Tape::position(&mut self.tape)) == self.size as u64)
+        Ok(Tape::position(&mut self.tape)? == self.size as u64)
     }
 
     #[inline]
