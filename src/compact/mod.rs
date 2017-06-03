@@ -1,6 +1,6 @@
 //! The [compact font format][1].
 //!
-//! [1]: https://www.adobe.com/content/dam/Adobe/en/devnet/font/pdfs/5176.CFF.pdf
+//! [1]: http://wwwimages.adobe.com/content/dam/Adobe/en/devnet/font/pdfs/5176.CFF.pdf
 
 mod font_set;
 mod header;
