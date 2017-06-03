@@ -1,4 +1,4 @@
-//! The [compact font format][1] of version 1.
+//! The [compact font format][1] of version 1.0.
 //!
 //! [1]: http://wwwimages.adobe.com/content/dam/Adobe/en/devnet/font/pdfs/5176.CFF.pdf
 
