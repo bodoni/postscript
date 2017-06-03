@@ -9,36 +9,30 @@ fn encoding_get(bencher: &mut Bencher) {
     use postscript::compact::Encoding;
 
     let mut source = random::default().seed([42, 69]);
-    let codes = source.iter::<u64>().take(SAMPLES).map(|number| (number as u16) % 256)
-                                                  .collect::<Vec<_>>();
+    let codes =
+        source.iter::<u64>().take(SAMPLES).map(|number| (number as u16) % 256).collect::<Vec<_>>();
     let encoding = Encoding::Standard;
-    bencher.iter(|| {
-        for &code in &codes {
-            black_box(encoding.get(code));
-        }
-    });
+    bencher.iter(|| for &code in &codes {
+                     black_box(encoding.get(code));
+                 });
 }
 
 #[bench]
 fn operator_default(bencher: &mut Bencher) {
     let mut source = random::default().seed([69, 42]);
     let operators = generate_operators(&mut source, SAMPLES);
-    bencher.iter(|| {
-        for &operator in &operators {
-            black_box(operator.default());
-        }
-    });
+    bencher.iter(|| for &operator in &operators {
+                     black_box(operator.default());
+                 });
 }
 
 #[bench]
 fn operator_get(bencher: &mut Bencher) {
     let mut source = random::default().seed([42, 69]);
     let codes = generate_codes(&mut source, SAMPLES);
-    bencher.iter(|| {
-        for &code in &codes {
-            black_box(ok!(Operator::from(code)));
-        }
-    });
+    bencher.iter(|| for &code in &codes {
+                     black_box(ok!(Operator::from(code)));
+                 });
 }
 
 fn generate_codes<T: Source>(source: &mut T, count: usize) -> Vec<u16> {
