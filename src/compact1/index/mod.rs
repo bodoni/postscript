@@ -1,7 +1,7 @@
 //! The indices.
 
 use {Result, Tape, Value};
-use compact::{Offset, OffsetSize};
+use compact1::{Offset, OffsetSize};
 
 table! {
     @define
@@ -48,8 +48,8 @@ macro_rules! index {
     (@define $(#[$attribute:meta])* pub $structure:ident) => (
         $(#[$attribute])*
         #[derive(Clone, Debug)]
-        pub struct $structure(pub ::compact::index::Index);
-        deref! { $structure::0 => ::compact::index::Index }
+        pub struct $structure(pub ::compact1::index::Index);
+        deref! { $structure::0 => ::compact1::index::Index }
     );
     (@implement $structure:ident) => (
         impl ::tape::Value for $structure {

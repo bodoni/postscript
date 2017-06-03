@@ -1,4 +1,4 @@
-use postscript::compact::Operator;
+use postscript::compact1::Operator;
 use random::{self, Source};
 use test::{Bencher, black_box};
 
@@ -6,7 +6,7 @@ const SAMPLES: usize = 1000;
 
 #[bench]
 fn encoding_get(bencher: &mut Bencher) {
-    use postscript::compact::Encoding;
+    use postscript::compact1::Encoding;
 
     let mut source = random::default().seed([42, 69]);
     let codes =

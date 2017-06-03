@@ -1,8 +1,8 @@
 use std::io::Cursor;
 
 use {Result, Tape};
-use compact::index::Index;
-use compact::Operations;
+use compact1::index::Index;
+use compact1::Operations;
 
 index! {
     #[doc = "A dictionary index."]

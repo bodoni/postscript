@@ -42,7 +42,7 @@ mod tests {
     use std::io::Cursor;
 
     use Walue;
-    use compact::Offset;
+    use compact1::Offset;
 
     #[test]
     fn read() {

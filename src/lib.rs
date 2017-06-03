@@ -5,7 +5,7 @@ mod macros;
 
 mod tape;
 
-pub mod compact;
+pub mod compact1;
 pub mod type2;
 
 pub use tape::{Tape, Value, Walue};

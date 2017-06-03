@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 
 use {Result, Tape, Value};
-use compact::number;
+use compact1::number;
 
 /// An operand.
 pub type Operand = f32;

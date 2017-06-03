@@ -1,5 +1,5 @@
 use Result;
-use compact::index::Index;
+use compact1::index::Index;
 
 index! {
     #[doc = "A name index."]

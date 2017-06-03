@@ -1,7 +1,7 @@
 //! The char sets.
 
 use {Result, Tape, Walue};
-use compact::{GlyphID, StringID};
+use compact1::{GlyphID, StringID};
 
 /// A char set.
 #[derive(Clone, Debug)]

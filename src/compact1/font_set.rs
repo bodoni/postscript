@@ -1,7 +1,7 @@
 use std::io::Cursor;
 
 use {Result, Tape, Value};
-use compact::{
+use compact1::{
     CharSet,
     Encoding,
     Header,
@@ -9,7 +9,7 @@ use compact::{
     Operations,
     Operator,
 };
-use compact::index::{
+use compact1::index::{
     CharStrings,
     Dictionaries,
     Names,

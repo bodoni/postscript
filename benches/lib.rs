@@ -5,11 +5,11 @@ extern crate random;
 extern crate test;
 
 use postscript::Value;
-use postscript::compact::FontSet;
+use postscript::compact1::FontSet;
 
 macro_rules! ok(($result:expr) => ($result.unwrap()));
 
-mod compact;
+mod compact1;
 mod type2;
 
 fn setup() -> FontSet {

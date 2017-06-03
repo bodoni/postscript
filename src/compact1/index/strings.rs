@@ -1,4 +1,4 @@
-use compact::StringID;
+use compact1::StringID;
 
 const NUMBER_OF_STANDARD_STRINGS: usize = 391;
 
@@ -420,7 +420,7 @@ fn get_standard_string(sid: StringID) -> Option<&'static str> {
 
 #[cfg(test)]
 mod tests {
-    use compact::StringID;
+    use compact1::StringID;
     use super::NUMBER_OF_STANDARD_STRINGS;
     use super::get_standard_string;
 

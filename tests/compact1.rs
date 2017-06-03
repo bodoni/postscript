@@ -2,7 +2,7 @@ use setup;
 
 macro_rules! operations(
     ($($operator:ident: [$($operand:expr),*]),*) => ({
-        use postscript::compact::{Operand, Operator};
+        use postscript::compact1::{Operand, Operator};
         use std::collections::HashMap;
         let mut operations = HashMap::new();
         $(operations.insert(Operator::$operator, vec![$($operand as Operand),*]);)*
@@ -12,7 +12,7 @@ macro_rules! operations(
 
 #[test]
 fn char_sets() {
-    use postscript::compact::CharSet;
+    use postscript::compact1::CharSet;
 
     let set = setup();
     let vector = &set.char_sets;
@@ -33,7 +33,7 @@ fn char_strings() {
 
 #[test]
 fn encodings() {
-    use postscript::compact::Encoding;
+    use postscript::compact1::Encoding;
 
     let set = setup();
     let vector = &set.encodings;
