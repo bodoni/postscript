@@ -1,7 +1,7 @@
 use setup;
 
 macro_rules! operations(
-    ($($operator:ident: [$($operand:expr),*],)*) => ({
+    ($($operator:ident: [$($operand:expr),*]),*) => ({
         use postscript::compact::{Operand, Operator};
         use std::collections::HashMap;
         let mut operations = HashMap::new();
@@ -52,18 +52,17 @@ fn global_dictionaries() {
     let set = setup();
     let vector = &set.global_dictionaries;
     assert_eq!(vector.len(), 1);
-    assert_eq!(&*vector[0], &operations!(
-        Version: [709],
-        Notice: [710],
-        Copyright: [711],
-        FullName: [712],
-        FamilyName: [712],
-        Weight: [388],
-        FontBBox: [-178, -335, 1138, 918],
-        CharSet: [8340],
-        CharStrings: [8917],
-        Private: [65, 33671],
-    ));
+    assert_eq!(&*vector[0],
+               &operations!(Version: [709],
+                            Notice: [710],
+                            Copyright: [711],
+                            FullName: [712],
+                            FamilyName: [712],
+                            Weight: [388],
+                            FontBBox: [-178, -335, 1138, 918],
+                            CharSet: [8340],
+                            CharStrings: [8917],
+                            Private: [65, 33671]));
 }
 
 #[test]
@@ -88,21 +87,20 @@ fn local_dictionaries() {
     let set = setup();
     let vector = &set.local_dictionaries;
     assert_eq!(vector.len(), 1);
-    assert_eq!(&*vector[0], &operations!(
-        DefaultWidthX: [370],
-        FamilyOtherBlues: [-249, 10],
-        BlueValues: [-20, 20, 473, 18, 34, 15, 104, 15, 10, 20, 40, 20],
-        StemSnapH: [41, 15],
-        StdHW: [41],
-        NominalWidthX: [604],
-        StdVW: [85],
-        OtherBlues: [-249, 10],
-        BlueFuzz: [0],
-        Subrs: [65],
-        FamilyBlues: [-20, 20, 473, 18, 34, 15, 104, 15, 10, 20, 40, 20],
-        BlueScale: [0.0375],
-        StemSnapV: [85, 10],
-    ));
+    assert_eq!(&*vector[0],
+               &operations!(DefaultWidthX: [370],
+                            FamilyOtherBlues: [-249, 10],
+                            BlueValues: [-20, 20, 473, 18, 34, 15, 104, 15, 10, 20, 40, 20],
+                            StemSnapH: [41, 15],
+                            StdHW: [41],
+                            NominalWidthX: [604],
+                            StdVW: [85],
+                            OtherBlues: [-249, 10],
+                            BlueFuzz: [0],
+                            Subrs: [65],
+                            FamilyBlues: [-20, 20, 473, 18, 34, 15, 104, 15, 10, 20, 40, 20],
+                            BlueScale: [0.0375],
+                            StemSnapV: [85, 10]));
 }
 
 #[test]
