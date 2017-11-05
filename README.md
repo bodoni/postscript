@@ -1,10 +1,8 @@
-# PostScript [![Version][version-img]][version-url] [![Status][status-img]][status-url]
+# PostScript [![Package][package-img]][package-url] [![Documentation][documentation-img]][documentation-url] [![Build][build-img]][build-url]
 
 The package provides a parser for PostScript fonts. It is recommended to use a
 higher-level parser called [`opentype`][opentype], which internally relies on
 this package.
-
-## [Documentation][documentation]
 
 ## Contribution
 
@@ -14,8 +12,9 @@ will be licensed according to the terms given in [LICENSE.md](LICENSE.md).
 
 [opentype]: https://github.com/bodoni/opentype
 
-[documentation]: https://docs.rs/postscript
-[status-img]: https://travis-ci.org/bodoni/postscript.svg?branch=master
-[status-url]: https://travis-ci.org/bodoni/postscript
-[version-img]: https://img.shields.io/crates/v/postscript.svg
-[version-url]: https://crates.io/crates/postscript
+[build-img]: https://travis-ci.org/bodoni/postscript.svg?branch=master
+[build-url]: https://travis-ci.org/bodoni/postscript
+[documentation-img]: https://docs.rs/postscript/badge.svg
+[documentation-url]: https://docs.rs/postscript
+[package-img]: https://img.shields.io/crates/v/postscript.svg
+[package-url]: https://crates.io/crates/postscript
