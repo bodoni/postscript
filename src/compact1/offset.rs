@@ -48,9 +48,9 @@ mod tests {
     fn read() {
         let mut tape = Cursor::new(vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
-        assert_eq!(u32::from(Offset::read(&mut tape, 1).unwrap()), 0x01);
-        assert_eq!(u32::from(Offset::read(&mut tape, 2).unwrap()), 0x0203);
-        assert_eq!(u32::from(Offset::read(&mut tape, 3).unwrap()), 0x040506);
-        assert_eq!(u32::from(Offset::read(&mut tape, 4).unwrap()), 0x0708090a);
+        assert!(u32::from(Offset::read(&mut tape, 1).unwrap()) == 0x01);
+        assert!(u32::from(Offset::read(&mut tape, 2).unwrap()) == 0x0203);
+        assert!(u32::from(Offset::read(&mut tape, 3).unwrap()) == 0x040506);
+        assert!(u32::from(Offset::read(&mut tape, 4).unwrap()) == 0x0708090a);
     }
 }

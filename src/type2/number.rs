@@ -21,6 +21,6 @@ mod tests {
     #[test]
     fn real() {
         let mut tape = Cursor::new(vec![0xff, 0x00, 0x01, 0x04, 0x5a]);
-        assert_eq!(format!("{:.3}", super::read(&mut tape).unwrap()), "1.017");
+        assert!(format!("{:.3}", super::read(&mut tape).unwrap()) == "1.017");
     }
 }

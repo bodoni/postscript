@@ -19,6 +19,6 @@ fn setup() -> FontSet {
     let mut file = ok!(File::open("tests/fixtures/SourceSerifPro-Regular.otf"));
     ok!(file.seek(SeekFrom::Start(17732)));
     let mut buffer = vec![0; 37728];
-    assert_eq!(ok!(file.read(&mut buffer)), buffer.len());
+    assert!(ok!(file.read(&mut buffer)) == buffer.len());
     ok!(FontSet::read(&mut Cursor::new(buffer)))
 }

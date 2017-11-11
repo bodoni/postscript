@@ -53,31 +53,31 @@ mod tests {
         macro_rules! read(($tape:expr) => (super::read(&mut $tape).unwrap() as i32));
 
         let mut tape = Cursor::new(vec![0x8b]);
-        assert_eq!(read!(tape), 0);
+        assert!(read!(tape) == 0);
 
         let mut tape = Cursor::new(vec![0xef]);
-        assert_eq!(read!(tape), 100);
+        assert!(read!(tape) == 100);
 
         let mut tape = Cursor::new(vec![0x27]);
-        assert_eq!(read!(tape), -100);
+        assert!(read!(tape) == -100);
 
         let mut tape = Cursor::new(vec![0xfa, 0x7c]);
-        assert_eq!(read!(tape), 1000);
+        assert!(read!(tape) == 1000);
 
         let mut tape = Cursor::new(vec![0xfe, 0x7c]);
-        assert_eq!(read!(tape), -1000);
+        assert!(read!(tape) == -1000);
 
         let mut tape = Cursor::new(vec![0x1c, 0x27, 0x10]);
-        assert_eq!(read!(tape), 10000);
+        assert!(read!(tape) == 10000);
 
         let mut tape = Cursor::new(vec![0x1c, 0xd8, 0xf0]);
-        assert_eq!(read!(tape), -10000);
+        assert!(read!(tape) == -10000);
 
         let mut tape = Cursor::new(vec![0x1d, 0x00, 0x01, 0x86, 0xa0]);
-        assert_eq!(read!(tape), 100000);
+        assert!(read!(tape) == 100000);
 
         let mut tape = Cursor::new(vec![0x1d, 0xff, 0xfe, 0x79, 0x60]);
-        assert_eq!(read!(tape), -100000);
+        assert!(read!(tape) == -100000);
     }
 
     #[test]
@@ -85,7 +85,7 @@ mod tests {
         macro_rules! read(($tape:expr) => (super::read(&mut $tape).unwrap()));
 
         let mut tape = Cursor::new(vec![0x1e, 0xe2, 0xa2, 0x5f, 0x0f]);
-        assert_eq!(read!(tape), -2.25);
+        assert!(read!(tape) == -2.25);
 
         let mut tape = Cursor::new(vec![0x1e, 0x0a, 0x14, 0x05, 0x41, 0xc3, 0xff, 0x0f]);
         assert!((read!(tape) - 0.140541e-3).abs() < 1e-14);
