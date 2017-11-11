@@ -20,7 +20,12 @@ impl Value for Index {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
         let count = tape.take::<u16>()?;
         if count == 0 {
-            return Ok(Index { count: 0, offset_size: 0, offsets: vec![], data: vec![] });
+            return Ok(Index {
+                count: 0,
+                offset_size: 0,
+                offsets: vec![],
+                data: vec![],
+            });
         }
         let offset_size = tape.take::<OffsetSize>()?;
         let mut offsets = Vec::with_capacity(count as usize + 1);
@@ -36,7 +41,12 @@ impl Value for Index {
             let size = (u32::from(offsets[i + 1]) - u32::from(offsets[i])) as usize;
             data.push(tape.take_given(size)?);
         }
-        Ok(Index { count: count, offset_size: offset_size, offsets: offsets, data: data })
+        Ok(Index {
+            count: count,
+            offset_size: offset_size,
+            offsets: offsets,
+            data: data,
+        })
     }
 }
 

@@ -28,7 +28,7 @@ impl Value for Operation {
                         tape.take::<u8>()? as u16
                     };
                     return Ok((Operator::from(code)?, operands));
-                },
+                }
             }
         }
     }
@@ -80,13 +80,11 @@ impl Value for Operations {
             match tape.take() {
                 Ok((operator, operands)) => {
                     map.insert(operator, operands);
-                },
-                Err(error) => {
-                    if error.kind() == ErrorKind::UnexpectedEof {
-                        return Ok(Operations(map));
-                    } else {
-                        return Err(error);
-                    }
+                }
+                Err(error) => if error.kind() == ErrorKind::UnexpectedEof {
+                    return Ok(Operations(map));
+                } else {
+                    return Err(error);
                 },
             }
         }

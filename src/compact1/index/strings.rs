@@ -13,10 +13,10 @@ impl Strings {
         match sid as usize {
             i if i < NUMBER_OF_STANDARD_STRINGS => {
                 get_standard_string(sid).map(|string| string.to_string())
-            },
-            i => self.0.get(i - NUMBER_OF_STANDARD_STRINGS).map(|chunk| {
-                String::from_utf8_lossy(chunk).into_owned()
-            }),
+            }
+            i => self.0
+                .get(i - NUMBER_OF_STANDARD_STRINGS)
+                .map(|chunk| String::from_utf8_lossy(chunk).into_owned()),
         }
     }
 }

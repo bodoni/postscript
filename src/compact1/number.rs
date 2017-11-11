@@ -24,7 +24,7 @@ fn parse_real<T: Tape>(tape: &mut T) -> Result<f32> {
             true => {
                 byte = tape.take::<u8>()?;
                 byte >> 4
-            },
+            }
             false => byte & 0x0f,
         };
         high = !high;

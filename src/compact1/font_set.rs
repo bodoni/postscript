@@ -1,21 +1,8 @@
 use std::io::Cursor;
 
 use {Result, Tape, Value};
-use compact1::{
-    CharSet,
-    Encoding,
-    Header,
-    Operand,
-    Operations,
-    Operator,
-};
-use compact1::index::{
-    CharStrings,
-    Dictionaries,
-    Names,
-    Strings,
-    Subroutines,
-};
+use compact1::{CharSet, Encoding, Header, Operand, Operations, Operator};
+use compact1::index::{CharStrings, Dictionaries, Names, Strings, Subroutines};
 
 /// A font set.
 #[derive(Clone, Debug)]
@@ -85,7 +72,7 @@ impl Value for FontSet {
                 offset => {
                     tape.jump(position + offset as u64)?;
                     tape.take_given(char_strings[i].len())?
-                },
+                }
             });
             local_dictionaries.push({
                 let (size, offset) = get_double!(dictionary, Private);

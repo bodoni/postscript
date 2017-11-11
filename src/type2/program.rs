@@ -2,7 +2,7 @@ use std::io::Cursor;
 use std::mem;
 
 use {Result, Tape};
-use type2::{Operand, Operation, Operator, number};
+use type2::{number, Operand, Operation, Operator};
 
 /// A program.
 pub struct Program<'l> {
@@ -143,8 +143,10 @@ impl<'l> Program<'l> {
             HLineTo | VLineTo => clear!([equal(1), maybe_modulo(2)], [modulo(2)]),
             RRCurveTo => clear!([modulo(6)]),
             HHCurveTo | VVCurveTo => clear!([maybe_equal(1), modulo(4)]),
-            HVCurveTo | VHCurveTo => clear!([equal(4), maybe_modulo(8), maybe_equal(1)],
-                                            [modulo(8), maybe_equal(1)]),
+            HVCurveTo | VHCurveTo => clear!(
+                [equal(4), maybe_modulo(8), maybe_equal(1)],
+                [modulo(8), maybe_equal(1)]
+            ),
             RCurveLine => clear!([modulo(6), equal(2)]),
             RLineCurve => clear!([modulo(2), equal(6)]),
             Flex => clear!([equal(13)]),
@@ -165,18 +167,18 @@ impl<'l> Program<'l> {
                     self.width = Some(self.stack[length - 1]);
                 }
                 return Ok(None);
-            },
+            }
 
             // Hint operators
             HStem | VStem | HStemHM | VStemHM => {
                 self.stems += self.stack.len() >> 1;
                 clear!([equal(2), maybe_modulo(2)]);
-            },
+            }
             HintMask | CntrMask => {
                 self.stems += self.stack.len() >> 1;
                 let _ = self.routine.take_given::<Vec<u8>>((self.stems + 7) >> 3)?;
                 clear!([equal(0)]);
-            },
+            }
 
             // Arithmetic operators
             Abs => push!(pop!().abs()),
@@ -184,11 +186,11 @@ impl<'l> Program<'l> {
             Sub => {
                 let (right, left) = (pop!(), pop!());
                 push!(left - right);
-            },
+            }
             Div => {
                 let (right, left) = (pop!(), pop!());
                 push!(left / right);
-            },
+            }
             Neg => push!(-pop!()),
             Random => unimplemented!(),
             Mul => push!(pop!() * pop!()),
@@ -198,11 +200,11 @@ impl<'l> Program<'l> {
                 let (right, left) = (pop!(), pop!());
                 push!(right);
                 push!(left);
-            },
+            }
             Index => {
                 let i = pop!(i32);
                 push!(read!(if i >= 0 { i as usize } else { 0 }));
-            },
+            }
             Roll => {
                 let (shift, span) = (pop!(i32), pop!(i32));
                 let length = self.stack.len();
@@ -223,7 +225,7 @@ impl<'l> Program<'l> {
                         }
                     }
                 }
-            },
+            }
             Dup => push!(read!(0)),
 
             // Storage operators
@@ -234,20 +236,20 @@ impl<'l> Program<'l> {
             And => {
                 let (right, left) = (pop!(bool), pop!(bool));
                 push!(left && right, bool);
-            },
+            }
             Or => {
                 let (right, left) = (pop!(bool), pop!(bool));
                 push!(left || right, bool);
-            },
+            }
             Not => push!(!pop!(bool), bool),
             Eq => {
                 let (right, left) = (pop!(), pop!());
                 push!(left == right, bool);
-            },
+            }
             IfElse => {
                 let (right, left, no, yes) = (pop!(), pop!(), pop!(), pop!());
                 push!(if left <= right { yes } else { no });
-            },
+            }
 
             // Subroutine operators
             CallSubr | CallGSubr => {
@@ -267,14 +269,14 @@ impl<'l> Program<'l> {
                 };
                 mem::swap(&mut self.routine, &mut routine);
                 self.routine.caller = Some(Box::new(routine));
-            },
+            }
             Return => {
                 let caller = match self.routine.caller.take() {
                     Some(caller) => caller,
                     _ => raise!("found a return operator without a caller"),
                 };
                 mem::replace(&mut self.routine, *caller);
-            },
+            }
         };
         self.next()
     }
@@ -289,7 +291,11 @@ impl<'l> Program<'l> {
 impl<'l> Routine<'l> {
     #[inline]
     fn new(code: &'l [u8]) -> Routine<'l> {
-        Routine { tape: Cursor::new(code), size: code.len(), caller: None }
+        Routine {
+            tape: Cursor::new(code),
+            size: code.len(),
+            caller: None,
+        }
     }
 
     #[inline]
@@ -307,5 +313,11 @@ deref! { Routine<'l>::tape => Cursor<&'l [u8]> }
 
 #[inline]
 fn bias(count: usize) -> i32 {
-    if count < 1240 { 107 } else if count < 33900 { 1131 } else { 32768 }
+    if count < 1240 {
+        107
+    } else if count < 33900 {
+        1131
+    } else {
+        32768
+    }
 }

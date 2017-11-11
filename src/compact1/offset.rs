@@ -30,7 +30,7 @@ impl Walue for Offset {
             3 => {
                 let trio: [u8; 3] = tape.take()?;
                 unsafe { mem::transmute::<_, u32>(assemble!(trio[0], trio[1], trio[2])) }
-            },
+            }
             4 => tape.take::<u32>()?,
             _ => raise!("found a malformed offset"),
         }))

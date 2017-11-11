@@ -73,7 +73,10 @@ impl Walue for CharSet1 {
         if found != glyphs {
             reject!();
         }
-        Ok(CharSet1 { format: format, ranges: ranges })
+        Ok(CharSet1 {
+            format: format,
+            ranges: ranges,
+        })
     }
 }
 
