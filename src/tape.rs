@@ -56,7 +56,7 @@ impl<T: Read + Seek> Tape for T {}
 
 macro_rules! read(
     ($tape:ident, $size:expr) => (unsafe {
-        let mut buffer: [u8; $size] = ::std::mem::uninitialized();
+        let mut buffer: [u8; $size] = ::std::mem::zeroed();
         ::std::io::Read::read_exact($tape, &mut buffer)?;
         ::std::mem::transmute(buffer)
     });
@@ -100,8 +100,7 @@ macro_rules! walue {
             type Parameter = usize;
 
             fn read<T: Tape>(tape: &mut T, count: usize) -> Result<Self> {
-                let mut buffer = Vec::with_capacity(count);
-                unsafe { buffer.set_len(count) };
+                let mut buffer = vec![0; count];
                 ::std::io::Read::read_exact(tape, &mut buffer)?;
                 Ok(buffer)
             }
