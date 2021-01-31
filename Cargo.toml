@@ -18,7 +18,3 @@ random = "0.12"
 [[bench]]
 name = "postscript"
 path = "benches/lib.rs"
-
-[[test]]
-name = "postscript"
-path = "tests/lib.rs"

@@ -5,10 +5,7 @@ use postscript::compact1::FontSet;
 
 macro_rules! ok(($result:expr) => ($result.unwrap()));
 
-mod compact1;
-mod type2;
-
-fn setup() -> FontSet {
+pub fn setup() -> FontSet {
     use std::fs::File;
     use std::io::{Seek, SeekFrom};
 

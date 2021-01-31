@@ -1,6 +1,9 @@
 use postscript::type2::Program;
 
-use setup;
+#[macro_use]
+mod common;
+
+use common::setup;
 
 macro_rules! operations(
     ($($operator:ident: [$($operand:expr),*],)*) => ({
