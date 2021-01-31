@@ -1,5 +1,3 @@
-extern crate postscript;
-
 use postscript::Value;
 use postscript::compact1::FontSet;
 

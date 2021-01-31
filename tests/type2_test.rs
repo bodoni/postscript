@@ -1,3 +1,5 @@
+extern crate postscript;
+
 use postscript::type2::Program;
 
 #[macro_use]
