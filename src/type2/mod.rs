@@ -6,5 +6,5 @@ mod number;
 mod operation;
 mod program;
 
-pub use self::operation::{Operand, Operation, Operations, Operator};
-pub use self::program::Program;
+pub use operation::{Operand, Operation, Operations, Operator};
+pub use program::Program;

@@ -77,8 +77,8 @@ mod names;
 mod strings;
 mod subroutines;
 
-pub use self::char_strings::CharStrings;
-pub use self::dictionaries::Dictionaries;
-pub use self::names::Names;
-pub use self::strings::Strings;
-pub use self::subroutines::Subroutines;
+pub use char_strings::CharStrings;
+pub use dictionaries::Dictionaries;
+pub use names::Names;
+pub use strings::Strings;
+pub use subroutines::Subroutines;

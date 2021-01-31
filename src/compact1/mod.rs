@@ -12,13 +12,13 @@ pub mod char_set;
 pub mod encoding;
 pub mod index;
 
-pub use self::char_set::CharSet;
-pub use self::encoding::Encoding;
-pub use self::font_set::FontSet;
-pub use self::header::Header;
-pub use self::index::Index;
-pub use self::offset::{Offset, OffsetSize};
-pub use self::operation::{Operand, Operation, Operations, Operator};
+pub use char_set::CharSet;
+pub use encoding::Encoding;
+pub use font_set::FontSet;
+pub use header::Header;
+pub use index::Index;
+pub use offset::{Offset, OffsetSize};
+pub use operation::{Operand, Operation, Operations, Operator};
 
 /// A glyph identifier.
 pub type GlyphID = u16;
