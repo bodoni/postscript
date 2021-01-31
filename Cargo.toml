@@ -1,6 +1,7 @@
 [package]
 name = "postscript"
 version = "0.13.2"
+edition = "2018"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
 description = "The package provides a parser for PostScript fonts."
