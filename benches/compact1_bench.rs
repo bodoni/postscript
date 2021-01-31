@@ -1,6 +1,15 @@
+#![feature(test)]
+
+extern crate postscript;
+extern crate random;
+extern crate test;
+
 use postscript::compact1::Operator;
-use random::{self, Source};
+use random::Source;
 use test::{black_box, Bencher};
+
+#[macro_use]
+mod common;
 
 const SAMPLES: usize = 1000;
 

@@ -1,7 +1,15 @@
+#![feature(test)]
+
+extern crate postscript;
+extern crate test;
+
 use postscript::type2::Program;
 use test::Bencher;
 
-use setup;
+#[macro_use]
+mod common;
+
+use common::setup;
 
 #[bench]
 fn program(bencher: &mut Bencher) {

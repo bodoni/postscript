@@ -1,18 +1,10 @@
-#![feature(test)]
-
-extern crate postscript;
-extern crate random;
-extern crate test;
-
 use postscript::Value;
 use postscript::compact1::FontSet;
 
 macro_rules! ok(($result:expr) => ($result.unwrap()));
 
-mod compact1;
-mod type2;
-
-fn setup() -> FontSet {
+#[allow(dead_code)]
+pub fn setup() -> FontSet {
     use std::fs::File;
     use std::io::{Cursor, Read, Seek, SeekFrom};
 

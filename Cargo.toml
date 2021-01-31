@@ -15,7 +15,3 @@ exclude = ["tests/fixtures/*"]
 
 [dev-dependencies]
 random = "0.12"
-
-[[bench]]
-name = "postscript"
-path = "benches/lib.rs"
