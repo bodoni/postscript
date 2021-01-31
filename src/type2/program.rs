@@ -35,7 +35,7 @@ impl<'l> Program<'l> {
     }
 
     /// Return the next operation.
-    #[allow(unused_comparisons)]
+    #[allow(unused_comparisons, unused_must_use)]
     pub fn next(&mut self) -> Result<Option<Operation>> {
         use type2::Operator::*;
 
