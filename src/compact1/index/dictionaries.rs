@@ -1,8 +1,8 @@
 use std::io::Cursor;
 
-use crate::{Result, Tape};
 use crate::compact1::index::Index;
 use crate::compact1::Operations;
+use crate::{Result, Tape};
 
 index! {
     #[doc = "A dictionary index."]

@@ -14,7 +14,8 @@ impl Strings {
             i if i < NUMBER_OF_STANDARD_STRINGS => {
                 get_standard_string(sid).map(|string| string.to_string())
             }
-            i => self.0
+            i => self
+                .0
                 .get(i - NUMBER_OF_STANDARD_STRINGS)
                 .map(|chunk| String::from_utf8_lossy(chunk).into_owned()),
         }
@@ -420,9 +421,9 @@ fn get_standard_string(sid: StringID) -> Option<&'static str> {
 
 #[cfg(test)]
 mod tests {
-    use crate::compact1::StringID;
-    use super::NUMBER_OF_STANDARD_STRINGS;
     use super::get_standard_string;
+    use super::NUMBER_OF_STANDARD_STRINGS;
+    use crate::compact1::StringID;
 
     #[test]
     fn number_of_standard_strings() {

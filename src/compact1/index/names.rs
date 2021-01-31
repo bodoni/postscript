@@ -1,5 +1,5 @@
-use crate::Result;
 use crate::compact1::index::Index;
+use crate::Result;
 
 index! {
     #[doc = "A name index."]

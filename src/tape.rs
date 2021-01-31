@@ -63,30 +63,30 @@ macro_rules! read(
 );
 
 macro_rules! value {
-    ([$kind:ident; $count:expr], 1) => (
+    ([$kind:ident; $count:expr], 1) => {
         impl Value for [$kind; $count] {
             #[inline]
             fn read<T: Tape>(tape: &mut T) -> Result<Self> {
                 Ok(read!(tape, $count))
             }
         }
-    );
-    ($kind:ident, 1) => (
+    };
+    ($kind:ident, 1) => {
         impl Value for $kind {
             #[inline]
             fn read<T: Tape>(tape: &mut T) -> Result<Self> {
                 Ok(read!(tape, 1))
             }
         }
-    );
-    ($kind:ident, $size:expr) => (
+    };
+    ($kind:ident, $size:expr) => {
         impl Value for $kind {
             #[inline]
             fn read<T: Tape>(tape: &mut T) -> Result<Self> {
                 Ok($kind::from_be(read!(tape, $size)))
             }
         }
-    );
+    };
 }
 
 value!(u8, 1);
@@ -95,7 +95,7 @@ value!(u32, 4);
 value!([u8; 3], 1);
 
 macro_rules! walue {
-    ($kind:ty, 1) => (
+    ($kind:ty, 1) => {
         impl Walue for $kind {
             type Parameter = usize;
 
@@ -105,7 +105,7 @@ macro_rules! walue {
                 Ok(buffer)
             }
         }
-    );
+    };
 }
 
 walue!(Vec<u8>, 1);

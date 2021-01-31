@@ -1,7 +1,7 @@
 //! The char sets.
 
-use crate::{Result, Tape, Walue};
 use crate::compact1::{GlyphID, StringID};
+use crate::{Result, Tape, Walue};
 
 /// A char set.
 #[derive(Clone, Debug)]

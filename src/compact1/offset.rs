@@ -41,8 +41,8 @@ impl Walue for Offset {
 mod tests {
     use std::io::Cursor;
 
-    use crate::Walue;
     use crate::compact1::Offset;
+    use crate::Walue;
 
     #[test]
     fn read() {

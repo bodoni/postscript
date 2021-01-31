@@ -1,7 +1,7 @@
 //! The indices.
 
-use crate::{Result, Tape, Value};
 use crate::compact1::{Offset, OffsetSize};
+use crate::{Result, Tape, Value};
 
 table! {
     @define

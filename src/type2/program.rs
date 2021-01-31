@@ -1,8 +1,8 @@
 use std::io::Cursor;
 use std::mem;
 
-use crate::{Result, Tape};
 use crate::type2::{number, Operand, Operation, Operator};
+use crate::{Result, Tape};
 
 /// A program.
 pub struct Program<'l> {

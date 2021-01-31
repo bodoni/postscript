@@ -1,8 +1,8 @@
 use std::io::Cursor;
 
-use crate::{Result, Tape, Value};
-use crate::compact1::{CharSet, Encoding, Header, Operand, Operations, Operator};
 use crate::compact1::index::{CharStrings, Dictionaries, Names, Strings, Subroutines};
+use crate::compact1::{CharSet, Encoding, Header, Operand, Operations, Operator};
+use crate::{Result, Tape, Value};
 
 /// A font set.
 #[derive(Clone, Debug)]

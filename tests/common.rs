@@ -1,5 +1,5 @@
-use postscript::Value;
 use postscript::compact1::FontSet;
+use postscript::Value;
 
 macro_rules! ok(($result:expr) => ($result.unwrap()));
 

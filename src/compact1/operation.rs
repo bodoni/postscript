@@ -2,8 +2,8 @@
 
 use std::collections::HashMap;
 
-use crate::{Result, Tape, Value};
 use crate::compact1::number;
+use crate::{Result, Tape, Value};
 
 /// An operand.
 pub type Operand = f32;
@@ -81,11 +81,13 @@ impl Value for Operations {
                 Ok((operator, operands)) => {
                     map.insert(operator, operands);
                 }
-                Err(error) => if error.kind() == ErrorKind::UnexpectedEof {
-                    return Ok(Operations(map));
-                } else {
-                    return Err(error);
-                },
+                Err(error) => {
+                    if error.kind() == ErrorKind::UnexpectedEof {
+                        return Ok(Operations(map));
+                    } else {
+                        return Err(error);
+                    }
+                }
             }
         }
     }
