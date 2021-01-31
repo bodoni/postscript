@@ -79,7 +79,7 @@ impl<'l> Program<'l> {
         loop {
             code = self.routine.peek::<u8>()?;
             match code {
-                0x1c | 0x20...0xff => push!(self.routine.take_operand()?),
+                0x1c | 0x20..=0xff => push!(self.routine.take_operand()?),
                 _ => break,
             }
         }

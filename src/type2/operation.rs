@@ -67,8 +67,8 @@ operator! {
         0x1d => CallGSubr,
         0x1e => VHCurveTo,
         0x1f => HVCurveTo,
-        // 0x20...0xf6 => <numbers>,
-        // 0xf7...0xfe => <numbers>,
+        // 0x20..=0xf6 => <numbers>,
+        // 0xf7..=0xfe => <numbers>,
         // 0xff => <number>,
         // 0x0c00 => Reserved,
         // 0x0c01 => Reserved,
@@ -108,6 +108,6 @@ operator! {
         0x0c23 => Flex,
         0x0c24 => HFlex1,
         0x0c25 => Flex1,
-        // 0x0c26...0x0cff => Reserved,
+        // 0x0c26..=0x0cff => Reserved,
     }
 }

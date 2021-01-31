@@ -5,9 +5,9 @@ macro_rules! reject(() => (raise!("found a malformed number")));
 pub fn read<T: Tape>(tape: &mut T) -> Result<f32> {
     let first = tape.take::<u8>()?;
     Ok(match first {
-        0x20...0xf6 => (first as i32 - 139) as f32,
-        0xf7...0xfa => ((first as i32 - 247) * 256 + tape.take::<u8>()? as i32 + 108) as f32,
-        0xfb...0xfe => (-(first as i32 - 251) * 256 - tape.take::<u8>()? as i32 - 108) as f32,
+        0x20..=0xf6 => (first as i32 - 139) as f32,
+        0xf7..=0xfa => ((first as i32 - 247) * 256 + tape.take::<u8>()? as i32 + 108) as f32,
+        0xfb..=0xfe => (-(first as i32 - 251) * 256 - tape.take::<u8>()? as i32 - 108) as f32,
         0x1c => tape.take::<u16>()? as i16 as i32 as f32,
         0x1d => tape.take::<u32>()? as i32 as f32,
         0x1e => parse_real(tape)?,
@@ -29,7 +29,7 @@ fn parse_real<T: Tape>(tape: &mut T) -> Result<f32> {
         };
         high = !high;
         match nibble {
-            0...9 => buffer.push(('0' as u8 + nibble) as char),
+            0..=9 => buffer.push(('0' as u8 + nibble) as char),
             0x0a => buffer.push('.'),
             0x0b => buffer.push('e'),
             0x0c => buffer.push_str("e-"),

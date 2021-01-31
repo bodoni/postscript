@@ -60,7 +60,7 @@ fn generate_codes<T: Source>(source: &mut T, count: usize) -> Vec<u16> {
             loop {
                 let number = source.read::<u64>();
                 match 0x0c00 | (number % (0x26 + 1)) as u16 {
-                    0x0c0f...0x0c10 | 0x0c18...0x0c1d => continue,
+                    0x0c0f..=0x0c10 | 0x0c18..=0x0c1d => continue,
                     code => codes.push(code),
                 }
                 break;

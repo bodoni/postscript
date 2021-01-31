@@ -20,7 +20,7 @@ impl Value for Operation {
         let mut operands = vec![];
         loop {
             match tape.peek::<u8>()? {
-                0x1c | 0x1d | 0x1e | 0x20...0xfe => operands.push(number::read(tape)?),
+                0x1c | 0x1d | 0x1e | 0x20..=0xfe => operands.push(number::read(tape)?),
                 code => {
                     let code = if code == 0x0c {
                         tape.take::<u16>()?
@@ -155,13 +155,13 @@ operator! {
         0x13 => Subrs [],
         0x14 => DefaultWidthX [0],
         0x15 => NominalWidthX [0],
-        // 0x16...0x1b => Reserved,
+        // 0x16..=0x1b => Reserved,
         // 0x1c => ShortInt,
         // 0x1d => LongInt,
         // 0x1e => BCD,
         // 0x1f => Reserved,
-        // 0x20...0xf6 => <numbers>,
-        // 0xf7...0xfe => <numbers>,
+        // 0x20..=0xf6 => <numbers>,
+        // 0xf7..=0xfe => <numbers>,
         // 0xff => Reserved,
         0x0c00 => Copyright [],
         0x0c01 => IsFixedPitch [false as i32],
@@ -178,7 +178,7 @@ operator! {
         0x0c0c => StemSnapH [],
         0x0c0d => StemSnapV [],
         0x0c0e => ForceBold [false as i32],
-        // 0x0c0f...0x0c10 => Reserved,
+        // 0x0c0f..=0x0c10 => Reserved,
         0x0c11 => LanguageGroup [0],
         0x0c12 => ExpansionFactor [0.06],
         0x0c13 => InitialRandomSeed [0],
@@ -186,7 +186,7 @@ operator! {
         0x0c15 => PostScript [],
         0x0c16 => BaseFontName [],
         0x0c17 => BaseFontBlend [],
-        // 0x0c18...0x0c1d => Reserved,
+        // 0x0c18..=0x0c1d => Reserved,
         0x0c1e => ROS [],
         0x0c1f => CIDFontVersion [0],
         0x0c20 => CIDFontRevision [0],
@@ -196,6 +196,6 @@ operator! {
         0x0c24 => FDArray [],
         0x0c25 => FDSelect [],
         0x0c26 => FontName [],
-        // 0x0c27...0x0cff => Reserved,
+        // 0x0c27..=0x0cff => Reserved,
     }
 }
