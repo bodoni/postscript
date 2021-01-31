@@ -1,4 +1,4 @@
-use {Result, Tape};
+use crate::{Result, Tape};
 
 const FIXED_SCALING: f32 = 1f32 / (1 << 16) as f32;
 

@@ -1,6 +1,6 @@
 //! The encodings.
 
-use compact1::{GlyphID, StringID};
+use crate::compact1::{GlyphID, StringID};
 
 /// An encoding.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

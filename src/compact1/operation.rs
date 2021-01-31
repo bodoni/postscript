@@ -2,8 +2,8 @@
 
 use std::collections::HashMap;
 
-use {Result, Tape, Value};
-use compact1::number;
+use crate::{Result, Tape, Value};
+use crate::compact1::number;
 
 /// An operand.
 pub type Operand = f32;

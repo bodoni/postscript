@@ -1,4 +1,4 @@
-use {Result, Tape};
+use crate::{Result, Tape};
 
 macro_rules! reject(() => (raise!("found a malformed number")));
 

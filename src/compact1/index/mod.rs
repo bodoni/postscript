@@ -1,7 +1,7 @@
 //! The indices.
 
-use {Result, Tape, Value};
-use compact1::{Offset, OffsetSize};
+use crate::{Result, Tape, Value};
+use crate::compact1::{Offset, OffsetSize};
 
 table! {
     @define
@@ -58,13 +58,13 @@ macro_rules! index {
     (@define $(#[$attribute:meta])* pub $structure:ident) => (
         $(#[$attribute])*
         #[derive(Clone, Debug)]
-        pub struct $structure(pub ::compact1::index::Index);
-        deref! { $structure::0 => ::compact1::index::Index }
+        pub struct $structure(pub crate::compact1::index::Index);
+        deref! { $structure::0 => crate::compact1::index::Index }
     );
     (@implement $structure:ident) => (
-        impl ::tape::Value for $structure {
+        impl crate::tape::Value for $structure {
             #[inline]
-            fn read<T: ::tape::Tape>(tape: &mut T) -> ::Result<Self> {
+            fn read<T: crate::tape::Tape>(tape: &mut T) -> crate::Result<Self> {
                 Ok($structure(tape.take()?))
             }
         }

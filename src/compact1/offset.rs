@@ -1,6 +1,6 @@
 use std::mem;
 
-use {Result, Tape, Walue};
+use crate::{Result, Tape, Walue};
 
 /// An offset.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -41,8 +41,8 @@ impl Walue for Offset {
 mod tests {
     use std::io::Cursor;
 
-    use Walue;
-    use compact1::Offset;
+    use crate::Walue;
+    use crate::compact1::Offset;
 
     #[test]
     fn read() {

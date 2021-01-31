@@ -1,6 +1,6 @@
 //! The operations.
 
-use Result;
+use crate::Result;
 
 /// An operand.
 pub type Operand = f32;

@@ -1,4 +1,4 @@
-use {Result, Tape, Walue};
+use crate::{Result, Tape, Walue};
 
 index! {
     @define

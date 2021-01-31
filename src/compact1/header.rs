@@ -1,4 +1,4 @@
-use compact1::OffsetSize;
+use crate::compact1::OffsetSize;
 
 table! {
     #[doc = "A header."]

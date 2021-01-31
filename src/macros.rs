@@ -41,7 +41,7 @@ macro_rules! deref {
 }
 
 macro_rules! raise(
-    ($message:expr) => (return Err(::Error::new(::std::io::ErrorKind::Other, $message)));
+    ($message:expr) => (return Err(crate::Error::new(::std::io::ErrorKind::Other, $message)));
 );
 
 macro_rules! table {
@@ -55,8 +55,8 @@ macro_rules! table {
         pub struct $name { $(pub $field: $kind,)* }
     );
     (@implement pub $name:ident { $($field:ident,)* }) => (
-        impl ::Value for $name {
-            fn read<T: ::Tape>(tape: &mut T) -> ::Result<Self> {
+        impl crate::Value for $name {
+            fn read<T: crate::Tape>(tape: &mut T) -> crate::Result<Self> {
                 let mut table: $name = unsafe { ::std::mem::zeroed() };
                 $(::std::mem::forget(::std::mem::replace(&mut table.$field, tape.take()?));)+
                 Ok(table)
