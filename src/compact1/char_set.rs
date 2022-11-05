@@ -9,7 +9,15 @@ pub enum CharSet {
     ISOAdobe,
     Expert,
     ExpertSubset,
+    Format0(CharSet0),
     Format1(CharSet1),
+}
+
+/// A char set in format 0.
+#[derive(Clone, Debug)]
+pub struct CharSet0 {
+    pub format: u8,            // format
+    pub glyphs: Vec<StringID>, // glyph
 }
 
 /// A char set in format 1.
@@ -46,10 +54,29 @@ impl Walue for CharSet {
 
     fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
         Ok(match tape.peek::<u8>()? {
-            0 => unimplemented!(),
+            0 => CharSet::Format0(tape.take_given(glyphs)?),
             1 => CharSet::Format1(tape.take_given(glyphs)?),
             2 => unimplemented!(),
             _ => raise!("found an unknown char-set format"),
+        })
+    }
+}
+
+impl Walue for CharSet0 {
+    type Parameter = usize;
+
+    fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
+        macro_rules! reject(() => (raise!("found a malformed char set")));
+        let format = tape.take::<u8>()?;
+        if format != 0 {
+            reject!();
+        }
+        let glyphs = (1..=glyphs - 1)
+            .map(|_| tape.take())
+            .collect::<Result<Vec<_>>>()?;
+        Ok(CharSet0 {
+            format: format,
+            glyphs: glyphs,
         })
     }
 }
