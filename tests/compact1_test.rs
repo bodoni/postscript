@@ -3,7 +3,7 @@ extern crate postscript;
 #[macro_use]
 mod common;
 
-use common::setup;
+use common::{setup, Fixture};
 
 macro_rules! operations(
     ($($operator:ident: [$($operand:expr),*],)*) => ({
@@ -19,7 +19,7 @@ macro_rules! operations(
 fn char_sets() {
     use postscript::compact1::CharSet;
 
-    let set = setup();
+    let set = setup(Fixture::SourceSerifPro);
     let vector = &set.char_sets;
     assert!(vector.len() == 1);
     match &vector[0] {
@@ -30,7 +30,7 @@ fn char_sets() {
 
 #[test]
 fn char_strings() {
-    let set = setup();
+    let set = setup(Fixture::SourceSerifPro);
     let vector = &set.char_strings;
     assert!(vector.len() == 1);
     assert!(vector[0].len() == 547);
@@ -40,7 +40,7 @@ fn char_strings() {
 fn encodings() {
     use postscript::compact1::Encoding;
 
-    let set = setup();
+    let set = setup(Fixture::SourceSerifPro);
     let vector = &set.encodings;
     let strings = &set.strings;
     assert!(vector.len() == 1);
@@ -54,7 +54,7 @@ fn encodings() {
 
 #[test]
 fn global_dictionaries() {
-    let set = setup();
+    let set = setup(Fixture::SourceSerifPro);
     let vector = &set.global_dictionaries;
     assert!(vector.len() == 1);
     assert!(
@@ -76,14 +76,14 @@ fn global_dictionaries() {
 
 #[test]
 fn global_subroutines() {
-    let set = setup();
+    let set = setup(Fixture::SourceSerifPro);
     let index = &set.global_subroutines;
     assert!(index.len() == 181);
 }
 
 #[test]
 fn header() {
-    let set = setup();
+    let set = setup(Fixture::SourceSerifPro);
     let table = &set.header;
     assert!(table.major == 1);
     assert!(table.minor == 0);
@@ -93,7 +93,7 @@ fn header() {
 
 #[test]
 fn local_dictionaries() {
-    let set = setup();
+    let set = setup(Fixture::SourceSerifPro);
     let vector = &set.local_dictionaries;
     assert!(vector.len() == 1);
     assert!(
@@ -118,7 +118,7 @@ fn local_dictionaries() {
 
 #[test]
 fn local_subroutines() {
-    let set = setup();
+    let set = setup(Fixture::SourceSerifPro);
     let vector = &set.local_subroutines;
     assert!(vector.len() == 1);
     assert!(vector[0].len() == 180);
@@ -126,7 +126,7 @@ fn local_subroutines() {
 
 #[test]
 fn names() {
-    let set = setup();
+    let set = setup(Fixture::SourceSerifPro);
     let vector = &set.names;
     assert!(vector.len() == 1);
     assert!(&vector[0] == "SourceSerifPro-Regular");
@@ -134,7 +134,7 @@ fn names() {
 
 #[test]
 fn strings() {
-    let set = setup();
+    let set = setup(Fixture::SourceSerifPro);
     let index = &set.strings;
     assert!(index.len() == 322);
     assert!(ok!(index.get(175)) == "Aring");
