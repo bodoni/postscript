@@ -6,19 +6,23 @@ use postscript::Value;
 
 macro_rules! ok(($result:expr) => ($result.unwrap()));
 
+#[allow(dead_code)]
 pub enum Fixture {
+    NotoSansJP,
     SourceSerifPro,
 }
 
 impl Fixture {
     pub fn path(&self) -> PathBuf {
         match *self {
+            Fixture::NotoSansJP => "tests/fixtures/NotoSansJP-Regular.otf".into(),
             Fixture::SourceSerifPro => "tests/fixtures/SourceSerifPro-Regular.otf".into(),
         }
     }
 
     pub fn offset(&self) -> u64 {
         match *self {
+            Fixture::NotoSansJP => 337316,
             Fixture::SourceSerifPro => 17732,
         }
     }

@@ -75,6 +75,12 @@ fn global_dictionaries() {
 }
 
 #[test]
+#[should_panic]
+fn local_dictionaries_private() {
+    let _ = setup(Fixture::NotoSansJP);
+}
+
+#[test]
 fn global_subroutines() {
     let set = setup(Fixture::SourceSerifPro);
     let index = &set.global_subroutines;
