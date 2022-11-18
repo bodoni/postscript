@@ -43,6 +43,20 @@ mod noto_sans {
         assert_eq!(table.len(), 1);
         assert_eq!(&table[0], "NotoSansJP-Regular");
     }
+
+    #[test]
+    fn global_dictionaries() {
+        use postscript::compact1::index::{Dictionaries, Names};
+        use postscript::compact1::Header;
+
+        let mut tape = setup(Fixture::NotoSansJP);
+        let position = ok!(tape.position());
+        let table = ok!(tape.take::<Header>());
+        ok!(tape.jump(position + table.header_size as u64));
+        let _ = ok!(ok!(tape.take::<Names>()).into());
+        let table = ok!(ok!(tape.take::<Dictionaries>()).into());
+        assert_eq!(table.len(), 1);
+    }
 }
 
 mod source_serif {
@@ -54,7 +68,7 @@ mod source_serif {
 
         let set = setup_font_set(Fixture::SourceSerifPro);
         let table = &set.char_sets;
-        assert!(table.len() == 1);
+        assert_eq!(table.len(), 1);
         match &table[0] {
             &CharSet::Format1(..) => {}
             _ => unreachable!(),
@@ -65,8 +79,8 @@ mod source_serif {
     fn char_strings() {
         let set = setup_font_set(Fixture::SourceSerifPro);
         let table = &set.char_strings;
-        assert!(table.len() == 1);
-        assert!(table[0].len() == 547);
+        assert_eq!(table.len(), 1);
+        assert_eq!(table[0].len(), 547);
     }
 
     #[test]
@@ -76,10 +90,10 @@ mod source_serif {
         let set = setup_font_set(Fixture::SourceSerifPro);
         let encodings = &set.encodings;
         let strings = &set.strings;
-        assert!(encodings.len() == 1);
+        assert_eq!(encodings.len(), 1);
         match &encodings[0] {
             encoding @ &Encoding::Standard => {
-                assert!(ok!(strings.get(ok!(encoding.get(42)))) == "asterisk");
+                assert_eq!(ok!(strings.get(ok!(encoding.get(42)))), "asterisk");
             }
             _ => unreachable!(),
         }
@@ -89,21 +103,21 @@ mod source_serif {
     fn global_dictionaries() {
         let set = setup_font_set(Fixture::SourceSerifPro);
         let table = &set.global_dictionaries;
-        assert!(table.len() == 1);
-        assert!(
-            &*table[0]
-                == &operations!(
-                    Version: [709],
-                    Notice: [710],
-                    Copyright: [711],
-                    FullName: [712],
-                    FamilyName: [712],
-                    Weight: [388],
-                    FontBBox: [-178, -335, 1138, 918],
-                    CharSet: [8340],
-                    CharStrings: [8917],
-                    Private: [65, 33671],
-                )
+        assert_eq!(table.len(), 1);
+        assert_eq!(
+            &*table[0],
+            &operations!(
+                Version: [709],
+                Notice: [710],
+                Copyright: [711],
+                FullName: [712],
+                FamilyName: [712],
+                Weight: [388],
+                FontBBox: [-178, -335, 1138, 918],
+                CharSet: [8340],
+                CharStrings: [8917],
+                Private: [65, 33671],
+            )
         );
     }
 
@@ -111,7 +125,7 @@ mod source_serif {
     fn global_subroutines() {
         let set = setup_font_set(Fixture::SourceSerifPro);
         let table = &set.global_subroutines;
-        assert!(table.len() == 181);
+        assert_eq!(table.len(), 181);
     }
 
     #[test]
@@ -128,24 +142,24 @@ mod source_serif {
     fn local_dictionaries() {
         let set = setup_font_set(Fixture::SourceSerifPro);
         let table = &set.local_dictionaries;
-        assert!(table.len() == 1);
-        assert!(
-            &*table[0]
-                == &operations!(
-                    DefaultWidthX: [370],
-                    FamilyOtherBlues: [-249, 10],
-                    BlueValues: [-20, 20, 473, 18, 34, 15, 104, 15, 10, 20, 40, 20],
-                    StemSnapH: [41, 15],
-                    StdHW: [41],
-                    NominalWidthX: [604],
-                    StdVW: [85],
-                    OtherBlues: [-249, 10],
-                    BlueFuzz: [0],
-                    Subrs: [65],
-                    FamilyBlues: [-20, 20, 473, 18, 34, 15, 104, 15, 10, 20, 40, 20],
-                    BlueScale: [0.0375],
-                    StemSnapV: [85, 10],
-                )
+        assert_eq!(table.len(), 1);
+        assert_eq!(
+            &*table[0],
+            &operations!(
+                DefaultWidthX: [370],
+                FamilyOtherBlues: [-249, 10],
+                BlueValues: [-20, 20, 473, 18, 34, 15, 104, 15, 10, 20, 40, 20],
+                StemSnapH: [41, 15],
+                StdHW: [41],
+                NominalWidthX: [604],
+                StdVW: [85],
+                OtherBlues: [-249, 10],
+                BlueFuzz: [0],
+                Subrs: [65],
+                FamilyBlues: [-20, 20, 473, 18, 34, 15, 104, 15, 10, 20, 40, 20],
+                BlueScale: [0.0375],
+                StemSnapV: [85, 10],
+            )
         );
     }
 
@@ -153,8 +167,8 @@ mod source_serif {
     fn local_subroutines() {
         let set = setup_font_set(Fixture::SourceSerifPro);
         let table = &set.local_subroutines;
-        assert!(table.len() == 1);
-        assert!(table[0].len() == 180);
+        assert_eq!(table.len(), 1);
+        assert_eq!(table[0].len(), 180);
     }
 
     #[test]
@@ -169,8 +183,8 @@ mod source_serif {
     fn strings() {
         let set = setup_font_set(Fixture::SourceSerifPro);
         let table = &set.strings;
-        assert!(table.len() == 322);
-        assert!(ok!(table.get(175)) == "Aring");
-        assert!(ok!(table.get(500)) == "nine.tosf");
+        assert_eq!(table.len(), 322);
+        assert_eq!(ok!(table.get(175)), "Aring");
+        assert_eq!(ok!(table.get(500)), "nine.tosf");
     }
 }
