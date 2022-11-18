@@ -28,10 +28,15 @@ impl Fixture {
     }
 }
 
-pub fn setup(fixture: Fixture) -> FontSet {
+pub fn setup(fixture: Fixture) -> File {
     use std::io::{Seek, SeekFrom};
 
     let mut file = ok!(File::open(fixture.path()));
     ok!(file.seek(SeekFrom::Start(fixture.offset())));
+    file
+}
+
+pub fn setup_font_set(fixture: Fixture) -> FontSet {
+    let mut file = setup(fixture);
     ok!(FontSet::read(&mut file))
 }
