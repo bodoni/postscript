@@ -25,8 +25,8 @@ macro_rules! get(
     (@single $operations:expr, $operator:ident) => (
         match $operations.get_single(Operator::$operator) {
             Some(value) if is_i32!(value) => value as i32,
-            Some(_) => raise!("found a malformed operation with operator {:?}", Operator::$operator),
-            _ => raise!("failed to find an operation with operator {:?}", Operator::$operator),
+            Some(_) => raise!(concat!("found a malformed operation with operator ", stringify!($operator))),
+            _ => raise!(concat!("failed to find an operation with operator ", stringify!($operator))),
         }
     );
     (@double $operations:expr, $operator:ident) => (
@@ -34,8 +34,8 @@ macro_rules! get(
             Some((value0, value1)) if is_i32!(value0) && is_i32!(value1) => {
                 (value0 as i32, value1 as i32)
             },
-            Some(_) => raise!("found a malformed operation with operator {:?}", Operator::$operator),
-            _ => raise!("failed to find an operation with operator {:?}", Operator::$operator),
+            Some(_) => raise!(concat!("found a malformed operation with operator ", stringify!($operator))),
+            _ => raise!(concat!("failed to find an operation with operator ", stringify!($operator))),
         }
     );
 );
