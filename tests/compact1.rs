@@ -16,7 +16,18 @@ macro_rules! operations(
 mod noto_sans {
     use postscript::Tape;
 
+    #[cfg(feature = "ignore-missing-operators")]
+    use crate::common::setup_font_set;
     use crate::common::{setup, Fixture};
+
+    #[cfg(feature = "ignore-missing-operators")]
+    #[test]
+    fn char_strings() {
+        let set = setup_font_set(Fixture::NotoSansJP);
+        let table = &set.char_strings;
+        assert_eq!(table.len(), 1);
+        assert_eq!(table[0].len(), 17810);
+    }
 
     #[test]
     fn header() {

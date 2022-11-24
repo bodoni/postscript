@@ -12,7 +12,7 @@ pub type Operand = f32;
 pub type Operation = (Operator, Vec<Operand>);
 
 /// A collection of operations.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Operations(pub HashMap<Operator, Vec<Operand>>);
 
 impl Value for Operation {

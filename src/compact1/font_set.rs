@@ -38,6 +38,15 @@ macro_rules! get(
             _ => raise!(concat!("failed to find an operation with operator ", stringify!($operator))),
         }
     );
+    (@try @double $operations:expr, $operator:ident) => (
+        match $operations.get_double(Operator::$operator) {
+            Some((value0, value1)) if is_i32!(value0) && is_i32!(value1) => {
+                Some((value0 as i32, value1 as i32))
+            },
+            Some(_) => raise!(concat!("found a malformed operation with operator ", stringify!($operator))),
+            _ => None,
+        }
+    );
 );
 
 impl Value for FontSet {
@@ -74,16 +83,36 @@ impl Value for FontSet {
                 }
             });
             local_dictionaries.push({
-                let (size, offset) = get!(@double dictionary, Private);
-                tape.jump(position + offset as u64)?;
-                let chunk = tape.take_given::<Vec<u8>>(size as usize)?;
-                Cursor::new(chunk).take::<Operations>()?
+                if cfg!(not(feature = "ignore-missing-operators")) {
+                    let (size, offset) = get!(@double dictionary, Private);
+                    tape.jump(position + offset as u64)?;
+                    let chunk = tape.take_given::<Vec<u8>>(size as usize)?;
+                    Cursor::new(chunk).take::<Operations>()?
+                } else {
+                    if let Some((size, offset)) = get!(@try @double dictionary, Private) {
+                        tape.jump(position + offset as u64)?;
+                        let chunk = tape.take_given::<Vec<u8>>(size as usize)?;
+                        Cursor::new(chunk).take::<Operations>()?
+                    } else {
+                        Default::default()
+                    }
+                }
             });
             local_subroutines.push({
-                let (_, mut offset) = get!(@double dictionary, Private);
-                offset += get!(@single &local_dictionaries[i], Subrs);
-                tape.jump(position + offset as u64)?;
-                tape.take()?
+                if cfg!(not(feature = "ignore-missing-operators")) {
+                    let (_, mut offset) = get!(@double dictionary, Private);
+                    offset += get!(@single &local_dictionaries[i], Subrs);
+                    tape.jump(position + offset as u64)?;
+                    tape.take()?
+                } else {
+                    if let Some((_, mut offset)) = get!(@try @double dictionary, Private) {
+                        offset += get!(@single &local_dictionaries[i], Subrs);
+                        tape.jump(position + offset as u64)?;
+                        tape.take()?
+                    } else {
+                        Default::default()
+                    }
+                }
             });
         }
         Ok(FontSet {
