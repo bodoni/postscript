@@ -16,12 +16,10 @@ macro_rules! operations(
 mod noto_sans {
     use postscript::Tape;
 
-    #[cfg(feature = "ignore-missing-operators")]
-    use crate::common::setup_font_set;
-    use crate::common::{setup, Fixture};
+    use crate::common::{setup, setup_font_set, Fixture};
 
-    #[cfg(feature = "ignore-missing-operators")]
     #[test]
+    #[cfg_attr(not(feature = "ignore-missing-operators"), should_panic)]
     fn char_strings() {
         let set = setup_font_set(Fixture::NotoSansJP);
         let table = &set.char_strings;
