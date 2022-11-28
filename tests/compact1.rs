@@ -65,6 +65,24 @@ mod noto_sans {
         let _ = ok!(ok!(tape.take::<Names>()).into());
         let table = ok!(ok!(tape.take::<Dictionaries>()).into());
         assert_eq!(table.len(), 1);
+        assert_eq!(
+            &*table[0],
+            &operations!(
+                CharStrings: [43287],
+                FDSelect: [42687],
+                Weight: [388],
+                FDArray: [43013],
+                UnderlinePosition: [-150],
+                CIDFontVersion: [2.002],
+                FamilyName: [393],
+                Notice: [391],
+                FullName: [392],
+                ROS: [394, 395, 0],
+                FontBBox: [-1002, -1048, 2928, 1808],
+                CIDCount: [65529],
+                CharSet: [7068],
+            )
+        );
     }
 }
 
