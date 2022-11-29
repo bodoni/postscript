@@ -22,9 +22,9 @@ mod noto_sans {
     #[cfg_attr(not(feature = "ignore-missing-operators"), should_panic)]
     fn char_strings() {
         let set = setup_font_set(Fixture::NotoSansJP);
-        let table = &set.char_strings;
-        assert_eq!(table.len(), 1);
-        assert_eq!(table[0].len(), 17810);
+        let tables = &set.char_strings;
+        assert_eq!(tables.len(), 1);
+        assert_eq!(tables[0].len(), 17810);
     }
 
     #[test]
@@ -94,9 +94,9 @@ mod source_serif {
         use postscript::compact1::CharSet;
 
         let set = setup_font_set(Fixture::SourceSerifPro);
-        let table = &set.char_sets;
-        assert_eq!(table.len(), 1);
-        match &table[0] {
+        let tables = &set.char_sets;
+        assert_eq!(tables.len(), 1);
+        match &tables[0] {
             &CharSet::Format1(..) => {}
             _ => unreachable!(),
         }
@@ -105,9 +105,9 @@ mod source_serif {
     #[test]
     fn char_strings() {
         let set = setup_font_set(Fixture::SourceSerifPro);
-        let table = &set.char_strings;
-        assert_eq!(table.len(), 1);
-        assert_eq!(table[0].len(), 547);
+        let tables = &set.char_strings;
+        assert_eq!(tables.len(), 1);
+        assert_eq!(tables[0].len(), 547);
     }
 
     #[test]
@@ -168,10 +168,10 @@ mod source_serif {
     #[test]
     fn local_dictionaries() {
         let set = setup_font_set(Fixture::SourceSerifPro);
-        let table = &set.local_dictionaries;
-        assert_eq!(table.len(), 1);
+        let tables = &set.local_dictionaries;
+        assert_eq!(tables.len(), 1);
         assert_eq!(
-            &*table[0],
+            &*tables[0],
             &operations!(
                 DefaultWidthX: [370],
                 FamilyOtherBlues: [-249, 10],
@@ -193,9 +193,9 @@ mod source_serif {
     #[test]
     fn local_subroutines() {
         let set = setup_font_set(Fixture::SourceSerifPro);
-        let table = &set.local_subroutines;
-        assert_eq!(table.len(), 1);
-        assert_eq!(table[0].len(), 180);
+        let tables = &set.local_subroutines;
+        assert_eq!(tables.len(), 1);
+        assert_eq!(tables[0].len(), 180);
     }
 
     #[test]
@@ -211,6 +211,7 @@ mod source_serif {
         let set = setup_font_set(Fixture::SourceSerifPro);
         let table = &set.strings;
         assert_eq!(table.len(), 322);
+        assert_eq!(ok!(table.get(0)), ".notdef");
         assert_eq!(ok!(table.get(175)), "Aring");
         assert_eq!(ok!(table.get(500)), "nine.tosf");
     }
