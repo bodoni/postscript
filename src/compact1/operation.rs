@@ -13,7 +13,10 @@ pub type Operation = (Operator, Vec<Operand>);
 
 /// A collection of operations.
 #[derive(Clone, Debug, Default)]
-pub struct Operations(pub HashMap<Operator, Vec<Operand>>);
+pub struct Operations {
+    pub mapping: HashMap<Operator, Vec<Operand>>,
+    pub ordering: Vec<Operator>,
+}
 
 impl Value for Operation {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
@@ -38,7 +41,7 @@ impl Operations {
     /// Return the operands of an operation.
     #[inline]
     pub fn get(&self, operator: Operator) -> Option<&[Operand]> {
-        match self.0.get(&operator) {
+        match self.mapping.get(&operator) {
             Some(operands) => Some(&*operands),
             _ => operator.default(),
         }
@@ -69,21 +72,23 @@ impl Operations {
     }
 }
 
-deref! { Operations::0 => HashMap<Operator, Vec<Operand>> }
+deref! { Operations::mapping => HashMap<Operator, Vec<Operand>> }
 
 impl Value for Operations {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
         use std::io::ErrorKind;
 
-        let mut map = HashMap::new();
+        let mut mapping = HashMap::new();
+        let mut ordering = vec![];
         loop {
             match tape.take() {
                 Ok((operator, operands)) => {
-                    map.insert(operator, operands);
+                    mapping.insert(operator, operands);
+                    ordering.push(operator);
                 }
                 Err(error) => {
                     if error.kind() == ErrorKind::UnexpectedEof {
-                        return Ok(Operations(map));
+                        return Ok(Operations { mapping, ordering });
                     } else {
                         return Err(error);
                     }

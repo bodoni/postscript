@@ -14,6 +14,7 @@ macro_rules! operations(
 );
 
 mod noto_sans {
+    use postscript::compact1::Operator;
     use postscript::Tape;
 
     use crate::common::{setup, setup_font_set, Fixture};
@@ -65,6 +66,7 @@ mod noto_sans {
         let _ = ok!(ok!(tape.take::<Names>()).into());
         let table = ok!(ok!(tape.take::<Dictionaries>()).into());
         assert_eq!(table.len(), 1);
+        assert_eq!(table[0].ordering[0], Operator::ROS);
         assert_eq!(
             &*table[0],
             &operations!(
@@ -120,6 +122,7 @@ mod source_serif {
         assert_eq!(encodings.len(), 1);
         match &encodings[0] {
             encoding @ &Encoding::Standard => {
+                assert_eq!(ok!(strings.get(ok!(encoding.get(0)))), ".notdef");
                 assert_eq!(ok!(strings.get(ok!(encoding.get(42)))), "asterisk");
             }
             _ => unreachable!(),
