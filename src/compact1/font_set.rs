@@ -83,36 +83,16 @@ impl Value for FontSet {
                 }
             });
             local_dictionaries.push({
-                if cfg!(not(feature = "ignore-missing-operators")) {
-                    let (size, offset) = get!(@double dictionary, Private);
-                    tape.jump(position + offset as u64)?;
-                    let chunk = tape.take_given::<Vec<u8>>(size as usize)?;
-                    Cursor::new(chunk).take::<Operations>()?
-                } else {
-                    if let Some((size, offset)) = get!(@try @double dictionary, Private) {
-                        tape.jump(position + offset as u64)?;
-                        let chunk = tape.take_given::<Vec<u8>>(size as usize)?;
-                        Cursor::new(chunk).take::<Operations>()?
-                    } else {
-                        Default::default()
-                    }
-                }
+                let (size, offset) = get!(@double dictionary, Private);
+                tape.jump(position + offset as u64)?;
+                let chunk = tape.take_given::<Vec<u8>>(size as usize)?;
+                Cursor::new(chunk).take::<Operations>()?
             });
             local_subroutines.push({
-                if cfg!(not(feature = "ignore-missing-operators")) {
-                    let (_, mut offset) = get!(@double dictionary, Private);
-                    offset += get!(@single &local_dictionaries[i], Subrs);
-                    tape.jump(position + offset as u64)?;
-                    tape.take()?
-                } else {
-                    if let Some((_, mut offset)) = get!(@try @double dictionary, Private) {
-                        offset += get!(@single &local_dictionaries[i], Subrs);
-                        tape.jump(position + offset as u64)?;
-                        tape.take()?
-                    } else {
-                        Default::default()
-                    }
-                }
+                let (_, mut offset) = get!(@double dictionary, Private);
+                offset += get!(@single &local_dictionaries[i], Subrs);
+                tape.jump(position + offset as u64)?;
+                tape.take()?
             });
         }
         Ok(FontSet {

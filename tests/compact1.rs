@@ -20,7 +20,6 @@ mod noto_sans {
     use crate::common::{setup, setup_font_set, Fixture};
 
     #[test]
-    #[cfg_attr(not(feature = "ignore-missing-operators"), should_panic)]
     fn char_strings() {
         let set = setup_font_set(Fixture::NotoSansJP);
         let tables = &set.char_strings;

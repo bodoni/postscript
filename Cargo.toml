@@ -13,9 +13,5 @@ categories = ["parsing"]
 keywords = ["font", "postscript", "typeface", "typography"]
 exclude = ["tests/fixtures/*"]
 
-[features]
-# https://github.com/google/fonts/issues/5620
-ignore-missing-operators = []
-
 [dev-dependencies]
 random = "0.12"
