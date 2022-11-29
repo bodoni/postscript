@@ -1,3 +1,5 @@
+//! The font sets.
+
 use std::io::Cursor;
 
 use crate::compact1::index::{CharStrings, Dictionaries, Names, Strings, Subroutines};
@@ -13,10 +15,29 @@ pub struct FontSet {
     pub encodings: Vec<Encoding>,
     pub char_sets: Vec<CharSet>,
     pub char_strings: Vec<CharStrings>,
-    pub global_dictionaries: Vec<Operations>,
-    pub global_subroutines: Subroutines,
-    pub local_dictionaries: Vec<Operations>,
-    pub local_subroutines: Vec<Subroutines>,
+    pub operations: Vec<Operations>,
+    pub subroutines: Subroutines,
+    pub records: Vec<Record>,
+}
+
+/// A font record.
+#[derive(Clone, Debug)]
+pub enum Record {
+    CharacterIDKeyed(CharacterIDKeyedRecord),
+    CharacterNameKeyed(CharacterNameKeyedRecord),
+}
+
+/// A character-ID-keyed font record.
+#[derive(Clone, Debug)]
+pub struct CharacterIDKeyedRecord {
+    pub operations: Vec<Operations>,
+}
+
+/// A character-name-keyed font record.
+#[derive(Clone, Debug)]
+pub struct CharacterNameKeyedRecord {
+    pub operations: Operations,
+    pub subroutines: Subroutines,
 }
 
 macro_rules! is_i32(($value:ident) => ($value as i32 as Operand == $value));
@@ -46,18 +67,14 @@ impl Value for FontSet {
         let header = tape.take::<Header>()?;
         tape.jump(position + header.header_size as u64)?;
         let names = tape.take::<Names>()?.into()?;
-        let global_dictionaries = tape.take::<Dictionaries>()?.into()?;
+        let operations = tape.take::<Dictionaries>()?.into()?;
         let strings = tape.take::<Strings>()?;
-        let global_subroutines = tape.take::<Subroutines>()?;
+        let subroutines = tape.take::<Subroutines>()?;
         let mut encodings = vec![];
         let mut char_sets = vec![];
         let mut char_strings = vec![];
-        let mut local_dictionaries = vec![];
-        let mut local_subroutines = vec![];
-        for (i, dictionary) in global_dictionaries.iter().enumerate() {
-            if let Some(Operator::ROS) = dictionary.ordering.get(0) {
-                raise!("CID-keyed fonts are not supported yet");
-            }
+        let mut records = vec![];
+        for (i, dictionary) in operations.iter().enumerate() {
             encodings.push(match get!(@single dictionary, Encoding) {
                 0 => Encoding::Standard,
                 1 => Encoding::Expert,
@@ -76,30 +93,37 @@ impl Value for FontSet {
                     tape.take_given(char_strings[i].len())?
                 }
             });
-            local_dictionaries.push({
-                let (size, offset) = get!(@double dictionary, Private);
+            if let Some(Operator::ROS) = dictionary.ordering.get(0) {
+                let offset = get!(@single dictionary, FDArray);
+                tape.jump(position + offset as u64)?;
+                let operations = tape.take::<Dictionaries>()?.into()?;
+                records.push(Record::CharacterIDKeyed(CharacterIDKeyedRecord {
+                    operations,
+                }));
+            } else {
+                let (size, mut offset) = get!(@double dictionary, Private);
                 tape.jump(position + offset as u64)?;
                 let chunk = tape.take_given::<Vec<u8>>(size as usize)?;
-                Cursor::new(chunk).take::<Operations>()?
-            });
-            local_subroutines.push({
-                let (_, mut offset) = get!(@double dictionary, Private);
-                offset += get!(@single &local_dictionaries[i], Subrs);
+                let operations = Cursor::new(chunk).take::<Operations>()?;
+                offset += get!(@single operations, Subrs);
                 tape.jump(position + offset as u64)?;
-                tape.take()?
-            });
+                let subroutines = tape.take()?;
+                records.push(Record::CharacterNameKeyed(CharacterNameKeyedRecord {
+                    operations,
+                    subroutines,
+                }));
+            }
         }
         Ok(FontSet {
-            header: header,
-            names: names,
-            strings: strings,
-            encodings: encodings,
-            char_sets: char_sets,
-            char_strings: char_strings,
-            global_dictionaries: global_dictionaries,
-            global_subroutines: global_subroutines,
-            local_dictionaries: local_dictionaries,
-            local_subroutines: local_subroutines,
+            header,
+            names,
+            strings,
+            encodings,
+            char_sets,
+            char_strings,
+            operations,
+            subroutines,
+            records,
         })
     }
 }

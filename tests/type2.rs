@@ -1,5 +1,6 @@
 extern crate postscript;
 
+use postscript::compact1::font_set::Record;
 use postscript::type2::Program;
 
 #[macro_use]
@@ -19,8 +20,11 @@ macro_rules! operations(
 #[test]
 fn program_all() {
     let set = setup_font_set(Fixture::SourceSerifPro);
-    let global = &set.global_subroutines;
-    let local = &set.local_subroutines[0];
+    let global = &set.subroutines;
+    let local = match &set.records[0] {
+        Record::CharacterNameKeyed(ref record) => &*record.subroutines,
+        _ => unreachable!(),
+    };
     for code in set.char_strings[0].iter() {
         let mut program = Program::new(code, global, local);
         while let Some(..) = ok!(program.next()) {}
@@ -31,8 +35,11 @@ fn program_all() {
 fn program_one() {
     let set = setup_font_set(Fixture::SourceSerifPro);
     let code = &set.char_strings[0][134];
-    let global = &set.global_subroutines;
-    let local = &set.local_subroutines[0];
+    let global = &set.subroutines;
+    let local = match &set.records[0] {
+        Record::CharacterNameKeyed(ref record) => &*record.subroutines,
+        _ => unreachable!(),
+    };
     let mut program = Program::new(code, global, local);
     let mut operations = vec![];
     while let Some(operation) = ok!(program.next()) {

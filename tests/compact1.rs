@@ -55,7 +55,7 @@ mod noto_sans {
     }
 
     #[test]
-    fn global_dictionaries() {
+    fn operations() {
         use postscript::compact1::index::{Dictionaries, Names};
         use postscript::compact1::Header;
 
@@ -83,6 +83,19 @@ mod noto_sans {
         );
         assert_eq!(table[0].mapping, operations.mapping);
         assert_eq!(table[0].ordering, operations.ordering);
+    }
+
+    #[test]
+    fn records() {
+        use postscript::compact1::font_set::Record;
+
+        let set = setup_font_set(Fixture::NotoSansJP);
+        let tables = &set.records;
+        assert_eq!(tables.len(), 1);
+        match &tables[0] {
+            Record::CharacterIDKeyed(_) => {}
+            _ => unreachable!(),
+        }
     }
 }
 
@@ -128,9 +141,19 @@ mod source_serif {
     }
 
     #[test]
-    fn global_dictionaries() {
+    fn header() {
         let set = setup_font_set(Fixture::SourceSerifPro);
-        let table = &set.global_dictionaries;
+        let table = &set.header;
+        assert_eq!(table.major, 1);
+        assert_eq!(table.minor, 0);
+        assert_eq!(table.header_size, 4);
+        assert_eq!(table.offset_size, 2);
+    }
+
+    #[test]
+    fn operations() {
+        let set = setup_font_set(Fixture::SourceSerifPro);
+        let table = &set.operations;
         assert_eq!(table.len(), 1);
         let operations = operations!(
             Version: [709],
@@ -149,26 +172,19 @@ mod source_serif {
     }
 
     #[test]
-    fn global_subroutines() {
+    fn names() {
         let set = setup_font_set(Fixture::SourceSerifPro);
-        let table = &set.global_subroutines;
-        assert_eq!(table.len(), 181);
+        let table = &set.names;
+        assert_eq!(table.len(), 1);
+        assert_eq!(&table[0], "SourceSerifPro-Regular");
     }
 
     #[test]
-    fn header() {
-        let set = setup_font_set(Fixture::SourceSerifPro);
-        let table = &set.header;
-        assert_eq!(table.major, 1);
-        assert_eq!(table.minor, 0);
-        assert_eq!(table.header_size, 4);
-        assert_eq!(table.offset_size, 2);
-    }
+    fn records() {
+        use postscript::compact1::font_set::Record;
 
-    #[test]
-    fn local_dictionaries() {
         let set = setup_font_set(Fixture::SourceSerifPro);
-        let tables = &set.local_dictionaries;
+        let tables = &set.records;
         assert_eq!(tables.len(), 1);
         let operations = operations!(
             BlueValues: [-20, 20, 473, 18, 34, 15, 104, 15, 10, 20, 40, 20],
@@ -185,24 +201,14 @@ mod source_serif {
             NominalWidthX: [604],
             Subrs: [65],
         );
-        assert_eq!(tables[0].mapping, operations.mapping);
-        assert_eq!(tables[0].ordering, operations.ordering);
-    }
-
-    #[test]
-    fn local_subroutines() {
-        let set = setup_font_set(Fixture::SourceSerifPro);
-        let tables = &set.local_subroutines;
-        assert_eq!(tables.len(), 1);
-        assert_eq!(tables[0].len(), 180);
-    }
-
-    #[test]
-    fn names() {
-        let set = setup_font_set(Fixture::SourceSerifPro);
-        let table = &set.names;
-        assert_eq!(table.len(), 1);
-        assert_eq!(&table[0], "SourceSerifPro-Regular");
+        match &tables[0] {
+            Record::CharacterNameKeyed(ref record) => {
+                assert_eq!(record.operations.mapping, operations.mapping);
+                assert_eq!(record.operations.ordering, operations.ordering);
+                assert_eq!(record.subroutines.len(), 180);
+            }
+            _ => unreachable!(),
+        }
     }
 
     #[test]
@@ -213,5 +219,12 @@ mod source_serif {
         assert_eq!(ok!(table.get(0)), ".notdef");
         assert_eq!(ok!(table.get(175)), "Aring");
         assert_eq!(ok!(table.get(500)), "nine.tosf");
+    }
+
+    #[test]
+    fn subroutines() {
+        let set = setup_font_set(Fixture::SourceSerifPro);
+        let table = &set.subroutines;
+        assert_eq!(table.len(), 181);
     }
 }
