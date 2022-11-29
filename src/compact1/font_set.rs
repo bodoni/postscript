@@ -38,15 +38,6 @@ macro_rules! get(
             _ => raise!(concat!("failed to find an operation with operator ", stringify!($operator))),
         }
     );
-    (@try @double $operations:expr, $operator:ident) => (
-        match $operations.get_double(Operator::$operator) {
-            Some((value0, value1)) if is_i32!(value0) && is_i32!(value1) => {
-                Some((value0 as i32, value1 as i32))
-            },
-            Some(_) => raise!(concat!("found a malformed operation with operator ", stringify!($operator))),
-            _ => None,
-        }
-    );
 );
 
 impl Value for FontSet {
@@ -64,6 +55,9 @@ impl Value for FontSet {
         let mut local_dictionaries = vec![];
         let mut local_subroutines = vec![];
         for (i, dictionary) in global_dictionaries.iter().enumerate() {
+            if let Some(Operator::ROS) = dictionary.ordering.get(0) {
+                raise!("CID-keyed fonts are not supported yet");
+            }
             encodings.push(match get!(@single dictionary, Encoding) {
                 0 => Encoding::Standard,
                 1 => Encoding::Expert,
