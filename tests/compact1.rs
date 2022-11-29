@@ -5,16 +5,17 @@ mod common;
 
 macro_rules! operations(
     ($($operator:ident: [$($operand:expr),*],)*) => ({
-        use postscript::compact1::{Operand, Operator};
+        use postscript::compact1::{Operand, Operations, Operator};
         use std::collections::HashMap;
-        let mut operations = HashMap::new();
-        $(operations.insert(Operator::$operator, vec![$($operand as Operand),*]);)*
-        operations
+        let mut mapping = HashMap::new();
+        let mut ordering = vec![];
+        $(mapping.insert(Operator::$operator, vec![$($operand as Operand),*]);)*
+        $(ordering.push(Operator::$operator);)*
+        Operations { mapping, ordering }
     });
 );
 
 mod noto_sans {
-    use postscript::compact1::Operator;
     use postscript::Tape;
 
     use crate::common::{setup, setup_font_set, Fixture};
@@ -65,25 +66,23 @@ mod noto_sans {
         let _ = ok!(ok!(tape.take::<Names>()).into());
         let table = ok!(ok!(tape.take::<Dictionaries>()).into());
         assert_eq!(table.len(), 1);
-        assert_eq!(table[0].ordering[0], Operator::ROS);
-        assert_eq!(
-            &*table[0],
-            &operations!(
-                CharStrings: [43287],
-                FDSelect: [42687],
-                Weight: [388],
-                FDArray: [43013],
-                UnderlinePosition: [-150],
-                CIDFontVersion: [2.002],
-                FamilyName: [393],
-                Notice: [391],
-                FullName: [392],
-                ROS: [394, 395, 0],
-                FontBBox: [-1002, -1048, 2928, 1808],
-                CIDCount: [65529],
-                CharSet: [7068],
-            )
+        let operations = operations!(
+            ROS: [394, 395, 0],
+            Notice: [391],
+            FullName: [392],
+            FamilyName: [393],
+            Weight: [388],
+            UnderlinePosition: [-150],
+            FontBBox: [-1002, -1048, 2928, 1808],
+            CIDFontVersion: [2.002],
+            CIDCount: [65529],
+            CharSet: [7068],
+            CharStrings: [43287],
+            FDSelect: [42687],
+            FDArray: [43013],
         );
+        assert_eq!(table[0].mapping, operations.mapping);
+        assert_eq!(table[0].ordering, operations.ordering);
     }
 }
 
@@ -133,21 +132,20 @@ mod source_serif {
         let set = setup_font_set(Fixture::SourceSerifPro);
         let table = &set.global_dictionaries;
         assert_eq!(table.len(), 1);
-        assert_eq!(
-            &*table[0],
-            &operations!(
-                Version: [709],
-                Notice: [710],
-                Copyright: [711],
-                FullName: [712],
-                FamilyName: [712],
-                Weight: [388],
-                FontBBox: [-178, -335, 1138, 918],
-                CharSet: [8340],
-                CharStrings: [8917],
-                Private: [65, 33671],
-            )
+        let operations = operations!(
+            Version: [709],
+            Notice: [710],
+            Copyright: [711],
+            FullName: [712],
+            FamilyName: [712],
+            Weight: [388],
+            FontBBox: [-178, -335, 1138, 918],
+            CharSet: [8340],
+            CharStrings: [8917],
+            Private: [65, 33671],
         );
+        assert_eq!(table[0].mapping, operations.mapping);
+        assert_eq!(table[0].ordering, operations.ordering);
     }
 
     #[test]
@@ -172,24 +170,23 @@ mod source_serif {
         let set = setup_font_set(Fixture::SourceSerifPro);
         let tables = &set.local_dictionaries;
         assert_eq!(tables.len(), 1);
-        assert_eq!(
-            &*tables[0],
-            &operations!(
-                DefaultWidthX: [370],
-                FamilyOtherBlues: [-249, 10],
-                BlueValues: [-20, 20, 473, 18, 34, 15, 104, 15, 10, 20, 40, 20],
-                StemSnapH: [41, 15],
-                StdHW: [41],
-                NominalWidthX: [604],
-                StdVW: [85],
-                OtherBlues: [-249, 10],
-                BlueFuzz: [0],
-                Subrs: [65],
-                FamilyBlues: [-20, 20, 473, 18, 34, 15, 104, 15, 10, 20, 40, 20],
-                BlueScale: [0.0375],
-                StemSnapV: [85, 10],
-            )
+        let operations = operations!(
+            BlueValues: [-20, 20, 473, 18, 34, 15, 104, 15, 10, 20, 40, 20],
+            OtherBlues: [-249, 10],
+            FamilyBlues: [-20, 20, 473, 18, 34, 15, 104, 15, 10, 20, 40, 20],
+            FamilyOtherBlues: [-249, 10],
+            BlueScale: [0.0375],
+            BlueFuzz: [0],
+            StdHW: [41],
+            StdVW: [85],
+            StemSnapH: [41, 15],
+            StemSnapV: [85, 10],
+            DefaultWidthX: [370],
+            NominalWidthX: [604],
+            Subrs: [65],
         );
+        assert_eq!(tables[0].mapping, operations.mapping);
+        assert_eq!(tables[0].ordering, operations.ordering);
     }
 
     #[test]
