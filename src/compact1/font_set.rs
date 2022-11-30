@@ -93,7 +93,7 @@ impl Value for FontSet {
                     tape.take_given(char_strings[i].len())?
                 }
             });
-            if let Some(Operator::ROS) = dictionary.ordering.get(0) {
+            if let Some((Operator::ROS, _)) = <[_]>::get(dictionary, 0) {
                 let offset = get!(@single dictionary, FDArray);
                 tape.jump(position + offset as u64)?;
                 let operations = tape.take::<Dictionaries>()?.into()?;

@@ -6,12 +6,7 @@ mod common;
 macro_rules! operations(
     ($($operator:ident: [$($operand:expr),*],)*) => ({
         use postscript::compact1::{Operand, Operations, Operator};
-        use std::collections::HashMap;
-        let mut mapping = HashMap::new();
-        let mut ordering = vec![];
-        $(mapping.insert(Operator::$operator, vec![$($operand as Operand),*]);)*
-        $(ordering.push(Operator::$operator);)*
-        Operations { mapping, ordering }
+        Operations(vec![$((Operator::$operator, vec![$($operand as Operand),*]),)*])
     });
 );
 
@@ -81,8 +76,7 @@ mod noto_sans {
             FDSelect: [42687],
             FDArray: [43013],
         );
-        assert_eq!(table[0].mapping, operations.mapping);
-        assert_eq!(table[0].ordering, operations.ordering);
+        assert_eq!(table[0].0, operations.0);
     }
 
     #[test]
@@ -167,8 +161,7 @@ mod source_serif {
             CharStrings: [8917],
             Private: [65, 33671],
         );
-        assert_eq!(table[0].mapping, operations.mapping);
-        assert_eq!(table[0].ordering, operations.ordering);
+        assert_eq!(table[0].0, operations.0);
     }
 
     #[test]
@@ -203,8 +196,7 @@ mod source_serif {
         );
         match &tables[0] {
             Record::CharacterNameKeyed(ref record) => {
-                assert_eq!(record.operations.mapping, operations.mapping);
-                assert_eq!(record.operations.ordering, operations.ordering);
+                assert_eq!(record.operations.0, operations.0);
                 assert_eq!(record.subroutines.len(), 180);
             }
             _ => unreachable!(),

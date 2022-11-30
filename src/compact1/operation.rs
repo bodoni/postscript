@@ -1,7 +1,5 @@
 //! The operations.
 
-use std::collections::HashMap;
-
 use crate::compact1::number;
 use crate::{Result, Tape, Value};
 
@@ -13,10 +11,9 @@ pub type Operation = (Operator, Vec<Operand>);
 
 /// A collection of operations.
 #[derive(Clone, Debug, Default)]
-pub struct Operations {
-    pub mapping: HashMap<Operator, Vec<Operand>>,
-    pub ordering: Vec<Operator>,
-}
+pub struct Operations(pub Vec<Operation>);
+
+deref! { Operations::0 => Vec<Operation> }
 
 impl Value for Operation {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
@@ -41,8 +38,8 @@ impl Operations {
     /// Return the operands of an operation.
     #[inline]
     pub fn get(&self, operator: Operator) -> Option<&[Operand]> {
-        match self.mapping.get(&operator) {
-            Some(operands) => Some(&*operands),
+        match self.0.iter().position(|operation| operation.0 == operator) {
+            Some(index) => Some(&self.0[index].1),
             _ => operator.default(),
         }
     }
@@ -72,23 +69,19 @@ impl Operations {
     }
 }
 
-deref! { Operations::mapping => HashMap<Operator, Vec<Operand>> }
-
 impl Value for Operations {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
         use std::io::ErrorKind;
 
-        let mut mapping = HashMap::new();
-        let mut ordering = vec![];
+        let mut records = vec![];
         loop {
             match tape.take() {
                 Ok((operator, operands)) => {
-                    mapping.insert(operator, operands);
-                    ordering.push(operator);
+                    records.push((operator, operands));
                 }
                 Err(error) => {
                     if error.kind() == ErrorKind::UnexpectedEof {
-                        return Ok(Operations { mapping, ordering });
+                        return Ok(Operations(records));
                     } else {
                         return Err(error);
                     }
