@@ -3,7 +3,7 @@
 use std::io::Cursor;
 
 use crate::compact1::index::{CharStrings, Dictionaries, Names, Strings, Subroutines};
-use crate::compact1::{CharSet, Encoding, Header, Operand, Operations, Operator};
+use crate::compact1::{CharSet, Encoding, Header, Number, Operations, Operator, StringID};
 use crate::{Result, Tape, Value};
 
 /// A font set.
@@ -30,6 +30,9 @@ pub enum Record {
 /// A character-ID-keyed font record.
 #[derive(Clone, Debug)]
 pub struct CharacterIDKeyedRecord {
+    pub registry: StringID,
+    pub ordering: StringID,
+    pub supplement: Number,
     pub operations: Vec<Operations>,
 }
 
@@ -40,21 +43,17 @@ pub struct CharacterNameKeyedRecord {
     pub subroutines: Subroutines,
 }
 
-macro_rules! is_i32(($value:ident) => ($value as i32 as Operand == $value));
-
 macro_rules! get(
     (@single $operations:expr, $operator:ident) => (
         match $operations.get_single(Operator::$operator) {
-            Some(value) if is_i32!(value) => value as i32,
+            Some(Number::Integer(value)) => value,
             Some(_) => raise!(concat!("found a malformed operation with operator ", stringify!($operator))),
             _ => raise!(concat!("failed to find an operation with operator ", stringify!($operator))),
         }
     );
     (@double $operations:expr, $operator:ident) => (
         match $operations.get_double(Operator::$operator) {
-            Some((value0, value1)) if is_i32!(value0) && is_i32!(value1) => {
-                (value0 as i32, value1 as i32)
-            },
+            Some((Number::Integer(value0), Number::Integer(value1))) => (value0, value1),
             Some(_) => raise!(concat!("found a malformed operation with operator ", stringify!($operator))),
             _ => raise!(concat!("failed to find an operation with operator ", stringify!($operator))),
         }
@@ -93,12 +92,18 @@ impl Value for FontSet {
                     tape.take_given(char_strings[i].len())?
                 }
             });
-            if let Some((Operator::ROS, _)) = <[_]>::get(dictionary, 0) {
+            if let Some((Operator::ROS, operands)) = <[_]>::get(dictionary, 0) {
+                if operands.len() != 3 {
+                    raise!("found a malformed character-ID-keyed font");
+                }
                 let offset = get!(@single dictionary, FDArray);
                 tape.jump(position + offset as u64)?;
                 let operations = tape.take::<Dictionaries>()?.into()?;
                 records.push(Record::CharacterIDKeyed(CharacterIDKeyedRecord {
-                    operations,
+                    registry: operands[0].try_into()?,
+                    ordering: operands[1].try_into()?,
+                    supplement: operands[2],
+                    operations: operations,
                 }));
             } else {
                 let (size, mut offset) = get!(@double dictionary, Private);

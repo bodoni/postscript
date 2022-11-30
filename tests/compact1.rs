@@ -5,8 +5,8 @@ mod common;
 
 macro_rules! operations(
     ($($operator:ident: [$($operand:expr),*],)*) => ({
-        use postscript::compact1::{Operand, Operations, Operator};
-        Operations(vec![$((Operator::$operator, vec![$($operand as Operand),*]),)*])
+        use postscript::compact1::{Operations, Operator};
+        Operations(vec![$((Operator::$operator, vec![$($operand.into()),*]),)*])
     });
 );
 
@@ -82,12 +82,18 @@ mod noto_sans {
     #[test]
     fn records() {
         use postscript::compact1::font_set::Record;
+        use postscript::compact1::Number;
 
         let set = setup_font_set(Fixture::NotoSansJP);
-        let tables = &set.records;
-        assert_eq!(tables.len(), 1);
-        match &tables[0] {
-            Record::CharacterIDKeyed(_) => {}
+        let records = &set.records;
+        let strings = &set.strings;
+        assert_eq!(records.len(), 1);
+        match &records[0] {
+            Record::CharacterIDKeyed(ref record) => {
+                assert_eq!(ok!(strings.get(record.registry)), "Adobe");
+                assert_eq!(ok!(strings.get(record.ordering)), "Identity");
+                assert_eq!(record.supplement, Number::Integer(0));
+            }
             _ => unreachable!(),
         }
     }
