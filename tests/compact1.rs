@@ -82,20 +82,65 @@ mod noto_sans {
     #[test]
     fn records() {
         use postscript::compact1::font_set::Record;
-        use postscript::compact1::Number;
+        use postscript::compact1::{Number, Operator};
 
         let set = setup_font_set(Fixture::NotoSansJP);
         let records = &set.records;
         let strings = &set.strings;
         assert_eq!(records.len(), 1);
-        match &records[0] {
-            Record::CharacterIDKeyed(ref record) => {
-                assert_eq!(ok!(strings.get(record.registry)), "Adobe");
-                assert_eq!(ok!(strings.get(record.ordering)), "Identity");
-                assert_eq!(record.supplement, Number::Integer(0));
-            }
+        let record = match &records[0] {
+            Record::CharacterIDKeyed(ref record) => record,
             _ => unreachable!(),
-        }
+        };
+        assert_eq!(ok!(strings.get(record.registry)), "Adobe");
+        assert_eq!(ok!(strings.get(record.ordering)), "Identity");
+        assert_eq!(record.supplement, Number::Integer(0));
+        assert_eq!(record.operations.len(), 18);
+        let operations = operations!(
+            FontName: [396],
+            Private: [32, 3978751],
+        );
+        assert_eq!(record.operations[0].0, operations.0);
+        assert_eq!(
+            ok!(strings.get(ok!(record.operations[0][0].1[0].try_into()))),
+            "NotoSansJP-Regular-Alphabetic",
+        );
+        assert_eq!(record.records.len(), 18);
+        assert_eq!(
+            record
+                .records
+                .iter()
+                .filter(|record| record.operations.get(Operator::Subrs).is_some())
+                .count(),
+            14,
+        );
+        assert_eq!(
+            record
+                .records
+                .iter()
+                .filter(|record| record.subroutines.len() > 0)
+                .count(),
+            14,
+        );
+        let operations = operations!(
+            BlueValues: [-13, 13, 544, 13, 178, 12],
+            OtherBlues: [-250, 21],
+            StdHW: [78],
+            StdVW: [85],
+            StemSnapH: [78, 33],
+            StemSnapV: [85, 10],
+            DefaultWidthX: [1000],
+            Subrs: [32],
+        );
+        assert_eq!(record.records[0].operations.0, operations.0);
+        let operations = operations!(
+            BlueValues: [-250, 0, 1350, 0],
+            StdHW: [78],
+            StdVW: [61],
+            LanguageGroup: [1],
+            DefaultWidthX: [500],
+        );
+        assert_eq!(record.records[7].operations.0, operations.0);
     }
 }
 

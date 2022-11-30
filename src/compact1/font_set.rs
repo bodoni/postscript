@@ -20,23 +20,31 @@ pub struct FontSet {
     pub records: Vec<Record>,
 }
 
-/// A font record.
+/// A record in a font set.
 #[derive(Clone, Debug)]
 pub enum Record {
     CharacterIDKeyed(CharacterIDKeyedRecord),
     CharacterNameKeyed(CharacterNameKeyedRecord),
 }
 
-/// A character-ID-keyed font record.
+/// A character-ID-keyed record in a font set.
 #[derive(Clone, Debug)]
 pub struct CharacterIDKeyedRecord {
     pub registry: StringID,
     pub ordering: StringID,
     pub supplement: Number,
     pub operations: Vec<Operations>,
+    pub records: Vec<CharacterIDKeyedRecordRecord>,
 }
 
-/// A character-name-keyed font record.
+/// A record in a character-ID-keyed record in a font set.
+#[derive(Clone, Debug)]
+pub struct CharacterIDKeyedRecordRecord {
+    pub operations: Operations,
+    pub subroutines: Subroutines,
+}
+
+/// A character-name-keyed record in a font set.
 #[derive(Clone, Debug)]
 pub struct CharacterNameKeyedRecord {
     pub operations: Operations,
@@ -49,6 +57,13 @@ macro_rules! get(
             Some(Number::Integer(value)) => value,
             Some(_) => raise!(concat!("found a malformed operation with operator ", stringify!($operator))),
             _ => raise!(concat!("failed to find an operation with operator ", stringify!($operator))),
+        }
+    );
+    (@try @single $operations:expr, $operator:ident) => (
+        match $operations.get_single(Operator::$operator) {
+            Some(Number::Integer(value)) => Some(value),
+            Some(_) => raise!(concat!("found a malformed operation with operator ", stringify!($operator))),
+            _ => None,
         }
     );
     (@double $operations:expr, $operator:ident) => (
@@ -135,11 +150,38 @@ impl<'l> Walue<'l> for CharacterIDKeyedRecord {
         let offset = get!(@single dictionary, FDArray);
         tape.jump(position + offset as u64)?;
         let operations = tape.take::<Dictionaries>()?.into()?;
+        let mut records = vec![];
+        for dictionary in operations.iter() {
+            records.push(tape.take_given((position, dictionary))?);
+        }
         Ok(CharacterIDKeyedRecord {
             registry: operands[0].try_into()?,
             ordering: operands[1].try_into()?,
             supplement: operands[2],
             operations: operations,
+            records: records,
+        })
+    }
+}
+
+impl<'l> Walue<'l> for CharacterIDKeyedRecordRecord {
+    type Parameter = (u64, &'l Operations);
+
+    fn read<T: Tape>(tape: &mut T, (position, dictionary): Self::Parameter) -> Result<Self> {
+        let (size, offset) = get!(@double dictionary, Private);
+        tape.jump(position + offset as u64)?;
+        let chunk = tape.take_given::<Vec<u8>>(size as usize)?;
+        let operations = Cursor::new(chunk).take::<Operations>()?;
+        let subroutines = match get!(@try @single operations, Subrs) {
+            Some(another_offset) => {
+                tape.jump(position + offset as u64 + another_offset as u64)?;
+                tape.take()?
+            }
+            _ => Default::default(),
+        };
+        Ok(CharacterIDKeyedRecordRecord {
+            operations,
+            subroutines,
         })
     }
 }
