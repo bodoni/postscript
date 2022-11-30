@@ -6,7 +6,7 @@ index! {
     pub CharStrings
 }
 
-impl Walue for CharStrings {
+impl Walue<'static> for CharStrings {
     type Parameter = i32;
 
     fn read<T: Tape>(tape: &mut T, format: i32) -> Result<Self> {

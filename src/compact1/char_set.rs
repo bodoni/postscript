@@ -49,7 +49,7 @@ impl CharSet {
     }
 }
 
-impl Walue for CharSet {
+impl Walue<'static> for CharSet {
     type Parameter = usize;
 
     fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
@@ -62,7 +62,7 @@ impl Walue for CharSet {
     }
 }
 
-impl Walue for CharSet0 {
+impl Walue<'static> for CharSet0 {
     type Parameter = usize;
 
     fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
@@ -81,7 +81,7 @@ impl Walue for CharSet0 {
     }
 }
 
-impl Walue for CharSet1 {
+impl Walue<'static> for CharSet1 {
     type Parameter = usize;
 
     fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {

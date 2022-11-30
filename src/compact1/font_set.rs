@@ -4,7 +4,7 @@ use std::io::Cursor;
 
 use crate::compact1::index::{CharStrings, Dictionaries, Names, Strings, Subroutines};
 use crate::compact1::{CharSet, Encoding, Header, Number, Operations, Operator, StringID};
-use crate::{Result, Tape, Value};
+use crate::{Result, Tape, Value, Walue};
 
 /// A font set.
 #[derive(Clone, Debug)]
@@ -92,32 +92,7 @@ impl Value for FontSet {
                     tape.take_given(char_strings[i].len())?
                 }
             });
-            if let Some((Operator::ROS, operands)) = <[_]>::get(dictionary, 0) {
-                if operands.len() != 3 {
-                    raise!("found a malformed character-ID-keyed font");
-                }
-                let offset = get!(@single dictionary, FDArray);
-                tape.jump(position + offset as u64)?;
-                let operations = tape.take::<Dictionaries>()?.into()?;
-                records.push(Record::CharacterIDKeyed(CharacterIDKeyedRecord {
-                    registry: operands[0].try_into()?,
-                    ordering: operands[1].try_into()?,
-                    supplement: operands[2],
-                    operations: operations,
-                }));
-            } else {
-                let (size, mut offset) = get!(@double dictionary, Private);
-                tape.jump(position + offset as u64)?;
-                let chunk = tape.take_given::<Vec<u8>>(size as usize)?;
-                let operations = Cursor::new(chunk).take::<Operations>()?;
-                offset += get!(@single operations, Subrs);
-                tape.jump(position + offset as u64)?;
-                let subroutines = tape.take()?;
-                records.push(Record::CharacterNameKeyed(CharacterNameKeyedRecord {
-                    operations,
-                    subroutines,
-                }));
-            }
+            records.push(tape.take_given((position, dictionary))?);
         }
         Ok(FontSet {
             header,
@@ -129,6 +104,60 @@ impl Value for FontSet {
             operations,
             subroutines,
             records,
+        })
+    }
+}
+
+impl<'l> Walue<'l> for Record {
+    type Parameter = (u64, &'l Operations);
+
+    fn read<T: Tape>(tape: &mut T, (position, dictionary): Self::Parameter) -> Result<Self> {
+        if let Some((Operator::ROS, _)) = <[_]>::get(dictionary, 0) {
+            Ok(Record::CharacterIDKeyed(
+                tape.take_given((position, dictionary))?,
+            ))
+        } else {
+            Ok(Record::CharacterNameKeyed(
+                tape.take_given((position, dictionary))?,
+            ))
+        }
+    }
+}
+
+impl<'l> Walue<'l> for CharacterIDKeyedRecord {
+    type Parameter = (u64, &'l Operations);
+
+    fn read<T: Tape>(tape: &mut T, (position, dictionary): Self::Parameter) -> Result<Self> {
+        let operands = match <[_]>::get(dictionary, 0) {
+            Some((Operator::ROS, operands)) if operands.len() == 3 => operands,
+            _ => raise!("found a malformed character-ID-keyed font"),
+        };
+        let offset = get!(@single dictionary, FDArray);
+        tape.jump(position + offset as u64)?;
+        let operations = tape.take::<Dictionaries>()?.into()?;
+        Ok(CharacterIDKeyedRecord {
+            registry: operands[0].try_into()?,
+            ordering: operands[1].try_into()?,
+            supplement: operands[2],
+            operations: operations,
+        })
+    }
+}
+
+impl<'l> Walue<'l> for CharacterNameKeyedRecord {
+    type Parameter = (u64, &'l Operations);
+
+    fn read<T: Tape>(tape: &mut T, (position, dictionary): Self::Parameter) -> Result<Self> {
+        let (size, mut offset) = get!(@double dictionary, Private);
+        tape.jump(position + offset as u64)?;
+        let chunk = tape.take_given::<Vec<u8>>(size as usize)?;
+        let operations = Cursor::new(chunk).take::<Operations>()?;
+        offset += get!(@single operations, Subrs);
+        tape.jump(position + offset as u64)?;
+        let subroutines = tape.take()?;
+        Ok(CharacterNameKeyedRecord {
+            operations,
+            subroutines,
         })
     }
 }
