@@ -9,7 +9,7 @@ pub struct Offset(pub u32);
 /// An offset size.
 pub type OffsetSize = u8;
 
-impl Walue for Offset {
+impl Walue<'static> for Offset {
     type Parameter = OffsetSize;
 
     fn read<T: Tape>(tape: &mut T, size: OffsetSize) -> Result<Self> {
