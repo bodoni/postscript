@@ -1,16 +1,42 @@
+use std::fs::File;
+use std::path::PathBuf;
+
 use postscript::compact1::FontSet;
 use postscript::Value;
 
 macro_rules! ok(($result:expr) => ($result.unwrap()));
 
 #[allow(dead_code)]
-pub fn setup() -> FontSet {
-    use std::fs::File;
-    use std::io::{Cursor, Read, Seek, SeekFrom};
+pub enum Fixture {
+    NotoSansJP,
+    SourceSerifPro,
+}
 
-    let mut file = ok!(File::open("tests/fixtures/SourceSerifPro-Regular.otf"));
-    ok!(file.seek(SeekFrom::Start(17732)));
-    let mut buffer = vec![0; 37728];
-    assert!(ok!(file.read(&mut buffer)) == buffer.len());
-    ok!(FontSet::read(&mut Cursor::new(buffer)))
+impl Fixture {
+    pub fn path(&self) -> PathBuf {
+        match *self {
+            Fixture::NotoSansJP => "tests/fixtures/NotoSansJP-Regular.otf".into(),
+            Fixture::SourceSerifPro => "tests/fixtures/SourceSerifPro-Regular.otf".into(),
+        }
+    }
+
+    pub fn offset(&self) -> u64 {
+        match *self {
+            Fixture::NotoSansJP => 337316,
+            Fixture::SourceSerifPro => 17732,
+        }
+    }
+}
+
+pub fn setup(fixture: Fixture) -> File {
+    use std::io::{Seek, SeekFrom};
+
+    let mut file = ok!(File::open(fixture.path()));
+    ok!(file.seek(SeekFrom::Start(fixture.offset())));
+    file
+}
+
+pub fn setup_font_set(fixture: Fixture) -> FontSet {
+    let mut file = setup(fixture);
+    ok!(FontSet::read(&mut file))
 }
