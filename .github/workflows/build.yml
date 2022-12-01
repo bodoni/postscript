@@ -25,6 +25,9 @@ jobs:
         with: {command: test}
       - uses: actions-rs/cargo@v1
         with: {command: test, args: --all-features}
+      - uses: actions-rs/toolchain@v1
+        with: {toolchain: nightly}
+      - run: cargo +nightly bench
 
   ubuntu:
     runs-on: ubuntu-latest
@@ -34,3 +37,6 @@ jobs:
         with: {command: test}
       - uses: actions-rs/cargo@v1
         with: {command: test, args: --all-features}
+      - uses: actions-rs/toolchain@v1
+        with: {toolchain: nightly}
+      - run: cargo +nightly bench
