@@ -24,7 +24,7 @@ impl<'l> Walue<'l> for Record {
         offset += get!(@single operations, Subrs);
         tape.jump(position + offset as u64)?;
         let subroutines = tape.take()?;
-        Ok(Record {
+        Ok(Self {
             operations,
             subroutines,
         })

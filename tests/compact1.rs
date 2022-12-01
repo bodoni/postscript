@@ -81,6 +81,7 @@ mod noto_sans {
 
     #[test]
     fn records() {
+        use postscript::compact1::font_set::character_id_keyed::Encoding;
         use postscript::compact1::font_set::Record;
         use postscript::compact1::{Number, Operator};
 
@@ -95,6 +96,13 @@ mod noto_sans {
         assert_eq!(ok!(strings.get(record.registry)), "Adobe");
         assert_eq!(ok!(strings.get(record.ordering)), "Identity");
         assert_eq!(record.supplement, Number::Integer(0));
+        match record.encoding {
+            Encoding::Format3(ref encoding) => {
+                assert_eq!(encoding.range_count, 107);
+                assert_eq!(encoding.glyph_count, 17810);
+            }
+            _ => unreachable!(),
+        }
         assert_eq!(record.operations.len(), 18);
         let operations = operations!(
             FontName: [396],

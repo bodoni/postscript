@@ -12,7 +12,7 @@ impl Walue<'static> for CharStrings {
     fn read<T: Tape>(tape: &mut T, format: i32) -> Result<Self> {
         Ok(match format {
             2 => CharStrings(tape.take()?),
-            _ => raise!("found an unknown char-string format"),
+            _ => raise!("found an unknown format of char strings"),
         })
     }
 }

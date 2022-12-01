@@ -31,8 +31,8 @@ table! {
     #[doc = "A range of a char set in format 1."]
     #[derive(Copy)]
     pub Range1 {
-        first (StringID), // first
-        left  (u8      ), // nLeft
+        first_string_id (StringID), // first
+        left_count      (u8      ), // nLeft
     }
 }
 
@@ -57,7 +57,7 @@ impl Walue<'static> for CharSet {
             0 => CharSet::Format0(tape.take_given(glyphs)?),
             1 => CharSet::Format1(tape.take_given(glyphs)?),
             2 => unimplemented!(),
-            _ => raise!("found an unknown char-set format"),
+            _ => raise!("found an unknown format of char sets"),
         })
     }
 }
@@ -94,7 +94,7 @@ impl Walue<'static> for CharSet1 {
         let mut found = 0 + 1;
         while found < glyphs {
             let range = tape.take::<Range1>()?;
-            found += 1 + range.left as usize;
+            found += 1 + range.left_count as usize;
             ranges.push(range);
         }
         if found != glyphs {

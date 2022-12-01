@@ -81,12 +81,12 @@ impl Value for FontSet {
                 2 => CharSet::ExpertSubset,
                 offset => {
                     tape.jump(position + offset as u64)?;
-                    tape.take_given(char_strings[i].len())?
+                    tape.take_given(char_strings[i].count as usize)?
                 }
             });
-            records.push(tape.take_given((position, dictionary))?);
+            records.push(tape.take_given((position, dictionary, &char_strings[i]))?);
         }
-        Ok(FontSet {
+        Ok(Self {
             header,
             names,
             strings,
@@ -101,13 +101,18 @@ impl Value for FontSet {
 }
 
 impl<'l> Walue<'l> for Record {
-    type Parameter = (u64, &'l Operations);
+    type Parameter = (u64, &'l Operations, &'l CharStrings);
 
-    fn read<T: Tape>(tape: &mut T, (position, dictionary): Self::Parameter) -> Result<Self> {
+    fn read<T: Tape>(
+        tape: &mut T,
+        (position, dictionary, char_strings): Self::Parameter,
+    ) -> Result<Self> {
         if let Some((Operator::ROS, _)) = <[_]>::get(dictionary, 0) {
-            Ok(Record::CharacterIDKeyed(
-                tape.take_given((position, dictionary))?,
-            ))
+            Ok(Record::CharacterIDKeyed(tape.take_given((
+                position,
+                dictionary,
+                char_strings,
+            ))?))
         } else {
             Ok(Record::CharacterNameKeyed(
                 tape.take_given((position, dictionary))?,
