@@ -1,7 +1,7 @@
 //! The font sets.
 
 use crate::compact1::index::{CharStrings, Dictionaries, Names, Strings, Subroutines};
-use crate::compact1::{CharSet, Encoding, Header, Operations, Operator};
+use crate::compact1::{CharSet, Encoding, Header, Operation, Operations, Operator};
 use crate::{Result, Tape, Value, Walue};
 
 macro_rules! get(
@@ -107,7 +107,7 @@ impl<'l> Walue<'l> for Record {
         tape: &mut T,
         (position, dictionary, char_strings): Self::Parameter,
     ) -> Result<Self> {
-        if let Some((Operator::ROS, _)) = <[_]>::get(dictionary, 0) {
+        if let Some(Operation(Operator::ROS, _)) = <[_]>::get(dictionary, 0) {
             Ok(Record::CharacterIDKeyed(tape.take_given((
                 position,
                 dictionary,

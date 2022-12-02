@@ -7,7 +7,8 @@ use crate::{Result, Tape, Value};
 pub type Operand = Number;
 
 /// An operation.
-pub type Operation = (Operator, Vec<Operand>);
+#[derive(Clone, Debug)]
+pub struct Operation(pub Operator, pub Vec<Operand>);
 
 /// A collection of operations.
 #[derive(Clone, Debug, Default)]
@@ -27,7 +28,7 @@ impl Value for Operation {
                     } else {
                         tape.take::<u8>()? as u16
                     };
-                    return Ok((Operator::from(code)?, operands));
+                    return Ok(Self(Operator::from(code)?, operands));
                 }
             }
         }
@@ -76,8 +77,8 @@ impl Value for Operations {
         let mut records = vec![];
         loop {
             match tape.take() {
-                Ok((operator, operands)) => {
-                    records.push((operator, operands));
+                Ok(operation) => {
+                    records.push(operation);
                 }
                 Err(error) => {
                     if error.kind() == ErrorKind::UnexpectedEof {

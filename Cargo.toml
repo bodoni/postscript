@@ -1,6 +1,6 @@
 [package]
 name = "postscript"
-version = "0.15.0"
+version = "0.16.0"
 edition = "2021"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
@@ -12,6 +12,9 @@ readme = "README.md"
 categories = ["parsing"]
 keywords = ["font", "postscript", "typeface", "typography"]
 exclude = ["tests/fixtures/*"]
+
+[dependencies]
+typeface = "0.1"
 
 [dev-dependencies]
 random = "0.12"

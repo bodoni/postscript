@@ -3,10 +3,16 @@ extern crate postscript;
 #[macro_use]
 mod common;
 
+macro_rules! expand(
+    ($operations:expr) => (
+        $operations.iter().map(|operation| (&operation.0, &operation.1)).collect::<Vec<_>>()
+    );
+);
+
 macro_rules! operations(
     ($($operator:ident: [$($operand:expr),*],)*) => ({
-        use postscript::compact1::{Operations, Operator};
-        Operations(vec![$((Operator::$operator, vec![$($operand.into()),*]),)*])
+        use postscript::compact1::{Operation, Operations, Operator};
+        Operations(vec![$(Operation(Operator::$operator, vec![$($operand.into()),*]),)*])
     });
 );
 
@@ -76,7 +82,7 @@ mod noto_sans {
             FDSelect: [42687],
             FDArray: [43013],
         );
-        assert_eq!(table[0].0, operations.0);
+        assert_eq!(expand!(table[0].0), expand!(operations.0));
     }
 
     #[test]
@@ -108,7 +114,7 @@ mod noto_sans {
             FontName: [396],
             Private: [32, 3978751],
         );
-        assert_eq!(record.operations[0].0, operations.0);
+        assert_eq!(expand!(record.operations[0].0), expand!(operations.0));
         assert_eq!(
             ok!(strings.get(ok!(record.operations[0][0].1[0].try_into()))),
             "NotoSansJP-Regular-Alphabetic",
@@ -140,7 +146,10 @@ mod noto_sans {
             DefaultWidthX: [1000],
             Subrs: [32],
         );
-        assert_eq!(record.records[0].operations.0, operations.0);
+        assert_eq!(
+            expand!(record.records[0].operations.0),
+            expand!(operations.0),
+        );
         let operations = operations!(
             BlueValues: [-250, 0, 1350, 0],
             StdHW: [78],
@@ -148,7 +157,10 @@ mod noto_sans {
             LanguageGroup: [1],
             DefaultWidthX: [500],
         );
-        assert_eq!(record.records[7].operations.0, operations.0);
+        assert_eq!(
+            expand!(record.records[7].operations.0),
+            expand!(operations.0),
+        );
     }
 }
 
@@ -220,7 +232,7 @@ mod source_serif {
             CharStrings: [8917],
             Private: [65, 33671],
         );
-        assert_eq!(table[0].0, operations.0);
+        assert_eq!(expand!(table[0].0), expand!(operations.0));
     }
 
     #[test]
@@ -255,7 +267,7 @@ mod source_serif {
         );
         match &tables[0] {
             Record::CharacterNameKeyed(ref record) => {
-                assert_eq!(record.operations.0, operations.0);
+                assert_eq!(expand!(record.operations.0), expand!(operations.0));
                 assert_eq!(record.subroutines.len(), 180);
             }
             _ => unreachable!(),

@@ -3,7 +3,7 @@
 use std::io::Cursor;
 
 use crate::compact1::index::{CharStrings, Dictionaries, Subroutines};
-use crate::compact1::{GlyphID, Number, Operations, Operator, StringID};
+use crate::compact1::{GlyphID, Number, Operation, Operations, Operator, StringID};
 use crate::{Result, Tape, Walue};
 
 /// A character-ID-keyed record in a font set.
@@ -71,7 +71,7 @@ impl<'l> Walue<'l> for Record {
         (position, dictionary, char_strings): Self::Parameter,
     ) -> Result<Self> {
         let operands = match <[_]>::get(dictionary, 0) {
-            Some((Operator::ROS, operands)) if operands.len() == 3 => operands,
+            Some(Operation(Operator::ROS, operands)) if operands.len() == 3 => operands,
             _ => raise!("found a malformed character-ID-keyed record"),
         };
         let offset = get!(@single dictionary, FDSelect);

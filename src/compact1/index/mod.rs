@@ -62,9 +62,9 @@ macro_rules! index {
         deref! { $structure::0 => crate::compact1::index::Index }
     );
     (@implement $structure:ident) => (
-        impl crate::tape::Value for $structure {
+        impl typeface::Value for $structure {
             #[inline]
-            fn read<T: crate::tape::Tape>(tape: &mut T) -> crate::Result<Self> {
+            fn read<T: typeface::Tape>(tape: &mut T) -> typeface::Result<Self> {
                 Ok($structure(tape.take()?))
             }
         }
