@@ -1,6 +1,6 @@
 //! Parser for PostScript fonts.
 
-#[macro_use]
+#[macro_use(deref, raise, table)]
 extern crate typeface;
 
 pub mod compact1;
