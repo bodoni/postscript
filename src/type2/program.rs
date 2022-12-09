@@ -263,7 +263,7 @@ impl<'l> Program<'l> {
                     let count = subroutines.len();
                     let i = address + bias(count);
                     if i < 0 || i as usize >= count {
-                        raise!("failed to find a subroutine");
+                        raise!("found no subroutine");
                     }
                     Routine::new(&subroutines[i as usize])
                 };

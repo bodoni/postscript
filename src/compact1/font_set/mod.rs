@@ -9,7 +9,7 @@ macro_rules! get(
         match $operations.get_single(crate::compact1::Operator::$operator) {
             Some(crate::compact1::Number::Integer(value)) => value,
             Some(_) => raise!(concat!("found a malformed operation with operator ", stringify!($operator))),
-            _ => raise!(concat!("failed to find an operation with operator ", stringify!($operator))),
+            _ => raise!(concat!("found no operation with operator ", stringify!($operator))),
         }
     );
     (@try @single $operations:expr, $operator:ident) => (
@@ -23,7 +23,7 @@ macro_rules! get(
         match $operations.get_double(crate::compact1::Operator::$operator) {
             Some((crate::compact1::Number::Integer(value0), crate::compact1::Number::Integer(value1))) => (value0, value1),
             Some(_) => raise!(concat!("found a malformed operation with operator ", stringify!($operator))),
-            _ => raise!(concat!("failed to find an operation with operator ", stringify!($operator))),
+            _ => raise!(concat!("found no operation with operator ", stringify!($operator))),
         }
     );
 );
