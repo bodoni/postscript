@@ -14,7 +14,7 @@ pub struct Operation(pub Operator, pub Vec<Operand>);
 #[derive(Clone, Debug, Default)]
 pub struct Operations(pub Vec<Operation>);
 
-deref! { Operations::0 => Vec<Operation> }
+dereference! { Operations::0 => Vec<Operation> }
 
 impl Value for Operation {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {

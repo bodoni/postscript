@@ -309,7 +309,7 @@ impl<'l> Routine<'l> {
     }
 }
 
-deref! { Routine<'l>::tape => Cursor<&'l [u8]> }
+dereference! { Routine<'l>::tape => Cursor<&'l [u8]> }
 
 #[inline]
 fn bias(count: usize) -> i32 {

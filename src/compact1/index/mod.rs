@@ -14,7 +14,7 @@ table! {
     }
 }
 
-deref! { Index::data => [Vec<u8>] }
+dereference! { Index::data => [Vec<u8>] }
 
 impl Value for Index {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
@@ -59,7 +59,7 @@ macro_rules! index {
         $(#[$attribute])*
         #[derive(Clone, Debug)]
         pub struct $structure(pub crate::compact1::index::Index);
-        deref! { $structure::0 => crate::compact1::index::Index }
+        dereference! { $structure::0 => crate::compact1::index::Index }
     );
     (@implement $structure:ident) => (
         impl typeface::Value for $structure {

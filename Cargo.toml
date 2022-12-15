@@ -14,7 +14,7 @@ keywords = ["font", "postscript", "typeface", "typography"]
 exclude = ["tests/fixtures/*"]
 
 [dependencies]
-typeface = "0.1"
+typeface = "0.2"
 
 [dev-dependencies]
 random = "0.12"
