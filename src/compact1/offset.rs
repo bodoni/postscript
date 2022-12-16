@@ -1,5 +1,3 @@
-use std::mem;
-
 use crate::{Result, Tape, Walue};
 
 /// An offset.
@@ -13,6 +11,8 @@ impl Walue<'static> for Offset {
     type Parameter = OffsetSize;
 
     fn read<T: Tape>(tape: &mut T, size: OffsetSize) -> Result<Self> {
+        use std::mem;
+
         #[cfg(target_endian = "big")]
         macro_rules! assemble(($hi:expr, $me:expr, $lo:expr) => ([0, $hi, $me, $lo]));
         #[cfg(target_endian = "little")]

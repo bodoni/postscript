@@ -1,10 +1,10 @@
 extern crate postscript;
 
-use postscript::compact1::font_set::Record;
-use postscript::type2::Program;
-
 #[macro_use]
 mod common;
+
+use postscript::compact1::font_set::Record;
+use postscript::type2::Program;
 
 use common::{setup_font_set, Fixture};
 

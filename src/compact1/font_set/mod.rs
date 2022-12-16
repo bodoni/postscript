@@ -1,9 +1,5 @@
 //! The font sets.
 
-use crate::compact1::index::{CharStrings, Dictionaries, Names, Strings, Subroutines};
-use crate::compact1::{CharSet, Encoding, Header, Operation, Operations, Operator};
-use crate::{Result, Tape, Value, Walue};
-
 macro_rules! get(
     (@single $operations:expr, $operator:ident) => (
         match $operations.get_single(crate::compact1::Operator::$operator) {
@@ -30,6 +26,10 @@ macro_rules! get(
 
 pub mod character_id_keyed;
 pub mod character_name_keyed;
+
+use crate::compact1::index::{CharStrings, Dictionaries, Names, Strings, Subroutines};
+use crate::compact1::{CharSet, Encoding, Header, Operation, Operations, Operator};
+use crate::{Result, Tape, Value, Walue};
 
 /// A font set.
 #[derive(Clone, Debug)]

@@ -2,17 +2,15 @@
 //!
 //! [1]: https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf
 
-use crate::{Error, Result};
+pub mod char_set;
+pub mod encoding;
+pub mod font_set;
+pub mod index;
 
 mod header;
 mod number;
 mod offset;
 mod operation;
-
-pub mod char_set;
-pub mod encoding;
-pub mod font_set;
-pub mod index;
 
 pub use char_set::CharSet;
 pub use encoding::Encoding;
@@ -22,6 +20,8 @@ pub use index::Index;
 pub use number::Number;
 pub use offset::{Offset, OffsetSize};
 pub use operation::{Operand, Operation, Operations, Operator};
+
+use crate::{Error, Result};
 
 /// A glyph identifier.
 pub type GlyphID = u16;
