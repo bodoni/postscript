@@ -5,7 +5,7 @@ extern crate random;
 extern crate test;
 
 #[macro_use]
-mod common;
+mod support;
 
 mod encoding {
     use postscript::compact1::Encoding;
@@ -93,7 +93,7 @@ mod operation {
 mod noto_sans {
     use test::Bencher;
 
-    use crate::common::{setup_font_set, Fixture};
+    use crate::support::{setup_font_set, Fixture};
 
     #[bench]
     fn font_set(bencher: &mut Bencher) {

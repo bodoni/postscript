@@ -4,14 +4,14 @@ extern crate postscript;
 extern crate test;
 
 #[macro_use]
-mod common;
+mod support;
 
 mod source_serif {
     use postscript::compact1::font_set::Record;
     use postscript::type2::Program;
     use test::Bencher;
 
-    use crate::common::{setup_font_set, Fixture};
+    use crate::support::{setup_font_set, Fixture};
 
     #[bench]
     fn program(bencher: &mut Bencher) {

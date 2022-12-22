@@ -1,7 +1,7 @@
 extern crate postscript;
 
 #[macro_use]
-mod common;
+mod support;
 
 macro_rules! expand(
     ($operations:expr) => (
@@ -19,7 +19,7 @@ macro_rules! operations(
 mod noto_sans {
     use postscript::Tape;
 
-    use crate::common::{setup, setup_font_set, Fixture};
+    use crate::support::{setup, setup_font_set, Fixture};
 
     #[test]
     fn char_strings() {
@@ -165,7 +165,7 @@ mod noto_sans {
 }
 
 mod source_serif {
-    use crate::common::{setup_font_set, Fixture};
+    use crate::support::{setup_font_set, Fixture};
 
     #[test]
     fn char_sets() {
