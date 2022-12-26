@@ -39,12 +39,12 @@ table! {
 impl CharSet {
     /// Return the name of a glyph.
     #[inline]
-    pub fn get(&self, gid: GlyphID) -> Option<&'static str> {
+    pub fn get(&self, glyph_id: GlyphID) -> Option<&'static str> {
         match self {
-            &CharSet::ISOAdobe => get_iso_adobe(gid),
-            &CharSet::Expert => get_expert(gid),
-            &CharSet::ExpertSubset => get_expert_subset(gid),
-            _ => unimplemented!(),
+            &CharSet::ISOAdobe => get_iso_adobe(glyph_id),
+            &CharSet::Expert => get_expert(glyph_id),
+            &CharSet::ExpertSubset => get_expert_subset(glyph_id),
+            _ => None,
         }
     }
 }
@@ -56,7 +56,6 @@ impl Walue<'static> for CharSet {
         Ok(match tape.peek::<u8>()? {
             0 => CharSet::Format0(tape.take_given(glyphs)?),
             1 => CharSet::Format1(tape.take_given(glyphs)?),
-            2 => unimplemented!(),
             _ => raise!("found an unknown format of char sets"),
         })
     }
@@ -107,8 +106,8 @@ impl Walue<'static> for CharSet1 {
     }
 }
 
-fn get_iso_adobe(gid: GlyphID) -> Option<&'static str> {
-    Some(match gid {
+fn get_iso_adobe(glyph_id: GlyphID) -> Option<&'static str> {
+    Some(match glyph_id {
         1 => "space",
         2 => "exclam",
         3 => "quotedbl",
@@ -341,8 +340,8 @@ fn get_iso_adobe(gid: GlyphID) -> Option<&'static str> {
     })
 }
 
-fn get_expert(gid: GlyphID) -> Option<&'static str> {
-    Some(match gid {
+fn get_expert(glyph_id: GlyphID) -> Option<&'static str> {
+    Some(match glyph_id {
         1 => "space",
         229 => "exclamsmall",
         230 => "Hungarumlautsmall",
@@ -512,8 +511,8 @@ fn get_expert(gid: GlyphID) -> Option<&'static str> {
     })
 }
 
-fn get_expert_subset(gid: GlyphID) -> Option<&'static str> {
-    Some(match gid {
+fn get_expert_subset(glyph_id: GlyphID) -> Option<&'static str> {
+    Some(match glyph_id {
         1 => "space",
         231 => "dollaroldstyle",
         232 => "dollarsuperior",

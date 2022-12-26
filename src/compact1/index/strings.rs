@@ -9,10 +9,10 @@ index! {
 
 impl Strings {
     /// Return the string corresponding to a string identifier.
-    pub fn get(&self, sid: StringID) -> Option<String> {
-        match sid as usize {
+    pub fn get(&self, string_id: StringID) -> Option<String> {
+        match string_id as usize {
             i if i < NUMBER_OF_STANDARD_STRINGS => {
-                get_standard_string(sid).map(|string| string.to_string())
+                get_standard_string(string_id).map(|string| string.to_string())
             }
             i => self
                 .0
@@ -22,8 +22,8 @@ impl Strings {
     }
 }
 
-fn get_standard_string(sid: StringID) -> Option<&'static str> {
-    Some(match sid {
+fn get_standard_string(string_id: StringID) -> Option<&'static str> {
+    Some(match string_id {
         0 => ".notdef",
         1 => "space",
         2 => "exclam",

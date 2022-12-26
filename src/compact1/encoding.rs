@@ -12,25 +12,25 @@ pub enum Encoding {
 impl Encoding {
     /// Return the string identifier of a glyph.
     #[inline]
-    pub fn get(&self, gid: GlyphID) -> Option<StringID> {
+    pub fn get(&self, glyph_id: GlyphID) -> Option<StringID> {
         match *self {
-            Encoding::Standard => get_standard(gid),
-            Encoding::Expert => get_expert(gid),
+            Encoding::Standard => get_standard(glyph_id),
+            Encoding::Expert => get_expert(glyph_id),
         }
     }
 }
 
 macro_rules! get(
-    ($one:ident { $($gid:pat => $sid:expr => $name:expr,)+ }) => (
+    ($one:ident { $($glyph_id:pat => $string_id:expr => $name:expr,)+ }) => (
         Some(match $one {
-            $($gid => $sid,)+
+            $($glyph_id => $string_id,)+
             _ => return None,
         })
     );
 );
 
-fn get_standard(gid: GlyphID) -> Option<StringID> {
-    get!(gid {
+fn get_standard(glyph_id: GlyphID) -> Option<StringID> {
+    get!(glyph_id {
         0 => 0 => ".notdef",
         1 => 0 => ".notdef",
         2 => 0 => ".notdef",
@@ -290,8 +290,8 @@ fn get_standard(gid: GlyphID) -> Option<StringID> {
     })
 }
 
-fn get_expert(gid: GlyphID) -> Option<StringID> {
-    get!(gid {
+fn get_expert(glyph_id: GlyphID) -> Option<StringID> {
+    get!(glyph_id {
         0 => 0 => ".notdef",
         1 => 0 => ".notdef",
         2 => 0 => ".notdef",
