@@ -11,6 +11,7 @@ pub enum CharSet {
     ExpertSubset,
     Format0(CharSet0),
     Format1(CharSet1),
+    Format2(CharSet2),
 }
 
 /// A char set in format 0.
@@ -27,12 +28,28 @@ pub struct CharSet1 {
     pub ranges: Vec<Range1>, // Range1
 }
 
+/// A char set in format 2.
+#[derive(Clone, Debug)]
+pub struct CharSet2 {
+    pub format: u8,          // format
+    pub ranges: Vec<Range2>, // Range2
+}
+
 table! {
     #[doc = "A range of a char set in format 1."]
     #[derive(Copy)]
     pub Range1 {
         first_string_id (StringID), // first
         left_count      (u8      ), // nLeft
+    }
+}
+
+table! {
+    #[doc = "A range of a char set in format 2."]
+    #[derive(Copy)]
+    pub Range2 {
+        first_string_id (StringID), // first
+        left_count      (u16     ), // nLeft
     }
 }
 
@@ -56,6 +73,7 @@ impl Walue<'static> for CharSet {
         Ok(match tape.peek::<u8>()? {
             0 => CharSet::Format0(tape.take_given(glyphs)?),
             1 => CharSet::Format1(tape.take_given(glyphs)?),
+            2 => CharSet::Format2(tape.take_given(glyphs)?),
             _ => raise!("found an unknown format of the char set"),
         })
     }
@@ -100,6 +118,32 @@ impl Walue<'static> for CharSet1 {
             reject!();
         }
         Ok(CharSet1 {
+            format: format,
+            ranges: ranges,
+        })
+    }
+}
+
+impl Walue<'static> for CharSet2 {
+    type Parameter = usize;
+
+    fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
+        macro_rules! reject(() => (raise!("found a malformed char set")));
+        let format = tape.take::<u8>()?;
+        if format != 2 {
+            reject!();
+        }
+        let mut ranges = vec![];
+        let mut found = 0 + 1;
+        while found < glyphs {
+            let range = tape.take::<Range2>()?;
+            found += 1 + range.left_count as usize;
+            ranges.push(range);
+        }
+        if found != glyphs {
+            reject!();
+        }
+        Ok(CharSet2 {
             format: format,
             ranges: ranges,
         })
