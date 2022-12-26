@@ -1,8 +1,8 @@
-//! The encodings.
+//! The glyph encodings.
 
 use crate::compact1::{GlyphID, StringID};
 
-/// An encoding.
+/// A glyph encoding.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Encoding {
     Standard,

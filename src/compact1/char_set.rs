@@ -56,7 +56,7 @@ impl Walue<'static> for CharSet {
         Ok(match tape.peek::<u8>()? {
             0 => CharSet::Format0(tape.take_given(glyphs)?),
             1 => CharSet::Format1(tape.take_given(glyphs)?),
-            _ => raise!("found an unknown format of char sets"),
+            _ => raise!("found an unknown format of the char set"),
         })
     }
 }
