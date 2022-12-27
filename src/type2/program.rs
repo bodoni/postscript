@@ -192,7 +192,7 @@ impl<'l> Program<'l> {
                 push!(left / right);
             }
             Neg => push!(-pop!()),
-            Random => unimplemented!(),
+            // Random =>
             Mul => push!(pop!() * pop!()),
             Sqrt => push!(pop!().sqrt()),
             Drop => mem::drop(pop!()),
@@ -229,8 +229,8 @@ impl<'l> Program<'l> {
             Dup => push!(read!(0)),
 
             // Storage operators
-            Put => unimplemented!(),
-            Get => unimplemented!(),
+            // Put =>
+            // Get =>
 
             // Conditional operators
             And => {
@@ -277,6 +277,8 @@ impl<'l> Program<'l> {
                 };
                 mem::replace(&mut self.routine, *caller);
             }
+
+            operator => raise!("found an unsupported operation with {:?}", operator),
         };
         self.next()
     }
