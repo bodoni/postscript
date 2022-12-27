@@ -1,6 +1,6 @@
 [package]
 name = "postscript"
-version = "0.16.3"
+version = "0.16.4"
 edition = "2021"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
