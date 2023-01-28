@@ -117,7 +117,7 @@ macro_rules! operator {
 
             Ok(match code {
                 $($code => $variant,)+
-                _ => raise!("found an unknown operator"),
+                code => raise!("found an unsupported operator ({})", code),
             })
         }
 

@@ -278,7 +278,7 @@ impl<'l> Program<'l> {
                 mem::replace(&mut self.routine, *caller);
             }
 
-            operator => raise!("found an unsupported operation with {:?}", operator),
+            operator => raise!("found an unsupported operator ({:?})", operator),
         };
         self.next()
     }
