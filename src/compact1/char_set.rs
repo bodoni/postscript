@@ -58,10 +58,12 @@ impl CharSet {
     #[inline]
     pub fn get(&self, glyph_id: GlyphID) -> Option<&'static str> {
         match self {
-            &CharSet::ISOAdobe => get_iso_adobe(glyph_id),
-            &CharSet::Expert => get_expert(glyph_id),
-            &CharSet::ExpertSubset => get_expert_subset(glyph_id),
-            _ => None,
+            CharSet::ISOAdobe => get_iso_adobe(glyph_id),
+            CharSet::Expert => get_expert(glyph_id),
+            CharSet::ExpertSubset => get_expert_subset(glyph_id),
+            CharSet::Format0(ref char_set) => char_set.get(glyph_id),
+            CharSet::Format1(ref char_set) => char_set.get(glyph_id),
+            CharSet::Format2(ref char_set) => char_set.get(glyph_id),
         }
     }
 }
@@ -79,6 +81,13 @@ impl Walue<'static> for CharSet {
     }
 }
 
+impl CharSet0 {
+    #[inline]
+    fn get(&self, _: GlyphID) -> Option<&'static str> {
+        None
+    }
+}
+
 impl Walue<'static> for CharSet0 {
     type Parameter = usize;
 
@@ -91,6 +100,13 @@ impl Walue<'static> for CharSet0 {
             format: format,
             glyphs: tape.take_given(glyph_count - 1)?,
         })
+    }
+}
+
+impl CharSet1 {
+    #[inline]
+    fn get(&self, _: GlyphID) -> Option<&'static str> {
+        None
     }
 }
 
@@ -116,6 +132,13 @@ impl Walue<'static> for CharSet1 {
             format: format,
             ranges: ranges,
         })
+    }
+}
+
+impl CharSet2 {
+    #[inline]
+    fn get(&self, _: GlyphID) -> Option<&'static str> {
+        None
     }
 }
 
