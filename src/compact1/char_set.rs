@@ -69,11 +69,11 @@ impl CharSet {
 impl Walue<'static> for CharSet {
     type Parameter = usize;
 
-    fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
+    fn read<T: Tape>(tape: &mut T, glyph_count: usize) -> Result<Self> {
         Ok(match tape.peek::<u8>()? {
-            0 => CharSet::Format0(tape.take_given(glyphs)?),
-            1 => CharSet::Format1(tape.take_given(glyphs)?),
-            2 => CharSet::Format2(tape.take_given(glyphs)?),
+            0 => CharSet::Format0(tape.take_given(glyph_count)?),
+            1 => CharSet::Format1(tape.take_given(glyph_count)?),
+            2 => CharSet::Format2(tape.take_given(glyph_count)?),
             format => raise!("found an unsupported format of char sets ({})", format),
         })
     }
@@ -82,18 +82,14 @@ impl Walue<'static> for CharSet {
 impl Walue<'static> for CharSet0 {
     type Parameter = usize;
 
-    fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
-        macro_rules! reject(() => (raise!("found a malformed char set")));
+    fn read<T: Tape>(tape: &mut T, glyph_count: usize) -> Result<Self> {
         let format = tape.take::<u8>()?;
         if format != 0 {
-            reject!();
+            raise!("found a malformed char set");
         }
-        let glyphs = (1..=glyphs - 1)
-            .map(|_| tape.take())
-            .collect::<Result<Vec<_>>>()?;
         Ok(CharSet0 {
             format: format,
-            glyphs: glyphs,
+            glyphs: tape.take_given(glyph_count - 1)?,
         })
     }
 }
@@ -101,21 +97,20 @@ impl Walue<'static> for CharSet0 {
 impl Walue<'static> for CharSet1 {
     type Parameter = usize;
 
-    fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
-        macro_rules! reject(() => (raise!("found a malformed char set")));
+    fn read<T: Tape>(tape: &mut T, glyph_count: usize) -> Result<Self> {
         let format = tape.take::<u8>()?;
         if format != 1 {
-            reject!();
+            raise!("found a malformed char set");
         }
         let mut ranges = vec![];
-        let mut found = 0 + 1;
-        while found < glyphs {
+        let mut found_count = 0 + 1;
+        while found_count < glyph_count {
             let range = tape.take::<Range1>()?;
-            found += 1 + range.left_count as usize;
+            found_count += 1 + range.left_count as usize;
             ranges.push(range);
         }
-        if found != glyphs {
-            reject!();
+        if found_count != glyph_count {
+            raise!("found a malformed char set");
         }
         Ok(CharSet1 {
             format: format,
@@ -127,20 +122,20 @@ impl Walue<'static> for CharSet1 {
 impl Walue<'static> for CharSet2 {
     type Parameter = usize;
 
-    fn read<T: Tape>(tape: &mut T, glyphs: usize) -> Result<Self> {
+    fn read<T: Tape>(tape: &mut T, glyph_count: usize) -> Result<Self> {
         macro_rules! reject(() => (raise!("found a malformed char set")));
         let format = tape.take::<u8>()?;
         if format != 2 {
             reject!();
         }
         let mut ranges = vec![];
-        let mut found = 0 + 1;
-        while found < glyphs {
+        let mut found_count = 0 + 1;
+        while found_count < glyph_count {
             let range = tape.take::<Range2>()?;
-            found += 1 + range.left_count as usize;
+            found_count += 1 + range.left_count as usize;
             ranges.push(range);
         }
-        if found != glyphs {
+        if found_count != glyph_count {
             reject!();
         }
         Ok(CharSet2 {
