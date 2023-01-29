@@ -49,10 +49,11 @@ impl Encoding {
     /// Return the string identifier of a glyph.
     #[inline]
     pub fn get(&self, glyph_id: GlyphID) -> Option<StringID> {
-        match *self {
+        match self {
             Encoding::Standard => get_standard(glyph_id),
             Encoding::Expert => get_expert(glyph_id),
-            _ => unreachable!(),
+            Encoding::Format0(ref encoding) => encoding.get(glyph_id),
+            Encoding::Format1(ref encoding) => encoding.get(glyph_id),
         }
     }
 }
@@ -64,6 +65,20 @@ impl Value for Encoding {
             1 => Encoding::Format1(tape.take()?),
             format => raise!("found an unsupported format of encodings ({})", format),
         })
+    }
+}
+
+impl Encoding0 {
+    #[inline]
+    fn get(&self, _: GlyphID) -> Option<StringID> {
+        None
+    }
+}
+
+impl Encoding1 {
+    #[inline]
+    fn get(&self, _: GlyphID) -> Option<StringID> {
+        None
     }
 }
 
