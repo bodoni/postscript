@@ -1,12 +1,48 @@
 //! The glyph encodings.
 
 use crate::compact1::{GlyphID, StringID};
+use crate::{Result, Tape, Value};
 
 /// A glyph encoding.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug)]
 pub enum Encoding {
     Standard,
     Expert,
+    Format0(Encoding0),
+    Format1(Encoding1),
+}
+
+table! {
+    #[doc = "An encoding in format 0."]
+    pub Encoding0 { // Format 0
+        format     (u8) = { 0 }, // format
+        code_count (u8), // nCodes
+
+        codes (Vec<u8>) |this, tape| { // code
+            tape.take_given(this.code_count as usize)
+        },
+    }
+}
+
+table! {
+    #[doc = "An encoding in format 1."]
+    pub Encoding1 { // Format 1
+        format      (u8) = { 1 }, // format
+        range_count (u8), // nRanges
+
+        ranges (Vec<Range1>) |this, tape| { // Range1
+            tape.take_given(this.range_count as usize)
+        },
+    }
+}
+
+table! {
+    #[doc = "A range of an encoding in format 1."]
+    #[derive(Copy)]
+    pub Range1 {
+        first_code (u8), // first
+        left_count (u8), // nLeft
+    }
 }
 
 impl Encoding {
@@ -16,7 +52,18 @@ impl Encoding {
         match *self {
             Encoding::Standard => get_standard(glyph_id),
             Encoding::Expert => get_expert(glyph_id),
+            _ => unreachable!(),
         }
+    }
+}
+
+impl Value for Encoding {
+    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+        Ok(match tape.peek::<u8>()? {
+            0 => Encoding::Format0(tape.take()?),
+            1 => Encoding::Format1(tape.take()?),
+            format => raise!("found an unsupported format of encodings ({})", format),
+        })
     }
 }
 

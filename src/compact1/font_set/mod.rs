@@ -69,7 +69,10 @@ impl Value for FontSet {
             encodings.push(match get!(@single dictionary, Encoding) {
                 0 => Encoding::Standard,
                 1 => Encoding::Expert,
-                encoding => raise!("found an unsupported encoding of glyphs ({})", encoding),
+                offset => {
+                    tape.jump(position + offset as u64)?;
+                    tape.take()?
+                }
             });
             char_strings.push({
                 tape.jump(position + get!(@single dictionary, CharStrings) as u64)?;
