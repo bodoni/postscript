@@ -10,6 +10,7 @@ pub enum Encoding {
     Expert,
     Format0(Encoding0),
     Format1(Encoding1),
+    FormatSupplemental(EncodingSupplemental),
 }
 
 table! {
@@ -37,6 +38,18 @@ table! {
 }
 
 table! {
+    #[doc = "An encoding in the supplemental format."]
+    pub EncodingSupplemental { // Supplemental Encoding Data
+        format           (u8),
+        supplement_count (u8), // nSups
+
+        supplements (Vec<Supplement>) |this, tape| { // Supplement
+            tape.take_given(this.supplement_count as usize)
+        },
+    }
+}
+
+table! {
     #[doc = "A range of an encoding in format 1."]
     #[derive(Copy)]
     pub Range1 {
@@ -45,15 +58,24 @@ table! {
     }
 }
 
+table! {
+    #[doc = "A supplement of an encoding in the supplemental format."]
+    #[derive(Copy)]
+    pub Supplement {
+        code  (u8      ), // code
+        glyph (StringID), // glyph
+    }
+}
+
 impl Encoding {
     /// Return the string identifier of a glyph.
-    #[inline]
     pub fn get(&self, glyph_id: GlyphID) -> Option<StringID> {
         match self {
             Encoding::Standard => get_standard(glyph_id),
             Encoding::Expert => get_expert(glyph_id),
             Encoding::Format0(ref encoding) => encoding.get(glyph_id),
             Encoding::Format1(ref encoding) => encoding.get(glyph_id),
+            Encoding::FormatSupplemental(ref encoding) => encoding.get(glyph_id),
         }
     }
 }
@@ -63,6 +85,7 @@ impl Value for Encoding {
         Ok(match tape.peek::<u8>()? {
             0 => Encoding::Format0(tape.take()?),
             1 => Encoding::Format1(tape.take()?),
+            format if format & 0x80 > 0 => Encoding::FormatSupplemental(tape.take()?),
             format => raise!("found an unsupported format of encodings ({})", format),
         })
     }
@@ -76,6 +99,13 @@ impl Encoding0 {
 }
 
 impl Encoding1 {
+    #[inline]
+    fn get(&self, _: GlyphID) -> Option<StringID> {
+        None
+    }
+}
+
+impl EncodingSupplemental {
     #[inline]
     fn get(&self, _: GlyphID) -> Option<StringID> {
         None
