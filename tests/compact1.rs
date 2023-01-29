@@ -16,18 +16,10 @@ macro_rules! operations(
     });
 );
 
-mod noto_sans {
+mod noto_sans_direct {
     use postscript::Tape;
 
-    use crate::support::{setup, setup_font_set, Fixture};
-
-    #[test]
-    fn char_strings() {
-        let set = setup_font_set(Fixture::NotoSansJP);
-        let tables = &set.char_strings;
-        assert_eq!(tables.len(), 1);
-        assert_eq!(tables[0].len(), 17810);
-    }
+    use crate::support::{setup, Fixture};
 
     #[test]
     fn header() {
@@ -83,6 +75,18 @@ mod noto_sans {
             FDArray: [43013],
         );
         assert_eq!(expand!(table[0].0), expand!(operations.0));
+    }
+}
+
+mod noto_sans_indirect {
+    use crate::support::{setup_font_set, Fixture};
+
+    #[test]
+    fn char_strings() {
+        let set = setup_font_set(Fixture::NotoSansJP);
+        let tables = &set.char_strings;
+        assert_eq!(tables.len(), 1);
+        assert_eq!(tables[0].len(), 17810);
     }
 
     #[test]
