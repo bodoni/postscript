@@ -35,12 +35,12 @@ use crate::{Result, Tape, Value, Walue};
 #[derive(Clone, Debug)]
 pub struct FontSet {
     pub header: Header,
-    pub names: Vec<String>,
+    pub names: Names,
+    pub dictionaries: Vec<Operations>,
     pub strings: Strings,
     pub encodings: Vec<Encoding>,
     pub char_sets: Vec<CharSet>,
     pub char_strings: Vec<CharStrings>,
-    pub operations: Vec<Operations>,
     pub subroutines: Subroutines,
     pub records: Vec<Record>,
 }
@@ -57,15 +57,15 @@ impl Value for FontSet {
         let position = tape.position()?;
         let header = tape.take::<Header>()?;
         tape.jump(position + header.header_size as u64)?;
-        let names = tape.take::<Names>()?.into()?;
-        let operations = tape.take::<Dictionaries>()?.into()?;
+        let names = tape.take::<Names>()?;
+        let dictionaries = tape.take::<Dictionaries>()?.into()?;
         let strings = tape.take::<Strings>()?;
         let subroutines = tape.take::<Subroutines>()?;
         let mut encodings = vec![];
         let mut char_sets = vec![];
         let mut char_strings = vec![];
         let mut records = vec![];
-        for (i, dictionary) in operations.iter().enumerate() {
+        for (i, dictionary) in dictionaries.iter().enumerate() {
             encodings.push(match get!(@single dictionary, Encoding) {
                 0 => Encoding::Standard,
                 1 => Encoding::Expert,
@@ -92,11 +92,11 @@ impl Value for FontSet {
         Ok(Self {
             header,
             names,
+            dictionaries,
             strings,
             encodings,
             char_sets,
             char_strings,
-            operations,
             subroutines,
             records,
         })
