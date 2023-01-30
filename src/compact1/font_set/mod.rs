@@ -36,12 +36,12 @@ use crate::{Result, Tape, Value, Walue};
 pub struct FontSet {
     pub header: Header,
     pub names: Names,
-    pub dictionaries: Vec<Operations>,
+    pub operations: Vec<Operations>,
     pub strings: Strings,
-    pub encodings: Vec<Encoding>,
-    pub char_sets: Vec<CharSet>,
-    pub char_strings: Vec<CharStrings>,
     pub subroutines: Subroutines,
+    pub encodings: Vec<Encoding>,
+    pub char_strings: Vec<CharStrings>,
+    pub char_sets: Vec<CharSet>,
     pub records: Vec<Record>,
 }
 
@@ -58,22 +58,14 @@ impl Value for FontSet {
         let header = tape.take::<Header>()?;
         tape.jump(position + header.header_size as u64)?;
         let names = tape.take::<Names>()?;
-        let dictionaries = tape.take::<Dictionaries>()?.into()?;
+        let operations: Vec<_> = tape.take::<Dictionaries>()?.try_into()?;
         let strings = tape.take::<Strings>()?;
         let subroutines = tape.take::<Subroutines>()?;
         let mut encodings = vec![];
         let mut char_sets = vec![];
         let mut char_strings = vec![];
         let mut records = vec![];
-        for (i, dictionary) in dictionaries.iter().enumerate() {
-            encodings.push(match get!(@single dictionary, Encoding) {
-                0 => Encoding::Standard,
-                1 => Encoding::Expert,
-                offset => {
-                    tape.jump(position + offset as u64)?;
-                    tape.take()?
-                }
-            });
+        for (i, dictionary) in operations.iter().enumerate() {
             char_strings.push({
                 tape.jump(position + get!(@single dictionary, CharStrings) as u64)?;
                 tape.take_given::<CharStrings>(get!(@single dictionary, CharStringType))?
@@ -87,17 +79,25 @@ impl Value for FontSet {
                     tape.take_given(char_strings[i].count as usize)?
                 }
             });
+            encodings.push(match get!(@single dictionary, Encoding) {
+                0 => Encoding::Standard,
+                1 => Encoding::Expert,
+                offset => {
+                    tape.jump(position + offset as u64)?;
+                    tape.take()?
+                }
+            });
             records.push(tape.take_given((position, dictionary, &char_strings[i]))?);
         }
         Ok(Self {
             header,
             names,
-            dictionaries,
+            operations,
             strings,
-            encodings,
-            char_sets,
-            char_strings,
             subroutines,
+            encodings,
+            char_strings,
+            char_sets,
             records,
         })
     }

@@ -48,7 +48,7 @@ mod noto_sans_direct {
     }
 
     #[test]
-    fn dictionaries() {
+    fn operations() {
         use postscript::compact1::index::{Dictionaries, Names};
         use postscript::compact1::Header;
 
@@ -57,7 +57,7 @@ mod noto_sans_direct {
         let table = ok!(tape.take::<Header>());
         ok!(tape.jump(position + table.header_size as u64));
         let _ = ok!(tape.take::<Names>());
-        let table = ok!(ok!(tape.take::<Dictionaries>()).into());
+        let table: Vec<_> = ok!(ok!(tape.take::<Dictionaries>()).try_into());
         assert_eq!(table.len(), 1);
         let operations = operations!(
             ROS: [394, 395, 0],
@@ -193,26 +193,6 @@ mod source_serif {
     }
 
     #[test]
-    fn dictionaries() {
-        let set = setup_font_set(Fixture::SourceSerifPro);
-        let table = &set.dictionaries;
-        assert_eq!(table.len(), 1);
-        let operations = operations!(
-            Version: [709],
-            Notice: [710],
-            Copyright: [711],
-            FullName: [712],
-            FamilyName: [712],
-            Weight: [388],
-            FontBBox: [-178, -335, 1138, 918],
-            CharSet: [8340],
-            CharStrings: [8917],
-            Private: [65, 33671],
-        );
-        assert_eq!(expand!(table[0].0), expand!(operations.0));
-    }
-
-    #[test]
     fn encodings() {
         use postscript::compact1::Encoding;
 
@@ -245,6 +225,26 @@ mod source_serif {
         let table: Vec<_> = ok!(set.names.try_into());
         assert_eq!(table.len(), 1);
         assert_eq!(&table[0], "SourceSerifPro-Regular");
+    }
+
+    #[test]
+    fn operations() {
+        let set = setup_font_set(Fixture::SourceSerifPro);
+        let table = &set.operations;
+        assert_eq!(table.len(), 1);
+        let operations = operations!(
+            Version: [709],
+            Notice: [710],
+            Copyright: [711],
+            FullName: [712],
+            FamilyName: [712],
+            Weight: [388],
+            FontBBox: [-178, -335, 1138, 918],
+            CharSet: [8340],
+            CharStrings: [8917],
+            Private: [65, 33671],
+        );
+        assert_eq!(expand!(table[0].0), expand!(operations.0));
     }
 
     #[test]

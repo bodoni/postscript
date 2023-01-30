@@ -79,7 +79,7 @@ impl<'l> Walue<'l> for Record {
         let encoding = tape.take_given(char_strings)?;
         let offset = get!(@single dictionary, FDArray);
         tape.jump(position + offset as u64)?;
-        let operations = tape.take::<Dictionaries>()?.into()?;
+        let operations: Vec<_> = tape.take::<Dictionaries>()?.try_into()?;
         let mut records = vec![];
         for dictionary in operations.iter() {
             records.push(tape.take_given((position, dictionary))?);
