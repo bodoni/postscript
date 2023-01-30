@@ -1,46 +1,25 @@
 //! The operations.
 
+use std::collections::HashMap;
+
 use crate::compact1::number::Number;
 use crate::{Result, Tape, Value};
 
 /// An operand.
 pub type Operand = Number;
 
-/// An operation.
-#[derive(Clone, Debug)]
-pub struct Operation(pub Operator, pub Vec<Operand>);
-
 /// A collection of operations.
 #[derive(Clone, Debug, Default)]
-pub struct Operations(pub Vec<Operation>);
+pub struct Operations(pub HashMap<Operator, Vec<Operand>>);
 
-dereference! { Operations::0 => Vec<Operation> }
-
-impl Value for Operation {
-    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
-        let mut operands = vec![];
-        loop {
-            match tape.peek::<u8>()? {
-                0x1c | 0x1d | 0x1e | 0x20..=0xfe => operands.push(tape.take()?),
-                code => {
-                    let code = if code == 0x0c {
-                        tape.take::<u16>()?
-                    } else {
-                        tape.take::<u8>()? as u16
-                    };
-                    return Ok(Self(Operator::from(code)?, operands));
-                }
-            }
-        }
-    }
-}
+struct Operation(Operator, Vec<Operand>);
 
 impl Operations {
     /// Return the operands of an operation.
     #[inline]
     pub fn get(&self, operator: Operator) -> Option<&[Operand]> {
-        match self.0.iter().position(|operation| operation.0 == operator) {
-            Some(index) => Some(&self.0[index].1),
+        match self.0.get(&operator) {
+            Some(operands) => Some(operands),
             _ => operator.default(),
         }
     }
@@ -74,18 +53,39 @@ impl Value for Operations {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
         use std::io::ErrorKind;
 
-        let mut records = vec![];
+        let mut operations = HashMap::new();
         loop {
             match tape.take() {
-                Ok(operation) => {
-                    records.push(operation);
+                Ok(Operation(operator, operands)) => {
+                    operations.insert(operator, operands);
                 }
                 Err(error) => {
                     if error.kind() == ErrorKind::UnexpectedEof {
-                        return Ok(Operations(records));
+                        return Ok(Operations(operations));
                     } else {
                         return Err(error);
                     }
+                }
+            }
+        }
+    }
+}
+
+dereference! { Operations::0 => HashMap<Operator, Vec<Operand>> }
+
+impl Value for Operation {
+    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+        let mut operands = vec![];
+        loop {
+            match tape.peek::<u8>()? {
+                0x1c | 0x1d | 0x1e | 0x20..=0xfe => operands.push(tape.take()?),
+                code => {
+                    let code = if code == 0x0c {
+                        tape.take::<u16>()?
+                    } else {
+                        tape.take::<u8>()? as u16
+                    };
+                    return Ok(Self(Operator::from(code)?, operands));
                 }
             }
         }

@@ -28,7 +28,7 @@ pub mod character_id_keyed;
 pub mod character_name_keyed;
 
 use crate::compact1::index::{CharStrings, Dictionaries, Names, Strings, Subroutines};
-use crate::compact1::{CharSet, Encoding, Header, Operation, Operations, Operator};
+use crate::compact1::{CharSet, Encoding, Header, Operations, Operator};
 use crate::{Result, Tape, Value, Walue};
 
 /// A font set.
@@ -65,12 +65,12 @@ impl Value for FontSet {
         let mut char_sets = vec![];
         let mut char_strings = vec![];
         let mut records = vec![];
-        for (i, dictionary) in operations.iter().enumerate() {
+        for (i, operations) in operations.iter().enumerate() {
             char_strings.push({
-                tape.jump(position + get!(@single dictionary, CharStrings) as u64)?;
-                tape.take_given::<CharStrings>(get!(@single dictionary, CharStringType))?
+                tape.jump(position + get!(@single operations, CharStrings) as u64)?;
+                tape.take_given::<CharStrings>(get!(@single operations, CharStringType))?
             });
-            char_sets.push(match get!(@single dictionary, CharSet) {
+            char_sets.push(match get!(@single operations, CharSet) {
                 0 => CharSet::ISOAdobe,
                 1 => CharSet::Expert,
                 2 => CharSet::ExpertSubset,
@@ -79,7 +79,7 @@ impl Value for FontSet {
                     tape.take_given(char_strings[i].count as usize)?
                 }
             });
-            encodings.push(match get!(@single dictionary, Encoding) {
+            encodings.push(match get!(@single operations, Encoding) {
                 0 => Encoding::Standard,
                 1 => Encoding::Expert,
                 offset => {
@@ -87,7 +87,7 @@ impl Value for FontSet {
                     tape.take()?
                 }
             });
-            records.push(tape.take_given((position, dictionary, &char_strings[i]))?);
+            records.push(tape.take_given((position, operations, &char_strings[i]))?);
         }
         Ok(Self {
             header,
@@ -108,17 +108,17 @@ impl<'l> Walue<'l> for Record {
 
     fn read<T: Tape>(
         tape: &mut T,
-        (position, dictionary, char_strings): Self::Parameter,
+        (position, operations, char_strings): Self::Parameter,
     ) -> Result<Self> {
-        if let Some(Operation(Operator::ROS, _)) = <[_]>::get(dictionary, 0) {
+        if operations.contains_key(&Operator::ROS) {
             Ok(Record::CharacterIDKeyed(tape.take_given((
                 position,
-                dictionary,
+                operations,
                 char_strings,
             ))?))
         } else {
             Ok(Record::CharacterNameKeyed(
-                tape.take_given((position, dictionary))?,
+                tape.take_given((position, operations))?,
             ))
         }
     }

@@ -3,7 +3,7 @@
 use std::io::Cursor;
 
 use crate::compact1::index::{CharStrings, Dictionaries, Subroutines};
-use crate::compact1::{GlyphID, Number, Operation, Operations, Operator, StringID};
+use crate::compact1::{GlyphID, Number, Operations, Operator, StringID};
 use crate::{Result, Tape, Walue};
 
 /// A character-ID-keyed record in a font set.
@@ -68,21 +68,21 @@ impl<'l> Walue<'l> for Record {
 
     fn read<T: Tape>(
         tape: &mut T,
-        (position, dictionary, char_strings): Self::Parameter,
+        (position, top_operations, char_strings): Self::Parameter,
     ) -> Result<Self> {
-        let operands = match <[_]>::get(dictionary, 0) {
-            Some(Operation(Operator::ROS, operands)) if operands.len() == 3 => operands,
+        let operands = match top_operations.get(Operator::ROS) {
+            Some(operands) if operands.len() == 3 => operands,
             _ => raise!("found a malformed character-ID-keyed record"),
         };
-        let offset = get!(@single dictionary, FDSelect);
+        let offset = get!(@single top_operations, FDSelect);
         tape.jump(position + offset as u64)?;
         let encoding = tape.take_given(char_strings)?;
-        let offset = get!(@single dictionary, FDArray);
+        let offset = get!(@single top_operations, FDArray);
         tape.jump(position + offset as u64)?;
         let operations: Vec<_> = tape.take::<Dictionaries>()?.try_into()?;
         let mut records = vec![];
-        for dictionary in operations.iter() {
-            records.push(tape.take_given((position, dictionary))?);
+        for top_operations in operations.iter() {
+            records.push(tape.take_given((position, top_operations))?);
         }
         Ok(Self {
             registry: operands[0].try_into()?,
@@ -98,8 +98,8 @@ impl<'l> Walue<'l> for Record {
 impl<'l> Walue<'l> for RecordInner {
     type Parameter = (u64, &'l Operations);
 
-    fn read<T: Tape>(tape: &mut T, (position, dictionary): Self::Parameter) -> Result<Self> {
-        let (size, offset) = get!(@double dictionary, Private);
+    fn read<T: Tape>(tape: &mut T, (position, top_operations): Self::Parameter) -> Result<Self> {
+        let (size, offset) = get!(@double top_operations, Private);
         tape.jump(position + offset as u64)?;
         let chunk = tape.take_given::<Vec<u8>>(size as usize)?;
         let operations = Cursor::new(chunk).take::<Operations>()?;

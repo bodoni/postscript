@@ -19,7 +19,7 @@ pub use header::Header;
 pub use index::Index;
 pub use number::Number;
 pub use offset::{Offset, OffsetSize};
-pub use operation::{Operand, Operation, Operations, Operator};
+pub use operation::{Operand, Operations, Operator};
 
 use crate::{Error, Result};
 

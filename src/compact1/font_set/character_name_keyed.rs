@@ -16,8 +16,8 @@ pub struct Record {
 impl<'l> Walue<'l> for Record {
     type Parameter = (u64, &'l Operations);
 
-    fn read<T: Tape>(tape: &mut T, (position, dictionary): Self::Parameter) -> Result<Self> {
-        let (size, mut offset) = get!(@double dictionary, Private);
+    fn read<T: Tape>(tape: &mut T, (position, top_operations): Self::Parameter) -> Result<Self> {
+        let (size, mut offset) = get!(@double top_operations, Private);
         tape.jump(position + offset as u64)?;
         let chunk = tape.take_given::<Vec<u8>>(size as usize)?;
         let operations = Cursor::new(chunk).take::<Operations>()?;
