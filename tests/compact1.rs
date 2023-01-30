@@ -162,44 +162,6 @@ mod source_serif {
     use crate::support::{setup_font_set, Fixture};
 
     #[test]
-    fn character_sets() {
-        use postscript::compact1::CharacterSet;
-
-        let set = setup_font_set(Fixture::SourceSerifPro);
-        let tables = &set.character_sets;
-        assert_eq!(tables.len(), 1);
-        match &tables[0] {
-            &CharacterSet::Format1(..) => {}
-            _ => unreachable!(),
-        }
-    }
-
-    #[test]
-    fn character_strings() {
-        let set = setup_font_set(Fixture::SourceSerifPro);
-        let tables = &set.character_strings;
-        assert_eq!(tables.len(), 1);
-        assert_eq!(tables[0].len(), 547);
-    }
-
-    #[test]
-    fn encodings() {
-        use postscript::compact1::Encoding;
-
-        let set = setup_font_set(Fixture::SourceSerifPro);
-        let encodings = &set.encodings;
-        let strings = &set.strings;
-        assert_eq!(encodings.len(), 1);
-        match &encodings[0] {
-            encoding @ &Encoding::Standard => {
-                assert_eq!(ok!(strings.get(ok!(encoding.get(0)))), ".notdef");
-                assert_eq!(ok!(strings.get(ok!(encoding.get(42)))), "asterisk");
-            }
-            _ => unreachable!(),
-        }
-    }
-
-    #[test]
     fn header() {
         let set = setup_font_set(Fixture::SourceSerifPro);
         let table = &set.header;
@@ -238,6 +200,61 @@ mod source_serif {
     }
 
     #[test]
+    fn strings() {
+        let set = setup_font_set(Fixture::SourceSerifPro);
+        let table = &set.strings;
+        assert_eq!(table.len(), 322);
+        assert_eq!(ok!(table.get(0)), ".notdef");
+        assert_eq!(ok!(table.get(175)), "Aring");
+        assert_eq!(ok!(table.get(500)), "nine.tosf");
+    }
+
+    #[test]
+    fn subroutines() {
+        let set = setup_font_set(Fixture::SourceSerifPro);
+        let table = &set.subroutines;
+        assert_eq!(table.len(), 181);
+    }
+
+    #[test]
+    fn character_strings() {
+        let set = setup_font_set(Fixture::SourceSerifPro);
+        let tables = &set.character_strings;
+        assert_eq!(tables.len(), 1);
+        assert_eq!(tables[0].len(), 547);
+    }
+
+    #[test]
+    fn character_sets() {
+        use postscript::compact1::CharacterSet;
+
+        let set = setup_font_set(Fixture::SourceSerifPro);
+        let tables = &set.character_sets;
+        assert_eq!(tables.len(), 1);
+        match &tables[0] {
+            &CharacterSet::Format1(..) => {}
+            _ => unreachable!(),
+        }
+    }
+
+    #[test]
+    fn encodings() {
+        use postscript::compact1::Encoding;
+
+        let set = setup_font_set(Fixture::SourceSerifPro);
+        let encodings = &set.encodings;
+        let strings = &set.strings;
+        assert_eq!(encodings.len(), 1);
+        match &encodings[0] {
+            encoding @ &Encoding::Standard => {
+                assert_eq!(ok!(strings.get(ok!(encoding.get(0)))), ".notdef");
+                assert_eq!(ok!(strings.get(ok!(encoding.get(42)))), "asterisk");
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    #[test]
     fn records() {
         use postscript::compact1::font_set::Record;
 
@@ -266,22 +283,5 @@ mod source_serif {
             }
             _ => unreachable!(),
         }
-    }
-
-    #[test]
-    fn strings() {
-        let set = setup_font_set(Fixture::SourceSerifPro);
-        let table = &set.strings;
-        assert_eq!(table.len(), 322);
-        assert_eq!(ok!(table.get(0)), ".notdef");
-        assert_eq!(ok!(table.get(175)), "Aring");
-        assert_eq!(ok!(table.get(500)), "nine.tosf");
-    }
-
-    #[test]
-    fn subroutines() {
-        let set = setup_font_set(Fixture::SourceSerifPro);
-        let table = &set.subroutines;
-        assert_eq!(table.len(), 181);
     }
 }
