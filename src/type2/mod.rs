@@ -1,4 +1,4 @@
-//! The [Type 2 char-string format][1].
+//! The [Type 2 character-string format][1].
 //!
 //! [1]: https://adobe-type-tools.github.io/font-tech-notes/pdfs/5177.Type2.pdf
 

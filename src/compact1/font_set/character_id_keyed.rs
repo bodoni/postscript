@@ -2,7 +2,7 @@
 
 use std::io::Cursor;
 
-use crate::compact1::index::{CharStrings, Dictionaries, Subroutines};
+use crate::compact1::index::{CharacterStrings, Dictionaries, Subroutines};
 use crate::compact1::{GlyphID, Number, Operations, Operator, StringID};
 use crate::{Result, Tape, Walue};
 
@@ -64,11 +64,11 @@ table! {
 }
 
 impl<'l> Walue<'l> for Record {
-    type Parameter = (u64, &'l Operations, &'l CharStrings);
+    type Parameter = (u64, &'l Operations, &'l CharacterStrings);
 
     fn read<T: Tape>(
         tape: &mut T,
-        (position, top_operations, char_strings): Self::Parameter,
+        (position, top_operations, character_strings): Self::Parameter,
     ) -> Result<Self> {
         let operands = match top_operations.get(Operator::ROS) {
             Some(operands) if operands.len() == 3 => operands,
@@ -76,7 +76,7 @@ impl<'l> Walue<'l> for Record {
         };
         let offset = get!(@single top_operations, FDSelect);
         tape.jump(position + offset as u64)?;
-        let encoding = tape.take_given(char_strings)?;
+        let encoding = tape.take_given(character_strings)?;
         let offset = get!(@single top_operations, FDArray);
         tape.jump(position + offset as u64)?;
         let operations: Vec<_> = tape.take::<Dictionaries>()?.try_into()?;
@@ -118,11 +118,11 @@ impl<'l> Walue<'l> for RecordInner {
 }
 
 impl<'l> Walue<'l> for Encoding {
-    type Parameter = &'l CharStrings;
+    type Parameter = &'l CharacterStrings;
 
-    fn read<T: Tape>(tape: &mut T, char_strings: Self::Parameter) -> Result<Self> {
+    fn read<T: Tape>(tape: &mut T, character_strings: Self::Parameter) -> Result<Self> {
         Ok(match tape.peek::<u8>()? {
-            0 => Encoding::Format0(tape.take_given(char_strings)?),
+            0 => Encoding::Format0(tape.take_given(character_strings)?),
             3 => Encoding::Format3(tape.take()?),
             format => raise!(
                 "found an unsupported format of the glyph-to-dictionary encoding ({})",
@@ -133,14 +133,14 @@ impl<'l> Walue<'l> for Encoding {
 }
 
 impl<'l> Walue<'l> for Encoding0 {
-    type Parameter = &'l CharStrings;
+    type Parameter = &'l CharacterStrings;
 
-    fn read<T: Tape>(tape: &mut T, char_strings: Self::Parameter) -> Result<Self> {
+    fn read<T: Tape>(tape: &mut T, character_strings: Self::Parameter) -> Result<Self> {
         let format = tape.take()?;
         debug_assert_eq!(format, 0);
         Ok(Self {
             format: format,
-            dictionary_ids: tape.take_given(char_strings.count as usize)?,
+            dictionary_ids: tape.take_given(character_strings.count as usize)?,
         })
     }
 }

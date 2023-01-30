@@ -71,13 +71,13 @@ macro_rules! index {
     );
 }
 
-mod char_strings;
+mod character_strings;
 mod dictionaries;
 mod names;
 mod strings;
 mod subroutines;
 
-pub use char_strings::CharStrings;
+pub use character_strings::CharacterStrings;
 pub use dictionaries::Dictionaries;
 pub use names::Names;
 pub use strings::Strings;

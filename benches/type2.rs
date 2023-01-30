@@ -22,7 +22,7 @@ mod source_serif {
             _ => unreachable!(),
         };
         bencher.iter(|| {
-            for code in set.char_strings[0].iter() {
+            for code in set.character_strings[0].iter() {
                 let mut program = Program::new(code, global, local);
                 while let Some(..) = ok!(program.next()) {}
             }

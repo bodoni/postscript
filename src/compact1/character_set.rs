@@ -1,42 +1,42 @@
-//! The char sets.
+//! The character sets.
 
 use crate::compact1::{GlyphID, StringID};
 use crate::{Result, Tape, Walue};
 
-/// A char set.
+/// A character set.
 #[derive(Clone, Debug)]
-pub enum CharSet {
+pub enum CharacterSet {
     ISOAdobe,
     Expert,
     ExpertSubset,
-    Format0(CharSet0),
-    Format1(CharSet1),
-    Format2(CharSet2),
+    Format0(CharacterSet0),
+    Format1(CharacterSet1),
+    Format2(CharacterSet2),
 }
 
-/// A char set in format 0.
+/// A character set in format 0.
 #[derive(Clone, Debug)]
-pub struct CharSet0 {
+pub struct CharacterSet0 {
     pub format: u8,            // format
     pub glyphs: Vec<StringID>, // glyph
 }
 
-/// A char set in format 1.
+/// A character set in format 1.
 #[derive(Clone, Debug)]
-pub struct CharSet1 {
+pub struct CharacterSet1 {
     pub format: u8,          // format
     pub ranges: Vec<Range1>, // Range1
 }
 
-/// A char set in format 2.
+/// A character set in format 2.
 #[derive(Clone, Debug)]
-pub struct CharSet2 {
+pub struct CharacterSet2 {
     pub format: u8,          // format
     pub ranges: Vec<Range2>, // Range2
 }
 
 table! {
-    #[doc = "A range of a char set in format 1."]
+    #[doc = "A range of a character set in format 1."]
     #[derive(Copy)]
     pub Range1 {
         first_string_id (StringID), // first
@@ -45,7 +45,7 @@ table! {
 }
 
 table! {
-    #[doc = "A range of a char set in format 2."]
+    #[doc = "A range of a character set in format 2."]
     #[derive(Copy)]
     pub Range2 {
         first_string_id (StringID), // first
@@ -53,70 +53,70 @@ table! {
     }
 }
 
-impl CharSet {
+impl CharacterSet {
     /// Return the name of a glyph.
     #[inline]
     pub fn get(&self, glyph_id: GlyphID) -> Option<&'static str> {
         match self {
-            CharSet::ISOAdobe => get_iso_adobe(glyph_id),
-            CharSet::Expert => get_expert(glyph_id),
-            CharSet::ExpertSubset => get_expert_subset(glyph_id),
-            CharSet::Format0(ref char_set) => char_set.get(glyph_id),
-            CharSet::Format1(ref char_set) => char_set.get(glyph_id),
-            CharSet::Format2(ref char_set) => char_set.get(glyph_id),
+            CharacterSet::ISOAdobe => get_iso_adobe(glyph_id),
+            CharacterSet::Expert => get_expert(glyph_id),
+            CharacterSet::ExpertSubset => get_expert_subset(glyph_id),
+            CharacterSet::Format0(ref char_set) => char_set.get(glyph_id),
+            CharacterSet::Format1(ref char_set) => char_set.get(glyph_id),
+            CharacterSet::Format2(ref char_set) => char_set.get(glyph_id),
         }
     }
 }
 
-impl Walue<'static> for CharSet {
+impl Walue<'static> for CharacterSet {
     type Parameter = usize;
 
     fn read<T: Tape>(tape: &mut T, glyph_count: usize) -> Result<Self> {
         Ok(match tape.peek::<u8>()? {
-            0 => CharSet::Format0(tape.take_given(glyph_count)?),
-            1 => CharSet::Format1(tape.take_given(glyph_count)?),
-            2 => CharSet::Format2(tape.take_given(glyph_count)?),
-            format => raise!("found an unsupported format of char sets ({})", format),
+            0 => CharacterSet::Format0(tape.take_given(glyph_count)?),
+            1 => CharacterSet::Format1(tape.take_given(glyph_count)?),
+            2 => CharacterSet::Format2(tape.take_given(glyph_count)?),
+            format => raise!("found an unsupported format of character sets ({})", format),
         })
     }
 }
 
-impl CharSet0 {
+impl CharacterSet0 {
     #[inline]
     fn get(&self, _: GlyphID) -> Option<&'static str> {
         None
     }
 }
 
-impl Walue<'static> for CharSet0 {
+impl Walue<'static> for CharacterSet0 {
     type Parameter = usize;
 
     fn read<T: Tape>(tape: &mut T, glyph_count: usize) -> Result<Self> {
         let format = tape.take::<u8>()?;
         if format != 0 {
-            raise!("found a malformed char set");
+            raise!("found a malformed character set");
         }
-        Ok(CharSet0 {
+        Ok(CharacterSet0 {
             format: format,
             glyphs: tape.take_given(glyph_count - 1)?,
         })
     }
 }
 
-impl CharSet1 {
+impl CharacterSet1 {
     #[inline]
     fn get(&self, _: GlyphID) -> Option<&'static str> {
         None
     }
 }
 
-impl Walue<'static> for CharSet1 {
+impl Walue<'static> for CharacterSet1 {
     type Parameter = usize;
 
     fn read<T: Tape>(tape: &mut T, glyph_count: usize) -> Result<Self> {
         let format = tape.take::<u8>()?;
         if format != 1 {
-            raise!("found a malformed char set");
+            raise!("found a malformed character set");
         }
         let mut ranges = vec![];
         let mut found_count = 0 + 1;
@@ -126,27 +126,27 @@ impl Walue<'static> for CharSet1 {
             ranges.push(range);
         }
         if found_count != glyph_count {
-            raise!("found a malformed char set");
+            raise!("found a malformed character set");
         }
-        Ok(CharSet1 {
+        Ok(CharacterSet1 {
             format: format,
             ranges: ranges,
         })
     }
 }
 
-impl CharSet2 {
+impl CharacterSet2 {
     #[inline]
     fn get(&self, _: GlyphID) -> Option<&'static str> {
         None
     }
 }
 
-impl Walue<'static> for CharSet2 {
+impl Walue<'static> for CharacterSet2 {
     type Parameter = usize;
 
     fn read<T: Tape>(tape: &mut T, glyph_count: usize) -> Result<Self> {
-        macro_rules! reject(() => (raise!("found a malformed char set")));
+        macro_rules! reject(() => (raise!("found a malformed character set")));
         let format = tape.take::<u8>()?;
         if format != 2 {
             reject!();
@@ -161,7 +161,7 @@ impl Walue<'static> for CharSet2 {
         if found_count != glyph_count {
             reject!();
         }
-        Ok(CharSet2 {
+        Ok(CharacterSet2 {
             format: format,
             ranges: ranges,
         })

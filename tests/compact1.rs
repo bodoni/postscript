@@ -76,9 +76,9 @@ mod noto_sans_indirect {
     use crate::support::{setup_font_set, Fixture};
 
     #[test]
-    fn char_strings() {
+    fn character_strings() {
         let set = setup_font_set(Fixture::NotoSansJP);
-        let tables = &set.char_strings;
+        let tables = &set.character_strings;
         assert_eq!(tables.len(), 1);
         assert_eq!(tables[0].len(), 17810);
     }
@@ -162,22 +162,22 @@ mod source_serif {
     use crate::support::{setup_font_set, Fixture};
 
     #[test]
-    fn char_sets() {
-        use postscript::compact1::CharSet;
+    fn character_sets() {
+        use postscript::compact1::CharacterSet;
 
         let set = setup_font_set(Fixture::SourceSerifPro);
-        let tables = &set.char_sets;
+        let tables = &set.character_sets;
         assert_eq!(tables.len(), 1);
         match &tables[0] {
-            &CharSet::Format1(..) => {}
+            &CharacterSet::Format1(..) => {}
             _ => unreachable!(),
         }
     }
 
     #[test]
-    fn char_strings() {
+    fn character_strings() {
         let set = setup_font_set(Fixture::SourceSerifPro);
-        let tables = &set.char_strings;
+        let tables = &set.character_strings;
         assert_eq!(tables.len(), 1);
         assert_eq!(tables[0].len(), 547);
     }

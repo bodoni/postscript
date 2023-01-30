@@ -2,7 +2,7 @@
 //!
 //! [1]: https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf
 
-pub mod char_set;
+pub mod character_set;
 pub mod encoding;
 pub mod font_set;
 pub mod index;
@@ -12,7 +12,7 @@ mod number;
 mod offset;
 mod operation;
 
-pub use char_set::CharSet;
+pub use character_set::CharacterSet;
 pub use encoding::Encoding;
 pub use font_set::FontSet;
 pub use header::Header;

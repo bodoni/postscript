@@ -27,8 +27,8 @@ macro_rules! get(
 pub mod character_id_keyed;
 pub mod character_name_keyed;
 
-use crate::compact1::index::{CharStrings, Dictionaries, Names, Strings, Subroutines};
-use crate::compact1::{CharSet, Encoding, Header, Operations, Operator};
+use crate::compact1::index::{CharacterStrings, Dictionaries, Names, Strings, Subroutines};
+use crate::compact1::{CharacterSet, Encoding, Header, Operations, Operator};
 use crate::{Result, Tape, Value, Walue};
 
 /// A font set.
@@ -40,8 +40,8 @@ pub struct FontSet {
     pub strings: Strings,
     pub subroutines: Subroutines,
     pub encodings: Vec<Encoding>,
-    pub char_strings: Vec<CharStrings>,
-    pub char_sets: Vec<CharSet>,
+    pub character_strings: Vec<CharacterStrings>,
+    pub character_sets: Vec<CharacterSet>,
     pub records: Vec<Record>,
 }
 
@@ -62,21 +62,21 @@ impl Value for FontSet {
         let strings = tape.take::<Strings>()?;
         let subroutines = tape.take::<Subroutines>()?;
         let mut encodings = vec![];
-        let mut char_sets = vec![];
-        let mut char_strings = vec![];
+        let mut character_sets = vec![];
+        let mut character_strings = vec![];
         let mut records = vec![];
         for (i, operations) in operations.iter().enumerate() {
-            char_strings.push({
+            character_strings.push({
                 tape.jump(position + get!(@single operations, CharStrings) as u64)?;
-                tape.take_given::<CharStrings>(get!(@single operations, CharStringType))?
+                tape.take_given::<CharacterStrings>(get!(@single operations, CharStringType))?
             });
-            char_sets.push(match get!(@single operations, CharSet) {
-                0 => CharSet::ISOAdobe,
-                1 => CharSet::Expert,
-                2 => CharSet::ExpertSubset,
+            character_sets.push(match get!(@single operations, CharSet) {
+                0 => CharacterSet::ISOAdobe,
+                1 => CharacterSet::Expert,
+                2 => CharacterSet::ExpertSubset,
                 offset => {
                     tape.jump(position + offset as u64)?;
-                    tape.take_given(char_strings[i].count as usize)?
+                    tape.take_given(character_strings[i].count as usize)?
                 }
             });
             encodings.push(match get!(@single operations, Encoding) {
@@ -87,7 +87,7 @@ impl Value for FontSet {
                     tape.take()?
                 }
             });
-            records.push(tape.take_given((position, operations, &char_strings[i]))?);
+            records.push(tape.take_given((position, operations, &character_strings[i]))?);
         }
         Ok(Self {
             header,
@@ -96,25 +96,25 @@ impl Value for FontSet {
             strings,
             subroutines,
             encodings,
-            char_strings,
-            char_sets,
+            character_strings,
+            character_sets,
             records,
         })
     }
 }
 
 impl<'l> Walue<'l> for Record {
-    type Parameter = (u64, &'l Operations, &'l CharStrings);
+    type Parameter = (u64, &'l Operations, &'l CharacterStrings);
 
     fn read<T: Tape>(
         tape: &mut T,
-        (position, operations, char_strings): Self::Parameter,
+        (position, operations, character_strings): Self::Parameter,
     ) -> Result<Self> {
         if operations.contains_key(&Operator::ROS) {
             Ok(Record::CharacterIDKeyed(tape.take_given((
                 position,
                 operations,
-                char_strings,
+                character_strings,
             ))?))
         } else {
             Ok(Record::CharacterNameKeyed(
