@@ -17,13 +17,17 @@ impl<'l> Walue<'l> for Record {
     type Parameter = (u64, &'l Operations);
 
     fn read<T: Tape>(tape: &mut T, (position, top_operations): Self::Parameter) -> Result<Self> {
-        let (size, mut offset) = get!(@double top_operations, Private);
+        let (size, offset) = get!(@double top_operations, Private);
         tape.jump(position + offset as u64)?;
         let chunk = tape.take_given::<Vec<u8>>(size as usize)?;
         let operations = Cursor::new(chunk).take::<Operations>()?;
-        offset += get!(@single operations, Subrs);
-        tape.jump(position + offset as u64)?;
-        let subroutines = tape.take()?;
+        let subroutines = match get!(@try @single operations, Subrs) {
+            Some(another_offset) => {
+                tape.jump(position + offset as u64 + another_offset as u64)?;
+                tape.take()?
+            }
+            _ => Default::default(),
+        };
         Ok(Self {
             operations,
             subroutines,
