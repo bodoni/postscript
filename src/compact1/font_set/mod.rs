@@ -58,7 +58,7 @@ impl Value for FontSet {
         let header = tape.take::<Header>()?;
         tape.jump(position + header.header_size as u64)?;
         let names = tape.take::<Names>()?;
-        let operations: Vec<_> = tape.take::<Dictionaries>()?.try_into()?;
+        let operations: Vec<_> = (&tape.take::<Dictionaries>()?).try_into()?;
         let strings = tape.take::<Strings>()?;
         let subroutines = tape.take::<Subroutines>()?;
         let mut encodings = vec![];

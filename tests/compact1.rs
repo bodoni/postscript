@@ -51,7 +51,7 @@ mod noto_sans_direct {
         let table = ok!(tape.take::<Header>());
         ok!(tape.jump(position + table.header_size as u64));
         let _ = ok!(tape.take::<Names>());
-        let table: Vec<_> = ok!(ok!(tape.take::<Dictionaries>()).try_into());
+        let table: Vec<_> = ok!((&ok!(tape.take::<Dictionaries>())).try_into());
         assert_eq!(table.len(), 1);
         let operations = operations!(
             ROS: [394, 395, 0],
