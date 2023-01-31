@@ -29,15 +29,18 @@ impl Value for Index {
         }
         let offset_size = tape.take::<OffsetSize>()?;
         let mut offsets = Vec::with_capacity(count as usize + 1);
-        for i in 0..(count as usize + 1) {
+        for _ in 0..(count as usize + 1) {
             let offset = tape.take_given::<Offset>(offset_size)?;
-            if i == 0 && offset != Offset(1) || i > 0 && offset <= offsets[i - 1] {
-                raise!("found a malformed index");
-            }
             offsets.push(offset);
+        }
+        if offsets[0] != Offset(1) {
+            raise!("found a malformed index");
         }
         let mut data = Vec::with_capacity(count as usize);
         for i in 0..(count as usize) {
+            if offsets[i] > offsets[i + 1] {
+                raise!("found a malformed index");
+            }
             let size = (offsets[i + 1].0 - offsets[i].0) as usize;
             data.push(tape.take_given(size)?);
         }
