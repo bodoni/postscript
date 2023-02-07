@@ -97,7 +97,7 @@ impl Walue<'static> for CharacterSet0 {
             raise!("found a malformed character set");
         }
         Ok(CharacterSet0 {
-            format: format,
+            format,
             glyphs: tape.take_given(glyph_count - 1)?,
         })
     }
@@ -119,6 +119,7 @@ impl Walue<'static> for CharacterSet1 {
             raise!("found a malformed character set");
         }
         let mut ranges = vec![];
+        #[allow(clippy::identity_op)]
         let mut found_count = 0 + 1;
         while found_count < glyph_count {
             let range = tape.take::<Range1>()?;
@@ -128,10 +129,7 @@ impl Walue<'static> for CharacterSet1 {
         if found_count != glyph_count {
             raise!("found a malformed character set");
         }
-        Ok(CharacterSet1 {
-            format: format,
-            ranges: ranges,
-        })
+        Ok(CharacterSet1 { format, ranges })
     }
 }
 
@@ -152,6 +150,7 @@ impl Walue<'static> for CharacterSet2 {
             reject!();
         }
         let mut ranges = vec![];
+        #[allow(clippy::identity_op)]
         let mut found_count = 0 + 1;
         while found_count < glyph_count {
             let range = tape.take::<Range2>()?;
@@ -161,10 +160,7 @@ impl Walue<'static> for CharacterSet2 {
         if found_count != glyph_count {
             reject!();
         }
-        Ok(CharacterSet2 {
-            format: format,
-            ranges: ranges,
-        })
+        Ok(CharacterSet2 { format, ranges })
     }
 }
 

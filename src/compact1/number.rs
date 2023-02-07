@@ -58,7 +58,7 @@ fn parse<T: Tape>(tape: &mut T) -> Result<f32> {
         };
         high = !high;
         match nibble {
-            0..=9 => buffer.push(('0' as u8 + nibble) as char),
+            0..=9 => buffer.push((b'0' + nibble) as char),
             0x0a => buffer.push('.'),
             0x0b => buffer.push('e'),
             0x0c => buffer.push_str("e-"),

@@ -10,33 +10,33 @@ on:
   workflow_dispatch:
 
 jobs:
-  agnostic:
+  check:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/cargo@v1
-        with: {command: fmt, args: --all -- --check}
-
-  macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/cargo@v1
-        with: {command: test}
-      - uses: actions-rs/cargo@v1
-        with: {command: test, args: --all-features}
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
-        with: {toolchain: nightly}
-      - run: cargo +nightly bench
+        with: {toolchain: stable, components: clippy, rustfmt}
+      - run: cargo clippy -- -D warnings
+      - run: cargo fmt --all -- --check
 
-  ubuntu:
-    runs-on: ubuntu-latest
+  bench:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/cargo@v1
-        with: {command: test}
-      - uses: actions-rs/cargo@v1
-        with: {command: test, args: --all-features}
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
-        with: {toolchain: nightly}
-      - run: cargo +nightly bench
+        with: {toolchain: nightly, override: true}
+      - run: cargo bench
+
+  test:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with: {toolchain: stable}
+      - run: cargo test

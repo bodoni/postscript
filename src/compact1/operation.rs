@@ -28,7 +28,7 @@ impl Operations {
     #[inline]
     pub fn get_single(&self, operator: Operator) -> Option<Operand> {
         self.get(operator).and_then(|operands| {
-            if operands.len() > 0 {
+            if !operands.is_empty() {
                 Some(operands[0])
             } else {
                 None

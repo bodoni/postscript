@@ -88,9 +88,9 @@ impl<'l> Walue<'l> for Record {
             registry: operands[0].try_into()?,
             ordering: operands[1].try_into()?,
             supplement: operands[2],
-            encoding: encoding,
-            operations: operations,
-            records: records,
+            encoding,
+            operations,
+            records,
         })
     }
 }
@@ -139,7 +139,7 @@ impl<'l> Walue<'l> for Encoding0 {
         let format = tape.take()?;
         debug_assert_eq!(format, 0);
         Ok(Self {
-            format: format,
+            format,
             dictionary_ids: tape.take_given(character_strings.count as usize)?,
         })
     }

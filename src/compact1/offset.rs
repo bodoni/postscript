@@ -11,8 +11,6 @@ impl Walue<'static> for Offset {
     type Parameter = OffsetSize;
 
     fn read<T: Tape>(tape: &mut T, size: OffsetSize) -> Result<Self> {
-        use std::mem;
-
         #[cfg(target_endian = "big")]
         macro_rules! assemble(($hi:expr, $me:expr, $lo:expr) => ([0, $hi, $me, $lo]));
         #[cfg(target_endian = "little")]
@@ -22,7 +20,7 @@ impl Walue<'static> for Offset {
             2 => tape.take::<u16>()? as u32,
             3 => {
                 let trio: [u8; 3] = tape.take()?;
-                unsafe { mem::transmute::<_, u32>(assemble!(trio[0], trio[1], trio[2])) }
+                unsafe { std::mem::transmute::<_, u32>(assemble!(trio[0], trio[1], trio[2])) }
             }
             4 => tape.take::<u32>()?,
             _ => raise!("found a malformed offset"),

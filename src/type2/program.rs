@@ -1,5 +1,4 @@
 use std::io::Cursor;
-use std::mem;
 
 use crate::type2::{number, Operand, Operation, Operator};
 use crate::{Result, Tape};
@@ -26,8 +25,8 @@ impl<'l> Program<'l> {
     pub fn new(code: &'l [u8], global: &'l [Vec<u8>], local: &'l [Vec<u8>]) -> Self {
         Program {
             routine: Routine::new(code),
-            global: global,
-            local: local,
+            global,
+            local,
             stack: vec![],
             stems: 0,
             width: None,
@@ -35,6 +34,7 @@ impl<'l> Program<'l> {
     }
 
     /// Return the next operation.
+    #[allow(clippy::should_implement_trait)]
     #[allow(unused_comparisons, unused_must_use)]
     pub fn next(&mut self) -> Result<Option<Operation>> {
         use crate::type2::Operator::*;
@@ -126,7 +126,7 @@ impl<'l> Program<'l> {
                 if min == !0 {
                     raise!("found malformed operands");
                 }
-                let mut stack = mem::replace(&mut self.stack, vec![]);
+                let mut stack = std::mem::take(&mut self.stack);
                 let operands = stack.drain(min..).collect();
                 if min > 0 && self.width.is_none() {
                     self.width = Some(stack[min - 1]);
@@ -160,7 +160,7 @@ impl<'l> Program<'l> {
                     if !self.routine.done()? {
                         raise!("found trailing data after the end operator");
                     }
-                    mem::replace(&mut self.routine, *caller);
+                    std::mem::replace(&mut self.routine, *caller);
                 }
                 let length = self.stack.len();
                 if length > 0 && self.width.is_none() {
@@ -195,7 +195,8 @@ impl<'l> Program<'l> {
             // Random =>
             Mul => push!(pop!() * pop!()),
             Sqrt => push!(pop!().sqrt()),
-            Drop => mem::drop(pop!()),
+            #[allow(clippy::drop_copy)]
+            Drop => std::mem::drop(pop!()),
             Exch => {
                 let (right, left) = (pop!(), pop!());
                 push!(right);
@@ -214,15 +215,19 @@ impl<'l> Program<'l> {
                     raise!("expected more operands");
                 } else if span > 0 {
                     let position = length - span as usize;
-                    if shift > 0 {
-                        for _ in 0..shift {
-                            let operand = pop!();
-                            self.stack.insert(position, operand);
+                    match shift.cmp(&0) {
+                        std::cmp::Ordering::Greater => {
+                            for _ in 0..shift {
+                                let operand = pop!();
+                                self.stack.insert(position, operand);
+                            }
                         }
-                    } else if shift < 0 {
-                        for _ in 0..(-shift) {
-                            push!(self.stack.remove(position));
+                        std::cmp::Ordering::Less => {
+                            for _ in 0..(-shift) {
+                                push!(self.stack.remove(position));
+                            }
                         }
+                        _ => {}
                     }
                 }
             }
@@ -267,7 +272,7 @@ impl<'l> Program<'l> {
                     }
                     Routine::new(&subroutines[i as usize])
                 };
-                mem::swap(&mut self.routine, &mut routine);
+                std::mem::swap(&mut self.routine, &mut routine);
                 self.routine.caller = Some(Box::new(routine));
             }
             Return => {
@@ -275,7 +280,7 @@ impl<'l> Program<'l> {
                     Some(caller) => caller,
                     _ => raise!("found a return operator without a caller"),
                 };
-                mem::replace(&mut self.routine, *caller);
+                std::mem::replace(&mut self.routine, *caller);
             }
 
             operator => raise!("found an unsupported operator ({:?})", operator),

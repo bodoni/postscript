@@ -45,10 +45,10 @@ impl Value for Index {
             data.push(tape.take_given(size)?);
         }
         Ok(Index {
-            count: count,
-            offset_size: offset_size,
-            offsets: offsets,
-            data: data,
+            count,
+            offset_size,
+            offsets,
+            data,
         })
     }
 }
