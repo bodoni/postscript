@@ -1,4 +1,4 @@
-//! The [compact font format][1] of version 1.0.
+//! The [Compact Font Format][1] of version 1.0.
 //!
 //! [1]: https://adobe-type-tools.github.io/font-tech-notes/pdfs/5176.CFF.pdf
 
