@@ -86,7 +86,7 @@ impl Value for Encoding {
             0 => Encoding::Format0(tape.take()?),
             1 => Encoding::Format1(tape.take()?),
             format if format & 0x80 > 0 => Encoding::FormatSupplemental(tape.take()?),
-            format => raise!("found an unsupported format of encodings ({})", format),
+            format => raise!("found an unknown format of encodings ({format})"),
         })
     }
 }

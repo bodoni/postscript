@@ -283,7 +283,7 @@ impl<'l> Program<'l> {
                 std::mem::replace(&mut self.routine, *caller);
             }
 
-            operator => raise!("found an unsupported operator ({:?})", operator),
+            operator => raise!("found an unknown operator ({operator:?})"),
         };
         self.next()
     }

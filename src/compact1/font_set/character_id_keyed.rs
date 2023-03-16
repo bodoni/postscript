@@ -124,10 +124,9 @@ impl<'l> Walue<'l> for Encoding {
         Ok(match tape.peek::<u8>()? {
             0 => Encoding::Format0(tape.take_given(character_strings)?),
             3 => Encoding::Format3(tape.take()?),
-            format => raise!(
-                "found an unsupported format of the glyph-to-dictionary encoding ({})",
-                format,
-            ),
+            format => {
+                raise!("found an unknown format of the glyph-to-dictionary encoding ({format})")
+            }
         })
     }
 }

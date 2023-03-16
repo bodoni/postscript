@@ -27,7 +27,7 @@ macro_rules! operator {
             use self::$name::*;
             Ok(match code {
                 $($code => $variant,)+
-                code => raise!("found an unsupported operator ({})", code),
+                code => raise!("found an unknown operator ({code})"),
             })
         }
     });

@@ -76,7 +76,7 @@ impl Walue<'static> for CharacterSet {
             0 => CharacterSet::Format0(tape.take_given(glyph_count)?),
             1 => CharacterSet::Format1(tape.take_given(glyph_count)?),
             2 => CharacterSet::Format2(tape.take_given(glyph_count)?),
-            format => raise!("found an unsupported format of character sets ({})", format),
+            format => raise!("found an unknown format of character sets ({format})"),
         })
     }
 }
