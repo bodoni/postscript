@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::io::{Seek, SeekFrom};
 use std::path::PathBuf;
 
 use postscript::compact1::FontSet;
@@ -14,10 +15,11 @@ pub enum Fixture {
 
 impl Fixture {
     pub fn path(&self) -> PathBuf {
-        match *self {
-            Fixture::NotoSansJP => "tests/fixtures/NotoSansJP-Regular.otf".into(),
-            Fixture::SourceSerifPro => "tests/fixtures/SourceSerifPro-Regular.otf".into(),
-        }
+        let file_name = match *self {
+            Fixture::NotoSansJP => "NotoSansJP-Regular.otf",
+            Fixture::SourceSerifPro => "SourceSerifPro-Regular.otf",
+        };
+        PathBuf::from("tests").join("fixtures").join(file_name)
     }
 
     pub fn offset(&self) -> u64 {
@@ -29,8 +31,6 @@ impl Fixture {
 }
 
 pub fn setup(fixture: Fixture) -> File {
-    use std::io::{Seek, SeekFrom};
-
     let mut file = ok!(File::open(fixture.path()));
     ok!(file.seek(SeekFrom::Start(fixture.offset())));
     file
