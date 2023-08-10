@@ -195,7 +195,7 @@ impl<'l> Program<'l> {
             // Random =>
             Mul => push!(pop!() * pop!()),
             Sqrt => push!(pop!().sqrt()),
-            #[allow(clippy::drop_copy)]
+            #[allow(dropping_copy_types)]
             Drop => std::mem::drop(pop!()),
             Exch => {
                 let (right, left) = (pop!(), pop!());
