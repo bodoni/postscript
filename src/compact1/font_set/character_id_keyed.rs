@@ -75,11 +75,10 @@ impl<'l> Walue<'l> for Record {
             _ => raise!("found a malformed character-ID-keyed record"),
         };
         let offset = get!(@single top_operations, FDSelect);
-        tape.jump(position + offset as u64)?;
-        let encoding = tape.take_given(character_strings)?;
+        let encoding = jump_take_given!(@unwrap tape, position, offset, character_strings);
         let offset = get!(@single top_operations, FDArray);
-        tape.jump(position + offset as u64)?;
-        let operations: Vec<_> = (&tape.take::<Dictionaries>()?).try_into()?;
+        let operations: Dictionaries = jump_take!(@unwrap tape, position, offset);
+        let operations: Vec<_> = (&operations).try_into()?;
         let mut records = vec![];
         for top_operations in operations.iter() {
             records.push(tape.take_given((position, top_operations))?);
@@ -100,14 +99,10 @@ impl<'l> Walue<'l> for RecordInner {
 
     fn read<T: Tape>(tape: &mut T, (position, top_operations): Self::Parameter) -> Result<Self> {
         let (size, offset) = get!(@double top_operations, Private);
-        tape.jump(position + offset as u64)?;
-        let chunk = tape.take_given::<Vec<u8>>(size as usize)?;
+        let chunk: Vec<u8> = jump_take_given!(@unwrap tape, position, offset, size as usize);
         let operations = Cursor::new(chunk).take::<Operations>()?;
         let subroutines = match get!(@try @single operations, Subrs) {
-            Some(another_offset) => {
-                tape.jump(position + offset as u64 + another_offset as u64)?;
-                tape.take()?
-            }
+            Some(another_offset) => jump_take!(@unwrap tape, position, offset + another_offset),
             _ => Default::default(),
         };
         Ok(Self {

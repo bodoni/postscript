@@ -56,8 +56,7 @@ impl Value for FontSet {
     fn read<T: Tape>(tape: &mut T) -> Result<Self> {
         let position = tape.position()?;
         let header = tape.take::<Header>()?;
-        tape.jump(position + header.header_size as u64)?;
-        let names = tape.take::<Names>()?;
+        let names: Names = jump_take!(@unwrap tape, position, header.header_size);
         let operations: Vec<_> = (&tape.take::<Dictionaries>()?).try_into()?;
         let strings = tape.take::<Strings>()?;
         let subroutines = tape.take::<Subroutines>()?;
@@ -74,18 +73,12 @@ impl Value for FontSet {
                 0 => CharacterSet::ISOAdobe,
                 1 => CharacterSet::Expert,
                 2 => CharacterSet::ExpertSubset,
-                offset => {
-                    tape.jump(position + offset as u64)?;
-                    tape.take_given(character_strings[i].count as usize)?
-                }
+                offset => jump_take_given!(@unwrap tape, position, offset, character_strings[i].count as usize),
             });
             encodings.push(match get!(@single operations, Encoding) {
                 0 => Encoding::Standard,
                 1 => Encoding::Expert,
-                offset => {
-                    tape.jump(position + offset as u64)?;
-                    tape.take()?
-                }
+                offset => jump_take!(@unwrap tape, position, offset),
             });
             records.push(tape.take_given((position, operations, &character_strings[i]))?);
         }
