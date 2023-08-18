@@ -18,14 +18,10 @@ impl<'l> Walue<'l> for Record {
 
     fn read<T: Tape>(tape: &mut T, (position, top_operations): Self::Parameter) -> Result<Self> {
         let (size, offset) = get!(@double top_operations, Private);
-        tape.jump(position + offset as u64)?;
-        let chunk = tape.take_given::<Vec<u8>>(size as usize)?;
+        let chunk: Vec<u8> = jump_take_given!(@unwrap tape, position, offset, size as usize);
         let operations = Cursor::new(chunk).take::<Operations>()?;
         let subroutines = match get!(@try @single operations, Subrs) {
-            Some(another_offset) => {
-                tape.jump(position + offset as u64 + another_offset as u64)?;
-                tape.take()?
-            }
+            Some(another_offset) => jump_take!(@unwrap tape, position, offset + another_offset),
             _ => Default::default(),
         };
         Ok(Self {

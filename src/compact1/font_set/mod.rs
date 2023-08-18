@@ -62,18 +62,27 @@ impl Value for FontSet {
         let subroutines = tape.take::<Subroutines>()?;
         let mut encodings = vec![];
         let mut character_sets = vec![];
-        let mut character_strings = vec![];
+        let mut character_strings: Vec<CharacterStrings> = vec![];
         let mut records = vec![];
         for (i, operations) in operations.iter().enumerate() {
-            character_strings.push({
-                tape.jump(position + get!(@single operations, CharStrings) as u64)?;
-                tape.take_given::<CharacterStrings>(get!(@single operations, CharStringType))?
-            });
+            character_strings.push(jump_take_given!(
+                @unwrap
+                tape,
+                position,
+                get!(@single operations, CharStrings),
+                get!(@single operations, CharStringType)
+            ));
             character_sets.push(match get!(@single operations, CharSet) {
                 0 => CharacterSet::ISOAdobe,
                 1 => CharacterSet::Expert,
                 2 => CharacterSet::ExpertSubset,
-                offset => jump_take_given!(@unwrap tape, position, offset, character_strings[i].count as usize),
+                offset => jump_take_given!(
+                    @unwrap
+                    tape,
+                    position,
+                    offset,
+                    character_strings[i].count as usize
+                ),
             });
             encodings.push(match get!(@single operations, Encoding) {
                 0 => Encoding::Standard,
