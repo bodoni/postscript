@@ -1,7 +1,8 @@
 use std::io::Cursor;
 
+use crate::tape::Read;
 use crate::type2::{number, Operand, Operation, Operator};
-use crate::{Result, Tape};
+use crate::Result;
 
 /// A program.
 pub struct Program<'l> {
@@ -307,7 +308,7 @@ impl<'l> Routine<'l> {
 
     #[inline]
     fn done(&mut self) -> Result<bool> {
-        Ok(Tape::position(&mut self.tape)? == self.size as u64)
+        Ok(Read::position(&mut self.tape)? == self.size as u64)
     }
 
     #[inline]

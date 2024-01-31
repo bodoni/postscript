@@ -4,7 +4,7 @@ use std::io::Cursor;
 
 use crate::compact1::index::{CharacterStrings, Dictionaries, Subroutines};
 use crate::compact1::{GlyphID, Number, Operations, Operator, StringID};
-use crate::{Result, Tape, Walue};
+use crate::Result;
 
 /// A character-ID-keyed record in a font set.
 #[derive(Clone, Debug)]
@@ -63,10 +63,10 @@ table! {
     }
 }
 
-impl<'l> Walue<'l> for Record {
+impl<'l> crate::walue::Read<'l> for Record {
     type Parameter = (u64, &'l Operations, &'l CharacterStrings);
 
-    fn read<T: Tape>(
+    fn read<T: crate::tape::Read>(
         tape: &mut T,
         (position, top_operations, character_strings): Self::Parameter,
     ) -> Result<Self> {
@@ -94,10 +94,15 @@ impl<'l> Walue<'l> for Record {
     }
 }
 
-impl<'l> Walue<'l> for RecordInner {
+impl<'l> crate::walue::Read<'l> for RecordInner {
     type Parameter = (u64, &'l Operations);
 
-    fn read<T: Tape>(tape: &mut T, (position, top_operations): Self::Parameter) -> Result<Self> {
+    fn read<T: crate::tape::Read>(
+        tape: &mut T,
+        (position, top_operations): Self::Parameter,
+    ) -> Result<Self> {
+        use crate::tape::Read;
+
         let (size, offset) = get!(@double top_operations, Private);
         let chunk: Vec<u8> = jump_take_given!(@unwrap tape, position, offset, size as usize);
         let operations = Cursor::new(chunk).take::<Operations>()?;
@@ -112,10 +117,13 @@ impl<'l> Walue<'l> for RecordInner {
     }
 }
 
-impl<'l> Walue<'l> for Encoding {
+impl<'l> crate::walue::Read<'l> for Encoding {
     type Parameter = &'l CharacterStrings;
 
-    fn read<T: Tape>(tape: &mut T, character_strings: Self::Parameter) -> Result<Self> {
+    fn read<T: crate::tape::Read>(
+        tape: &mut T,
+        character_strings: Self::Parameter,
+    ) -> Result<Self> {
         Ok(match tape.peek::<u8>()? {
             0 => Encoding::Format0(tape.take_given(character_strings)?),
             3 => Encoding::Format3(tape.take()?),
@@ -126,10 +134,13 @@ impl<'l> Walue<'l> for Encoding {
     }
 }
 
-impl<'l> Walue<'l> for Encoding0 {
+impl<'l> crate::walue::Read<'l> for Encoding0 {
     type Parameter = &'l CharacterStrings;
 
-    fn read<T: Tape>(tape: &mut T, character_strings: Self::Parameter) -> Result<Self> {
+    fn read<T: crate::tape::Read>(
+        tape: &mut T,
+        character_strings: Self::Parameter,
+    ) -> Result<Self> {
         let format = tape.take()?;
         debug_assert_eq!(format, 0);
         Ok(Self {

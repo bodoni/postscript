@@ -1,4 +1,4 @@
-use crate::{Result, Tape, Walue};
+use crate::Result;
 
 /// An offset.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -7,10 +7,10 @@ pub struct Offset(pub u32);
 /// An offset size.
 pub type OffsetSize = u8;
 
-impl Walue<'static> for Offset {
+impl crate::walue::Read<'static> for Offset {
     type Parameter = OffsetSize;
 
-    fn read<T: Tape>(tape: &mut T, size: OffsetSize) -> Result<Self> {
+    fn read<T: crate::tape::Read>(tape: &mut T, size: OffsetSize) -> Result<Self> {
         #[cfg(target_endian = "big")]
         macro_rules! assemble(($hi:expr, $me:expr, $lo:expr) => ([0, $hi, $me, $lo]));
         #[cfg(target_endian = "little")]
@@ -33,7 +33,7 @@ mod tests {
     use std::io::Cursor;
 
     use crate::compact1::Offset;
-    use crate::Walue;
+    use crate::walue::Read;
 
     #[test]
     fn read() {

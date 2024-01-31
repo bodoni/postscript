@@ -1,7 +1,7 @@
 //! The indices.
 
 use crate::compact1::{Offset, OffsetSize};
-use crate::{Result, Tape, Value};
+use crate::Result;
 
 table! {
     @define
@@ -16,8 +16,8 @@ table! {
 
 dereference! { Index::data => [Vec<u8>] }
 
-impl Value for Index {
-    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+impl crate::value::Read for Index {
+    fn read<T: crate::tape::Read>(tape: &mut T) -> Result<Self> {
         let count = tape.take::<u16>()?;
         if count == 0 {
             return Ok(Index {
@@ -61,13 +61,13 @@ macro_rules! index {
     (@define $(#[$attribute:meta])* pub $structure:ident) => (
         $(#[$attribute])*
         #[derive(Clone, Debug)]
-        pub struct $structure(pub crate::compact1::index::Index);
-        dereference! { $structure::0 => crate::compact1::index::Index }
+        pub struct $structure(pub $crate::compact1::index::Index);
+        dereference! { $structure::0 => $crate::compact1::index::Index }
     );
     (@implement $structure:ident) => (
-        impl typeface::Value for $structure {
+        impl $crate::value::Read for $structure {
             #[inline]
-            fn read<T: typeface::Tape>(tape: &mut T) -> typeface::Result<Self> {
+            fn read<T: $crate::tape::Read>(tape: &mut T) -> $crate::Result<Self> {
                 Ok($structure(tape.take()?))
             }
         }

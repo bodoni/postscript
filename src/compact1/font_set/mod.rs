@@ -29,7 +29,7 @@ pub mod character_name_keyed;
 
 use crate::compact1::index::{CharacterStrings, Dictionaries, Names, Strings, Subroutines};
 use crate::compact1::{CharacterSet, Encoding, Header, Operations, Operator};
-use crate::{Result, Tape, Value, Walue};
+use crate::Result;
 
 /// A font set.
 #[derive(Clone, Debug)]
@@ -52,8 +52,8 @@ pub enum Record {
     CharacterNameKeyed(character_name_keyed::Record),
 }
 
-impl Value for FontSet {
-    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+impl crate::value::Read for FontSet {
+    fn read<T: crate::tape::Read>(tape: &mut T) -> Result<Self> {
         let position = tape.position()?;
         let header = tape.take::<Header>()?;
         let names: Names = jump_take!(@unwrap tape, position, header.header_size);
@@ -105,10 +105,10 @@ impl Value for FontSet {
     }
 }
 
-impl<'l> Walue<'l> for Record {
+impl<'l> crate::walue::Read<'l> for Record {
     type Parameter = (u64, &'l Operations, &'l CharacterStrings);
 
-    fn read<T: Tape>(
+    fn read<T: crate::tape::Read>(
         tape: &mut T,
         (position, operations, character_strings): Self::Parameter,
     ) -> Result<Self> {

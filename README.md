@@ -1,8 +1,8 @@
 # PostScript [![Package][package-img]][package-url] [![Documentation][documentation-img]][documentation-url] [![Build][build-img]][build-url]
 
-The package provides a parser for PostScript fonts. It is recommended to use a
-higher-level parser called [`opentype`][opentype], which internally relies on
-this package.
+The package provides a parser of PostScript fonts. It is recommended to use a
+higher-level abstraction called [`opentype`][opentype], which internally relies
+on this package.
 
 ## Contribution
 

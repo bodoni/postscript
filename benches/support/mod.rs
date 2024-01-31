@@ -2,7 +2,7 @@ use std::fs::File;
 use std::path::PathBuf;
 
 use postscript::compact1::FontSet;
-use postscript::Value;
+use postscript::value::Read;
 
 macro_rules! ok(($result:expr) => ($result.unwrap()));
 

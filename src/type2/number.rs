@@ -1,8 +1,8 @@
-use crate::{Result, Tape};
+use crate::Result;
 
 const FIXED_SCALING: f32 = 1f32 / (1 << 16) as f32;
 
-pub fn read<T: Tape>(tape: &mut T) -> Result<f32> {
+pub fn read<T: crate::tape::Read>(tape: &mut T) -> Result<f32> {
     let first = tape.take::<u8>()?;
     Ok(match first {
         0x20..=0xf6 => (first as i32 - 139) as f32,

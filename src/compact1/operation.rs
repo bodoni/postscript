@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 
 use crate::compact1::number::Number;
-use crate::{Result, Tape, Value};
+use crate::Result;
 
 /// An operand.
 pub type Operand = Number;
@@ -49,8 +49,8 @@ impl Operations {
     }
 }
 
-impl Value for Operations {
-    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+impl crate::value::Read for Operations {
+    fn read<T: crate::tape::Read>(tape: &mut T) -> Result<Self> {
         use std::io::ErrorKind;
 
         let mut operations = HashMap::new();
@@ -73,8 +73,8 @@ impl Value for Operations {
 
 dereference! { Operations::0 => HashMap<Operator, Vec<Operand>> }
 
-impl Value for Operation {
-    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+impl crate::value::Read for Operation {
+    fn read<T: crate::tape::Read>(tape: &mut T) -> Result<Self> {
         let mut operands = vec![];
         loop {
             match tape.peek::<u8>()? {

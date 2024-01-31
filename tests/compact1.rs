@@ -11,7 +11,7 @@ macro_rules! operations(
 );
 
 mod noto_sans_direct {
-    use postscript::Tape;
+    use postscript::tape::Read;
 
     use crate::support::{setup, Fixture};
 

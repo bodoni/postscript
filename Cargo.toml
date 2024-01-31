@@ -1,10 +1,10 @@
 [package]
 name = "postscript"
-version = "0.17.5"
+version = "0.18.0"
 edition = "2021"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
-description = "The package provides a parser for PostScript fonts."
+description = "The package provides a parser of PostScript fonts."
 documentation = "https://docs.rs/postscript"
 homepage = "https://github.com/bodoni/postscript"
 repository = "https://github.com/bodoni/postscript"
@@ -14,7 +14,7 @@ keywords = ["font", "postscript", "typeface", "typography"]
 exclude = ["tests/fixtures/*"]
 
 [dependencies]
-typeface = "0.3.0"
+typeface = "0.4.0"
 
 [dev-dependencies]
 random = "0.12"

@@ -1,7 +1,7 @@
 //! The glyph encodings.
 
 use crate::compact1::{GlyphID, StringID};
-use crate::{Result, Tape, Value};
+use crate::Result;
 
 /// A glyph encoding.
 #[derive(Clone, Debug)]
@@ -80,8 +80,8 @@ impl Encoding {
     }
 }
 
-impl Value for Encoding {
-    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+impl crate::value::Read for Encoding {
+    fn read<T: crate::tape::Read>(tape: &mut T) -> Result<Self> {
         Ok(match tape.peek::<u8>()? {
             0 => Encoding::Format0(tape.take()?),
             1 => Encoding::Format1(tape.take()?),

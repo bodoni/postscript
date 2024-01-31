@@ -1,7 +1,7 @@
 //! The character sets.
 
 use crate::compact1::{GlyphID, StringID};
-use crate::{Result, Tape, Walue};
+use crate::Result;
 
 /// A character set.
 #[derive(Clone, Debug)]
@@ -68,10 +68,10 @@ impl CharacterSet {
     }
 }
 
-impl Walue<'static> for CharacterSet {
+impl crate::walue::Read<'static> for CharacterSet {
     type Parameter = usize;
 
-    fn read<T: Tape>(tape: &mut T, glyph_count: usize) -> Result<Self> {
+    fn read<T: crate::tape::Read>(tape: &mut T, glyph_count: usize) -> Result<Self> {
         Ok(match tape.peek::<u8>()? {
             0 => CharacterSet::Format0(tape.take_given(glyph_count)?),
             1 => CharacterSet::Format1(tape.take_given(glyph_count)?),
@@ -88,10 +88,10 @@ impl CharacterSet0 {
     }
 }
 
-impl Walue<'static> for CharacterSet0 {
+impl crate::walue::Read<'static> for CharacterSet0 {
     type Parameter = usize;
 
-    fn read<T: Tape>(tape: &mut T, glyph_count: usize) -> Result<Self> {
+    fn read<T: crate::tape::Read>(tape: &mut T, glyph_count: usize) -> Result<Self> {
         let format = tape.take::<u8>()?;
         if format != 0 {
             raise!("found a malformed character set");
@@ -110,10 +110,10 @@ impl CharacterSet1 {
     }
 }
 
-impl Walue<'static> for CharacterSet1 {
+impl crate::walue::Read<'static> for CharacterSet1 {
     type Parameter = usize;
 
-    fn read<T: Tape>(tape: &mut T, glyph_count: usize) -> Result<Self> {
+    fn read<T: crate::tape::Read>(tape: &mut T, glyph_count: usize) -> Result<Self> {
         let format = tape.take::<u8>()?;
         if format != 1 {
             raise!("found a malformed character set");
@@ -140,10 +140,10 @@ impl CharacterSet2 {
     }
 }
 
-impl Walue<'static> for CharacterSet2 {
+impl crate::walue::Read<'static> for CharacterSet2 {
     type Parameter = usize;
 
-    fn read<T: Tape>(tape: &mut T, glyph_count: usize) -> Result<Self> {
+    fn read<T: crate::tape::Read>(tape: &mut T, glyph_count: usize) -> Result<Self> {
         macro_rules! reject(() => (raise!("found a malformed character set")));
         let format = tape.take::<u8>()?;
         if format != 2 {

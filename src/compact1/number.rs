@@ -1,4 +1,4 @@
-use crate::{Result, Tape, Value};
+use crate::Result;
 
 macro_rules! reject(() => (raise!("found a malformed number")));
 
@@ -25,8 +25,8 @@ impl From<i32> for Number {
     }
 }
 
-impl Value for Number {
-    fn read<T: Tape>(tape: &mut T) -> Result<Self> {
+impl crate::value::Read for Number {
+    fn read<T: crate::tape::Read>(tape: &mut T) -> Result<Self> {
         let first = tape.take::<u8>()?;
         Ok(match first {
             0x20..=0xf6 => Number::Integer(first as i32 - 139),
@@ -44,7 +44,7 @@ impl Value for Number {
     }
 }
 
-fn parse<T: Tape>(tape: &mut T) -> Result<f32> {
+fn parse<T: crate::tape::Read>(tape: &mut T) -> Result<f32> {
     let mut buffer = String::new();
     let mut byte = 0;
     let mut high = true;
@@ -78,7 +78,7 @@ mod tests {
     use std::io::Cursor;
 
     use super::Number;
-    use crate::Tape;
+    use crate::tape::Read;
 
     #[test]
     fn integer() {
