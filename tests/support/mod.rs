@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::fs::File;
 use std::io::{Seek, SeekFrom};
 use std::path::PathBuf;
@@ -7,7 +9,6 @@ use postscript::value::Read;
 
 macro_rules! ok(($result:expr) => ($result.unwrap()));
 
-#[allow(dead_code)]
 pub enum Fixture {
     NotoSansJP,
     SourceSerifPro,
@@ -37,6 +38,11 @@ pub fn setup(fixture: Fixture) -> File {
 }
 
 pub fn setup_font_set(fixture: Fixture) -> FontSet {
-    let mut file = setup(fixture);
-    ok!(FontSet::read(&mut file))
+    let mut file = ok!(File::open(fixture.path()));
+    ok!(file.seek(SeekFrom::Start(fixture.offset())));
+    let count = ok!(FontSet::count(&mut file));
+    ok!(file.seek(SeekFrom::Start(fixture.offset())));
+    let table = ok!(FontSet::read(&mut file));
+    assert_eq!(table.operations.len(), count);
+    table
 }

@@ -52,6 +52,16 @@ pub enum Record {
     CharacterNameKeyed(character_name_keyed::Record),
 }
 
+impl FontSet {
+    /// Count the number of records.
+    pub fn count<T: crate::tape::Read>(tape: &mut T) -> Result<usize> {
+        let position = tape.position()?;
+        let header = tape.take::<Header>()?;
+        let count: u16 = jump_take!(@unwrap tape, position, header.header_size);
+        Ok(count as usize)
+    }
+}
+
 impl crate::value::Read for FontSet {
     fn read<T: crate::tape::Read>(tape: &mut T) -> Result<Self> {
         let position = tape.position()?;
