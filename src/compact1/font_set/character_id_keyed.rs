@@ -41,7 +41,7 @@ pub struct Encoding0 {
 }
 
 table! {
-    #[doc = "A glyph-to-dictionary encoding in format 3."]
+    /// A glyph-to-dictionary encoding in format 3.
     pub Encoding3 {
         format      (u8 ) = { 3 }, // format
         range_count (u16), // nRanges
@@ -55,7 +55,7 @@ table! {
 }
 
 table! {
-    #[doc = "A range of a glyph-to-dictionary encoding in format 3."]
+    /// A range of a glyph-to-dictionary encoding in format 3.
     #[derive(Copy)]
     pub Range3 {
         first_glyph_id (GlyphID), // first

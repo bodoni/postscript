@@ -2,7 +2,7 @@ use crate::Result;
 
 index! {
     @define
-    #[doc = "A character-string index."]
+    /// A character-string index.
     pub CharacterStrings
 }
 

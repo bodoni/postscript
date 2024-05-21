@@ -14,7 +14,7 @@ pub enum Encoding {
 }
 
 table! {
-    #[doc = "An encoding in format 0."]
+    /// An encoding in format 0.
     pub Encoding0 { // Format 0
         format     (u8) = { 0 }, // format
         code_count (u8), // nCodes
@@ -26,7 +26,7 @@ table! {
 }
 
 table! {
-    #[doc = "An encoding in format 1."]
+    /// An encoding in format 1.
     pub Encoding1 { // Format 1
         format      (u8) = { 1 }, // format
         range_count (u8), // nRanges
@@ -38,7 +38,7 @@ table! {
 }
 
 table! {
-    #[doc = "An encoding in the supplemental format."]
+    /// An encoding in the supplemental format.
     pub EncodingSupplemental { // Supplemental Encoding Data
         format           (u8),
         supplement_count (u8), // nSups
@@ -50,7 +50,7 @@ table! {
 }
 
 table! {
-    #[doc = "A range of an encoding in format 1."]
+    /// A range of an encoding in format 1.
     #[derive(Copy)]
     pub Range1 {
         first_code (u8), // first
@@ -59,7 +59,7 @@ table! {
 }
 
 table! {
-    #[doc = "A supplement of an encoding in the supplemental format."]
+    /// A supplement of an encoding in the supplemental format.
     #[derive(Copy)]
     pub Supplement {
         code  (u8      ), // code

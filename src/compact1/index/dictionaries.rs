@@ -5,7 +5,7 @@ use crate::tape::Read;
 use crate::{Error, Result};
 
 index! {
-    #[doc = "A dictionary index."]
+    /// A dictionary index.
     pub Dictionaries
 }
 

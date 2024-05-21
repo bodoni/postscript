@@ -1,7 +1,7 @@
 use crate::compact1::OffsetSize;
 
 table! {
-    #[doc = "A header."]
+    /// A header.
     #[derive(Copy)]
     pub Header {
         major       (u8        ), // major

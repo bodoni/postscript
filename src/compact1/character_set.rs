@@ -36,7 +36,7 @@ pub struct CharacterSet2 {
 }
 
 table! {
-    #[doc = "A range of a character set in format 1."]
+    /// A range of a character set in format 1.
     #[derive(Copy)]
     pub Range1 {
         first_string_id (StringID), // first
@@ -45,7 +45,7 @@ table! {
 }
 
 table! {
-    #[doc = "A range of a character set in format 2."]
+    /// A range of a character set in format 2.
     #[derive(Copy)]
     pub Range2 {
         first_string_id (StringID), // first

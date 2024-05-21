@@ -1,5 +1,5 @@
 index! {
-    #[doc = "A subroutine index."]
+    /// A subroutine index.
     #[derive(Default)]
     pub Subroutines
 }

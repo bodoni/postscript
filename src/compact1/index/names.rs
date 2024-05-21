@@ -2,7 +2,7 @@ use crate::compact1::index::Index;
 use crate::{Error, Result};
 
 index! {
-    #[doc = "A name index."]
+    /// A name index.
     pub Names
 }
 

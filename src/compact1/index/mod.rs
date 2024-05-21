@@ -5,7 +5,7 @@ use crate::Result;
 
 table! {
     @define
-    #[doc = "An index."]
+    /// An index.
     pub Index {
         count       (u16         ), // count
         offset_size (OffsetSize  ), // offSize

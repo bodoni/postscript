@@ -3,7 +3,7 @@ use crate::compact1::StringID;
 const NUMBER_OF_STANDARD_STRINGS: usize = 391;
 
 index! {
-    #[doc = "A string index."]
+    /// A string index.
     pub Strings
 }
 
