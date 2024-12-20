@@ -1,5 +1,3 @@
-extern crate postscript;
-
 #[macro_use]
 mod support;
 
