@@ -14,7 +14,7 @@ mod encoding {
 
     #[bench]
     fn get(bencher: &mut Bencher) {
-        let mut source = random::default().seed([42, 69]);
+        let mut source = random::default(42);
         let codes = source
             .iter::<u64>()
             .take(1000)
@@ -36,7 +36,7 @@ mod operation {
 
     #[bench]
     fn operator_default(bencher: &mut Bencher) {
-        let mut source = random::default().seed([69, 42]);
+        let mut source = random::default(42);
         let operators = generate_operators(&mut source, 1000);
         bencher.iter(|| {
             for &operator in &operators {
@@ -47,7 +47,7 @@ mod operation {
 
     #[bench]
     fn operator_get(bencher: &mut Bencher) {
-        let mut source = random::default().seed([42, 69]);
+        let mut source = random::default(42);
         let codes = generate_codes(&mut source, 1000);
         bencher.iter(|| {
             for &code in &codes {
