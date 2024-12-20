@@ -10,6 +10,38 @@ macro_rules! operations(
     });
 );
 
+mod hirakatana {
+    use postscript::compact1::font_set::Record;
+    use postscript::type2::Program;
+
+    use crate::support::{setup_font_set, Fixture};
+
+    #[test]
+    fn one() {
+        let set = setup_font_set(Fixture::Hirakatana);
+        let code = &set.character_strings[0][10];
+        let global = &set.subroutines;
+        let local = match &set.records[0] {
+            Record::CharacterNameKeyed(ref record) => &*record.subroutines,
+            _ => unreachable!(),
+        };
+        let mut program = Program::new(code, global, local);
+        let mut operations = vec![];
+        while let Some(operation) = ok!(program.next()) {
+            operations.push(operation);
+        }
+        assert_eq!(
+            operations,
+            operations!(
+                HStem: [372.0, 57.933594],
+                RMoveTo: [42.0, 401.05176],
+                VLineTo: [-29.051758, 186.59766],
+                RLineTo: [186.59668, 0.0, -0.18261719, 28.88086, -0.18261719, 28.88086, -186.41504, 0.171875, -186.41406, 0.17089844],
+            )
+        );
+    }
+}
+
 mod source_serif {
     use postscript::compact1::font_set::Record;
     use postscript::type2::Program;
@@ -17,7 +49,7 @@ mod source_serif {
     use crate::support::{setup_font_set, Fixture};
 
     #[test]
-    fn program_all() {
+    fn all() {
         let set = setup_font_set(Fixture::SourceSerifPro);
         let global = &set.subroutines;
         let local = match &set.records[0] {
@@ -31,7 +63,7 @@ mod source_serif {
     }
 
     #[test]
-    fn program_one() {
+    fn one() {
         let set = setup_font_set(Fixture::SourceSerifPro);
         let code = &set.character_strings[0][134];
         let global = &set.subroutines;

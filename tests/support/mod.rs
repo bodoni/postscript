@@ -10,6 +10,7 @@ use postscript::value::Read;
 macro_rules! ok(($result:expr) => ($result.unwrap()));
 
 pub enum Fixture {
+    Hirakatana,
     NotoSansJP,
     SourceSerifPro,
 }
@@ -17,6 +18,7 @@ pub enum Fixture {
 impl Fixture {
     pub fn path(&self) -> PathBuf {
         let file_name = match *self {
+            Fixture::Hirakatana => "Hirakatana-Regular.otf",
             Fixture::NotoSansJP => "NotoSansJP-Regular.otf",
             Fixture::SourceSerifPro => "SourceSerifPro-Regular.otf",
         };
@@ -25,6 +27,7 @@ impl Fixture {
 
     pub fn offset(&self) -> u64 {
         match *self {
+            Fixture::Hirakatana => 1524,
             Fixture::NotoSansJP => 337316,
             Fixture::SourceSerifPro => 17732,
         }
