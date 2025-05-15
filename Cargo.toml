@@ -2,7 +2,7 @@
 name = "postscript"
 version = "0.19.0"
 edition = "2021"
-license = "Apache-2.0/MIT"
+license = "Apache-2.0 OR MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
 description = "The package provides a parser of PostScript fonts."
 documentation = "https://docs.rs/postscript"
